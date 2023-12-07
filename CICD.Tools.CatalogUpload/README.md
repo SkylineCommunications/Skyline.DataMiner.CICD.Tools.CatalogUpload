@@ -2,7 +2,7 @@
 
 ## About
 
-Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services)
+Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services) visible or invisible.
 
 ### About DataMiner
 
@@ -21,8 +21,72 @@ At Skyline Communications, we deal in world-class solutions that are deployed by
 
 ## Getting Started
 In commandline:
+
+```console
 dotnet tool install -g Skyline.DataMiner.CICD.Tools.CatalogUpload
+```
 
 Then run the command
-dataminer-catalog-upload help
 
+```console
+dataminer-catalog-upload help
+```
+## Common Commands
+
+### Volatile Uploads
+The most basic command will upload but not register a package. 
+This allows further usage only with the returned Artifact ID. The package will not show up in the Catalog. 
+Nothing will be registered but your cloud-connected agent will be able to get deployed with the package using the returned identifier.
+
+```console
+dataminer-catalog-upload --pathToArtifact "pathToPackage.dmapp" --dmCatalogToken "cloudConnectedToken"
+```
+
+### Authentication and Tokens
+
+You can choose to add the dmcatalogtoken to an environment variable instead and skip having to pass along the secure token.
+```console
+ dataminer-catalog-upload --pathToArtifact "pathToPackage.dmapp"
+```
+ 
+ There are 2 options to store the key in an environment variable:
+- key stored as an Environment Variable called "dmcatalogtoken". (unix/win)
+- key configured one-time using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogtoken_encrypted" (windows only)
+
+The first option is commonplace for environment setups in cloud-based CI/CD Pipelines (github, gitlab, azure, ...)
+The second option can be beneficial on a static server such as Jenkins or your local machine (windows only). It adds additional encryption to the environment variable only allowing decryption on the same machine. 
+for example:
+
+```console
+dotnet tool install -g Skyline.DataMiner.CICD.Tools.WinEncryptedKeys
+WinEncryptedKeys --name "dmcatalogtoken_encrypted" --value "MyTokenHere"
+```
+
+> **Note**
+> Make sure you close your commandline tool so it clears the history.
+> This only works on windows machines.
+
+You can review and make suggestions to the sourcecode of this encryption tool here: 
+https://github.com/SkylineCommunications/Skyline.DataMiner.CICD.Tools.WinEncryptedKeys
+
+ ### Registered Uploads
+
+If you want to make your package visible on the catalog and provide the ability to create combined Installation Packages (Currently only available through internal tools at Skyline Communications) you'll need to provide additional registration meta-data.
+
+The most basic command will be default anonymous and try to use the 'main' branch and the version defined in the artifact (either protocol version or dmapp version)
+
+```console
+ dataminer-catalog-upload WithRegistration --pathToArtifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo"
+```
+
+Though optional, it is however highly recommended (due to current restrictions to the internal dmapp version syntax) to provide your own version tag.
+
+```console
+ dataminer-catalog-upload WithRegistration --pathToArtifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1"
+```
+
+In addition you can provide additional optional information:
+
+```console
+ dataminer-catalog-upload WithRegistration --pathToArtifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1" --branch "dev/MyFeature" --authorMail "thunder@skyline.be" --releaseNotes "https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3"
+```

@@ -7,6 +7,8 @@ Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.se
 ## Projects
 
 * For more information about Skyline.DataMiner.CICD.Tools.CatalogUpload, see [CICD.Tools.CatalogUpload/README.md](CICD.Tools.CatalogUpload/README.md).
+* For more information about Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib, see [CICD.Tools.CatalogUpload.Lib/README.md](CICD.Tools.CatalogUpload.Lib/README.md).
+
 
 ### About DataMiner
 

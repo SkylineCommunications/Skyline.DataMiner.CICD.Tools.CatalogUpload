@@ -1,11 +1,13 @@
-﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.HttpArtifactUploadModels
+﻿#nullable enable
+
+namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib
 {
 	using Newtonsoft.Json;
 
 	/// <summary>
 	/// Artifact information returned from uploading an artifact to the catalog.
 	/// </summary>
-	public class ArtifactModel
+	public class ArtifactUploadResult
 	{
 		/// <summary>
 		/// The GUID that represents the ID of the artifact in our cloud storage database. Can be used to download or deploy the artifact.

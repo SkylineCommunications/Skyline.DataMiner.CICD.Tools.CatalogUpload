@@ -12,8 +12,6 @@
 
 	using Newtonsoft.Json;
 
-	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.HttpArtifactUploadModels;
-
 	internal sealed class HttpCatalogService : ICatalogService, IDisposable
 	{
 		private const string UploadPath = "api/key-artifact-upload/v1-0/private/artifact";
@@ -26,7 +24,7 @@
 			_httpClient = httpClient;
 		}
 
-		public async Task<ArtifactModel> ArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
+		public async Task<ArtifactUploadResult> ArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
 		{
 			using var formData = new MultipartFormDataContent();
 			formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
@@ -35,7 +33,7 @@
 			formData.Add(new StringContent(catalog.ContentType), "contentType");
 			formData.Add(new StringContent(catalog.Branch), "branch");
 			formData.Add(new StringContent(catalog.Identifier), "identifier");
-			formData.Add(new StringContent(catalog.IsPreRelease ? "true" : "false"), "isprerelease");
+			formData.Add(new StringContent(catalog.IsPreRelease() ? "true" : "false"), "isprerelease");
 			formData.Add(new StringContent(catalog.CommitterMail), "developer");
 			formData.Add(new StringContent(catalog.ReleaseUri), "releasepath");
 
@@ -55,7 +53,7 @@
 			if (response.IsSuccessStatusCode)
 			{
 				_logger.LogDebug($"The upload api returned a {response.StatusCode} response. Body: {response.Content}");
-				return JsonConvert.DeserializeObject<ArtifactModel>(await response.Content.ReadAsStringAsync(cancellationToken));
+				return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken));
 			}
 
 			_logger.LogError($"The upload api returned a {response.StatusCode} response. Body: {response.Content}");

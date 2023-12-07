@@ -1,9 +1,9 @@
-﻿using System.Net.Http;
-
-using Microsoft.Extensions.Logging;
-
-namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.CatalogService
+﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib
 {
+	using System.Net.Http;
+
+	using Microsoft.Extensions.Logging;
+
 	/// <summary>
 	/// Creates instances of <see cref="ICatalogService"/> to communicate with the Skyline DataMiner Catalog (https://catalog.dataminer.services/).
 	/// </summary>

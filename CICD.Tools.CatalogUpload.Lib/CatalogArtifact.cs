@@ -5,19 +5,17 @@
 	using System.Threading;
 	using System.Threading.Tasks;
 
-	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.Logging;
 
 	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.CICD.FileSystem;
-	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.HttpArtifactUploadModels;
 
 	/// <summary>
 	/// Allows Uploading an artifact to the Catalog using one of the below in order of priority:
 	///  <para>- provided key in upload argument (unix/win)</para>
-	///  <para>- key stored as an Environment Variable called "dmcatalogkey". (unix/win)</para>
-	///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogkey_encrypted" (windows only)</para>
+	///  <para>- key stored as an Environment Variable called "dmcatalogtoken". (unix/win)</para>
+	///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogtoken_encrypted" (windows only)</para>
 	/// </summary>
 	public class CatalogArtifact
 	{
@@ -26,7 +24,7 @@
 
 		/// <summary>
 		/// Creates an instance of <see cref="CatalogArtifact"/>.
-		/// It searches for an optional dmcatalogkey in the "dmcatalogkey" or "dmcatalogkey_encrypted" Environment Variable.
+		/// It searches for an optional dmCatalogToken in the "dmcatalogtoken" or "dmcatalogtoken_encrypted" Environment Variable.
 		/// </summary>
 		/// <param name="pathToArtifact">Path to the ".dmapp" or ".dmprotocol" file.</param>
 		/// <param name="service">An instance of <see cref="ICatalogService"/> used for communication.</param>
@@ -46,7 +44,7 @@
 
 		/// <summary>
 		/// Creates an instance of <see cref="CatalogArtifact"/> using a default HttpCatalogService with a new HttpClient for communication.
-		/// It searches for an optional dmcatalogkey in the "dmcatalogkey" or "dmcatalogkey_encrypted" Environment Variable for authentication.
+		/// It searches for an optional dmCatalogToken in the "dmcatalogtoken" or "dmcatalogtoken_encrypted" Environment Variable for authentication.
 		/// WARNING: when wishing to upload several Artifacts it's recommended to use the CatalogArtifact(string pathToArtifact, ICatalogService service, IFileSystem fileSystem, ILogger logger).
 		/// </summary>
 		/// <param name="pathToArtifact">Path to the ".dmapp" or ".dmprotocol" file.</param>
@@ -54,7 +52,6 @@
 		/// <param name="metaData">Contains package metadata.</param>
 		public CatalogArtifact(string pathToArtifact, ILogger logger, CatalogMetaData metaData) : this(pathToArtifact, new HttpCatalogService(new System.Net.Http.HttpClient(), logger), FileSystem.Instance, logger, metaData)
 		{
-
 		}
 
 		/// <summary>
@@ -80,16 +77,16 @@
 		}
 
 		/// <summary>
-		/// Uploads to the private catalog using the provided dmcatalogkey.
+		/// Uploads to the private catalog using the provided dmCatalogToken.
 		/// </summary>
-		/// <param name="dmcatalogkey">A provided token for the agent or organization as defined in https://admin.dataminer.services/.</param>
+		/// <param name="dmCatalogToken">A provided token for the agent or organization as defined in https://admin.dataminer.services/.</param>
 		/// <returns>If the upload was successful or not.</returns>
-		public async Task<ArtifactModel> UploadAsync(string dmcatalogkey)
+		public async Task<ArtifactUploadResult> UploadAsync(string dmCatalogToken)
 		{
 			_logger.LogDebug($"Uploading {PathToArtifact}...");
 
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
-			var result = await catalogService.ArtifactUploadAsync(packageData, dmcatalogkey, metaData, cancellationTokenSource.Token).ConfigureAwait(false);
+			var result = await catalogService.ArtifactUploadAsync(packageData, dmCatalogToken, metaData, cancellationTokenSource.Token).ConfigureAwait(false);
 			_logger.LogDebug($"Finished Uploading {PathToArtifact}");
 
 			_logger.LogInformation(JsonConvert.SerializeObject(result));
@@ -97,16 +94,16 @@
 		}
 
 		/// <summary>
-		/// Uploads to the private catalog using the dmcatalogkey or dmcatalogkey_encrypted environment variable as the token.
+		/// Uploads to the private catalog using the dmcatalogtoken or dmcatalogtoken environment variable as the token.
 		/// </summary>
 		/// <returns>If the upload was successful or not.</returns>
 		/// <exception cref="InvalidOperationException">Uploading failed.</exception>
 		/// <exception cref="UnauthorizedAccessException">Uploading failed due to invalid Token.</exception>
-		public async Task<ArtifactModel> UploadAsync()
+		public async Task<ArtifactUploadResult> UploadAsync()
 		{
 			if (String.IsNullOrWhiteSpace(keyFromEnv))
 			{
-				throw new InvalidOperationException("Uploading failed, missing token in environment variable dmcatalogkey or dmcatalogkey_encrypted.");
+				throw new InvalidOperationException("Uploading failed, missing token in environment variable dmcatalogtoken or dmcatalogtoken_encrypted.");
 			}
 
 			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
@@ -115,40 +112,49 @@
 
 		/// <summary>
 		///  Attempts to find the necessary API key in Environment Variables. In order of priority:
-		///  <para>- key stored as an Environment Variable called "dmcatalogkey". (unix/win)</para>
-		///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogkey_encrypted" (windows only)</para>
+		///  <para>- key stored as an Environment Variable called "dmcatalogtoken". (unix/win)</para>
+		///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogtoken_encrypted" (windows only)</para>
 		/// </summary>
 		private void TryFindEnvironmentKey()
 		{
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
-				var encryptedKey = WinEncryptedKeys.Lib.Keys.RetrieveKey("dmcatalogkey_encrypted");
-				if (encryptedKey != null)
+				try
 				{
-					string keyFromWinEncryptedKeys = encryptedKey.ToString();
-
-					if (!String.IsNullOrWhiteSpace(keyFromWinEncryptedKeys))
+					var encryptedKey = WinEncryptedKeys.Lib.Keys.RetrieveKey("dmcatalogtoken_encrypted");
+					if (encryptedKey != null)
 					{
-						_logger.LogDebug("OK: Found token in Env Variable: 'dmcatalogkey_encrypted' created by WinEncryptedKeys.");
-						keyFromEnv = keyFromWinEncryptedKeys;
+						string keyFromWinEncryptedKeys = new System.Net.NetworkCredential(string.Empty, encryptedKey).Password;
+
+						if (!String.IsNullOrWhiteSpace(keyFromWinEncryptedKeys))
+						{
+							_logger.LogDebug("OK: Found token in Env Variable: 'dmcatalogtoken_encrypted' created by WinEncryptedKeys.");
+							keyFromEnv = keyFromWinEncryptedKeys;
+						}
 					}
+				}
+				catch (InvalidOperationException)
+				{
+					// Gobble up, no key means we try the next thing.
 				}
 			}
 
-			var config = new ConfigurationBuilder()
-				.AddUserSecrets<CatalogArtifact>()
-				.Build();
-			string keyFromEnvironment = config["dmcatalogkey"];
+			//var config = new ConfigurationBuilder()
+			//	.AddUserSecrets<CatalogArtifact>()
+			//	.Build();
+			//string keyFromEnvironment = config["dmcatalogtoken"];
+
+			string keyFromEnvironment = Environment.GetEnvironmentVariable("dmcatalogtoken");
 
 			if (!String.IsNullOrWhiteSpace(keyFromEnvironment))
 			{
 				if (!String.IsNullOrWhiteSpace(keyFromEnv))
 				{
-					_logger.LogDebug("OK: Overriding 'dmcatalogkey_encrypted' with found token in Env Variable: 'dmcatalogkey'.");
+					_logger.LogDebug("OK: Overriding 'dmcatalogtoken_encrypted' with found token in Env Variable: 'dmcatalogtoken'.");
 				}
 				else
 				{
-					_logger.LogDebug("OK: Found token in Env Variable: 'dmcatalogkey'.");
+					_logger.LogDebug("OK: Found token in Env Variable: 'dmcatalogtoken'.");
 				}
 
 				keyFromEnv = keyFromEnvironment;
