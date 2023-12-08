@@ -24,16 +24,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestData\Demo InterAppCalls 1.0.0-CU1.dmapp">
+    <None Update="TestData\withAutomation.dmapp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\Microsoft Platform 1.0.0-CU4.dmapp">
+    <None Update="TestData\withVisio.dmapp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\SLNetSubscriptionsBenchmarking 1.0.1_B15.dmapp">
+    <None Update="TestData\withProtocols.dmapp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\Tandberg RX1290 1.0.0-CU1.dmapp">
+    <None Update="TestData\withDashboard.dmapp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

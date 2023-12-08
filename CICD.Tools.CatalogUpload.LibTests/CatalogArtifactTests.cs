@@ -60,9 +60,23 @@
 				Version = "1.0.0.1-alpha"
 			};
 
-			CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-			Func<Task> uploadAction = async () => { await artifactModel.UploadAsync(); };
-			await uploadAction.Should().ThrowAsync<InvalidOperationException>().WithMessage("*missing token*");
+			var originalKey_encrypt = Environment.GetEnvironmentVariable("dmcatalogtoken_encrypted", EnvironmentVariableTarget.Machine) ?? "";
+			var originalKey = Environment.GetEnvironmentVariable("dmcatalogtoken") ?? "";
+
+			try
+			{
+				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", "", EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("dmcatalogtoken", "");
+
+				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+				Func<Task> uploadAction = async () => { await artifactModel.UploadAsync(); };
+				await uploadAction.Should().ThrowAsync<InvalidOperationException>().WithMessage("*missing token*");
+			}
+			finally
+			{
+				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", originalKey_encrypt, EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("dmcatalogtoken", originalKey);
+			}
 		}
 
 		[TestMethod()]
@@ -93,8 +107,13 @@
 
 			fakeService.Setup(p => p.ArtifactUploadAsync(It.IsAny<byte[]>(), "encryptedFake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
+			var originalKey_encrypt = Environment.GetEnvironmentVariable("dmcatalogtoken_encrypted", EnvironmentVariableTarget.Machine) ?? "";
+			var originalKey = Environment.GetEnvironmentVariable("dmcatalogtoken") ?? "";
+
 			try
 			{
+				Environment.SetEnvironmentVariable("dmcatalogtoken", "");
+
 				WinEncryptedKeys.Lib.Keys.SetKey("dmcatalogtoken_encrypted", "encryptedFake");
 
 				// Act
@@ -111,7 +130,8 @@
 			}
 			finally
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", "", EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", originalKey_encrypt, EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("dmcatalogtoken", originalKey);
 			}
 		}
 
@@ -184,8 +204,12 @@
 
 			fakeService.Setup(p => p.ArtifactUploadAsync(It.IsAny<byte[]>(), "fake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
+			var originalKey_encrypt = Environment.GetEnvironmentVariable("dmcatalogtoken_encrypted", EnvironmentVariableTarget.Machine) ?? "";
+			var originalKey = Environment.GetEnvironmentVariable("dmcatalogtoken") ?? "";
+
 			try
 			{
+				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", "", EnvironmentVariableTarget.Machine);
 				Environment.SetEnvironmentVariable("dmcatalogtoken", "fake");
 
 				// Act
@@ -202,7 +226,8 @@
 			}
 			finally
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken", String.Empty);
+				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", originalKey_encrypt, EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("dmcatalogtoken", originalKey);
 			}
 		}
 	}

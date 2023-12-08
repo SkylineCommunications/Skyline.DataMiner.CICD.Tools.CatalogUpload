@@ -2,7 +2,7 @@
 
 ## About
 
-Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services) visible or invisible.
+Uploads and/or makes visible, artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).
 
 ### About DataMiner
 
@@ -55,8 +55,8 @@ You can choose to add the dmcatalogtoken to an environment variable instead and 
 
 The first option is commonplace for environment setups in cloud-based CI/CD Pipelines (github, gitlab, azure, ...)
 The second option can be beneficial on a static server such as Jenkins or your local machine (windows only). It adds additional encryption to the environment variable only allowing decryption on the same machine. 
-for example:
 
+Running as Administrator:
 ```console
 dotnet tool install -g Skyline.DataMiner.CICD.Tools.WinEncryptedKeys
 WinEncryptedKeys --name "dmcatalogtoken_encrypted" --value "MyTokenHere"

@@ -11,7 +11,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 		public void FromArtifactTest_BuildPreReleaseDmappWithProtocols()
 		{
 			// Arrange
-			string pathToArtifact = "TestData/SLNetSubscriptionsBenchmarking 1.0.1_B15.dmapp";
+			string pathToArtifact = "TestData/withProtocols.dmapp";
 
 			// Act
 			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
@@ -33,7 +33,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 		public void FromArtifactTest_ReleaseAutomation()
 		{
 			// Arrange
-			string pathToArtifact = "TestData/Demo InterAppCalls 1.0.0-CU1.dmapp";
+			string pathToArtifact = "TestData/withAutomation.dmapp";
 
 			// Act
 			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
@@ -55,7 +55,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 		public void FromArtifactTest_ReleaseDashboard()
 		{
 			// Arrange
-			string pathToArtifact = "TestData/Tandberg RX1290 1.0.0-CU1.dmapp";
+			string pathToArtifact = "TestData/withDashboard.dmapp";
 
 			// Act
 			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
@@ -77,7 +77,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 		public void FromArtifactTest_ReleaseProtocolVisio()
 		{
 			// Arrange
-			string pathToArtifact = "TestData/Microsoft Platform 1.0.0-CU4.dmapp";
+			string pathToArtifact = "TestData/withVisio.dmapp";
 
 			// Act
 			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
