@@ -26,7 +26,7 @@
 	}
 
 	[System.Flags]
-	internal enum Content
+	internal enum PackageTypes
 	{
 		None = 0b_0000_0000, // 0
 		HasAutomation = 0b_0000_0001, // 1
@@ -43,58 +43,55 @@
 		private readonly IEnumerable<ZipArchiveEntry> allContentFiles;
 
 		private readonly FileSystem.IPathIO path;
-		private readonly ZipArchive zipFile;
 
 		public ContentType(ZipArchive zipFile)
 		{
 			path = FileSystem.FileSystem.Instance.Path;
-
-			this.zipFile = zipFile;
 			this.allContentFiles = zipFile.Entries.Where(p => p.FullName.StartsWith("AppInstallContent"));
 
 			// Consider this a best effort currently.
-			Content content = Content.None;
+			PackageTypes content = PackageTypes.None;
 
-			if (HasAutomationScripts()) content |= Content.HasAutomation;
-			if (HasDashboards()) content |= Content.HasDashboards;
-			if (HasProtocols()) content |= Content.HasProtocols;
-			if (HasOtherAppPackages()) content |= Content.HasOtherAppPackages;
-			if (HasCompanionFiles()) content |= Content.HasCompanionFiles;
-			if (HasFunctions()) content |= Content.HasFunctions;
-			if (HasVisios()) content |= Content.HasVisios;
+			if (HasAutomationScripts()) content |= PackageTypes.HasAutomation;
+			if (HasDashboards()) content |= PackageTypes.HasDashboards;
+			if (HasProtocols()) content |= PackageTypes.HasProtocols;
+			if (HasOtherAppPackages()) content |= PackageTypes.HasOtherAppPackages;
+			if (HasCompanionFiles()) content |= PackageTypes.HasCompanionFiles;
+			if (HasFunctions()) content |= PackageTypes.HasFunctions;
+			if (HasVisios()) content |= PackageTypes.HasVisios;
 
 			switch (content)
 			{
-				case Content.HasAutomation:
-				case Content.HasAutomation | Content.HasCompanionFiles:
+				case PackageTypes.HasAutomation:
+				case PackageTypes.HasAutomation | PackageTypes.HasCompanionFiles:
 					Value = ArtifactContentType.DmScript.ToString();
 					break;
 
-				case Content.HasDashboards:
-				case Content.HasDashboards | Content.HasCompanionFiles:
+				case PackageTypes.HasDashboards:
+				case PackageTypes.HasDashboards | PackageTypes.HasCompanionFiles:
 					Value = ArtifactContentType.Dashboard.ToString();
 					break;
 
-				case Content.HasOtherAppPackages:
+				case PackageTypes.HasOtherAppPackages:
 					Value = ArtifactContentType.Package.ToString();
 					break;
 
-				case Content.HasCompanionFiles:
+				case PackageTypes.HasCompanionFiles:
 					Value = ArtifactContentType.CompanionFile.ToString();
 					break;
 
-				case Content.HasFunctions:
-				case Content.HasFunctions | Content.HasCompanionFiles:
+				case PackageTypes.HasFunctions:
+				case PackageTypes.HasFunctions | PackageTypes.HasCompanionFiles:
 					Value = ArtifactContentType.Function.ToString();
 					break;
 
-				case Content.HasVisios:
-				case Content.HasVisios | Content.HasCompanionFiles:
+				case PackageTypes.HasVisios:
+				case PackageTypes.HasVisios | PackageTypes.HasCompanionFiles:
 					Value = ArtifactContentType.Visio.ToString();
 					break;
 
-				case Content.HasProtocols:
-				case Content.HasProtocols | Content.HasCompanionFiles:
+				case PackageTypes.HasProtocols:
+				case PackageTypes.HasProtocols | PackageTypes.HasCompanionFiles:
 					Value = ArtifactContentType.Package.ToString();
 					break;
 
@@ -105,7 +102,7 @@
 			}
 		}
 
-		public string Value { get; set; } = "Unknown";
+		public string Value { get; set; }
 
 		private bool HasAutomationScripts()
 		{
