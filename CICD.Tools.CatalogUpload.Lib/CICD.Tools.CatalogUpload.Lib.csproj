@@ -18,7 +18,7 @@
 		<Company>Skyline Communications</Company>
 		<Description>
 			Library containing code to upload artifacts to the Skyline DataMiner Catalog (https://catalog.dataminer.services/).
-			Entry Point: new CatalogArtifact("PathToArtifact.dmapp", new HttpCatalogService(httpClient, debugLogger)).Upload(CatalogArtifactAccessType.privateCatalog, out output);
+			Entry Point: new CatalogArtifact("pathToArtifact", "logger", "metaData").UploadAsync();
 		</Description>
 		<RootNamespace>Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib</RootNamespace>
 	</PropertyGroup>
