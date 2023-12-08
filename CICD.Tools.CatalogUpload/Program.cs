@@ -56,7 +56,7 @@
 			};
 
 			var overrideVersion = new Option<string>(
-			name: "--version",
+			name: "--artifactVersion",
 			description: "Optional but recommended, include a different version then the internal package version to register your package under (this can be a pre-release version). e.g. '1.0.1', '1.0.1-prerelease1', '1.0.0.1'")
 			{
 				IsRequired = false,
@@ -83,7 +83,7 @@
 				IsRequired = false,
 			};
 
-			var withRegistrationCommand = new Command("withRegistration", "Uploads artifacts to become visible in the Skyline DataMiner catalog (https://catalog.dataminer.services")
+			var withRegistrationCommand = new Command("WithRegistration", "Uploads artifacts to become visible in the Skyline DataMiner catalog (https://catalog.dataminer.services")
 			{
 				registrationIdentifier,
 				overrideVersion,

@@ -31,11 +31,11 @@
 			formData.Add(new StringContent(catalog.Name), "name");
 			formData.Add(new StringContent(catalog.Version), "version");
 			formData.Add(new StringContent(catalog.ContentType), "contentType");
-			formData.Add(new StringContent(catalog.Branch), "branch");
-			formData.Add(new StringContent(catalog.Identifier), "identifier");
+			formData.Add(new StringContent(catalog.Branch ?? ""), "branch");
+			formData.Add(new StringContent(catalog.Identifier ?? ""), "identifier");
 			formData.Add(new StringContent(catalog.IsPreRelease() ? "true" : "false"), "isprerelease");
-			formData.Add(new StringContent(catalog.CommitterMail), "developer");
-			formData.Add(new StringContent(catalog.ReleaseUri), "releasepath");
+			formData.Add(new StringContent(catalog.CommitterMail ?? ""), "developer");
+			formData.Add(new StringContent(catalog.ReleaseUri ?? ""), "releasepath");
 
 			MemoryStream ms = new MemoryStream();
 			ms.Write(package, 0, package.Length);

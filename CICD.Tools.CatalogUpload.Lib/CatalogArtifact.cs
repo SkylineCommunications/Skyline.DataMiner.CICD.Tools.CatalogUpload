@@ -50,7 +50,7 @@
 		/// <param name="pathToArtifact">Path to the ".dmapp" or ".dmprotocol" file.</param>
 		/// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
 		/// <param name="metaData">Contains package metadata.</param>
-		public CatalogArtifact(string pathToArtifact, ILogger logger, CatalogMetaData metaData) : this(pathToArtifact, new HttpCatalogService(new System.Net.Http.HttpClient(), logger), FileSystem.Instance, logger, metaData)
+		public CatalogArtifact(string pathToArtifact, ILogger logger, CatalogMetaData metaData) : this(pathToArtifact, CatalogServiceFactory.CreateWithHttp(new System.Net.Http.HttpClient(), logger), FileSystem.Instance, logger, metaData)
 		{
 		}
 
