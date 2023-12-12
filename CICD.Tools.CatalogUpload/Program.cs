@@ -78,7 +78,7 @@
 
 			var releaseUri = new Option<string>(
 			name: "--releaseNotes",
-			description: "Optionally include a uri to the release notes. e.g. https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3")
+			description: "Optionally include a URL to the release notes. e.g. https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3")
 			{
 				IsRequired = false,
 			};
