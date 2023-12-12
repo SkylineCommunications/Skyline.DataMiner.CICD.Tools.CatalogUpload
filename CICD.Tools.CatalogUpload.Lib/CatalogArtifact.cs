@@ -13,7 +13,7 @@
 
 	/// <summary>
 	/// Allows Uploading an artifact to the Catalog using one of the below in order of priority:
-	///  <para>- provided key in upload argument (unix/win)</para>
+	///  <para>- provided key in upload argument (Unix/Windows)</para>
 	///  <para>- key stored as an Environment Variable called "dmcatalogtoken". (unix/win)</para>
 	///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogtoken_encrypted" (windows only)</para>
 	/// </summary>
