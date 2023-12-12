@@ -55,7 +55,7 @@
 		}
 
 		/// <summary>
-		/// Path to the ".dmapp" or ".dmprotocol" file.
+		/// Path to the application package (.dmapp) or protocol package (.dmprotocol).
 		/// </summary>
 		public string PathToArtifact { get; private set; }
 
