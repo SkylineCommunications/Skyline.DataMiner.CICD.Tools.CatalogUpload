@@ -45,8 +45,8 @@
 		/// <summary>
 		/// Creates an instance of <see cref="CatalogArtifact"/> using a default HttpCatalogService with a new HttpClient for communication.
 		/// It searches for an optional dmCatalogToken in the "dmcatalogtoken" or "dmcatalogtoken_encrypted" Environment Variable for authentication.
-		/// WARNING: when wishing to upload several Artifacts it's recommended to use the CatalogArtifact(string pathToArtifact, ICatalogService service, IFileSystem fileSystem, ILogger logger).
 		/// </summary>
+		/// <remarks>WARNING: when wishing to upload several Artifacts it's recommended to use the CatalogArtifact(string pathToArtifact, ICatalogService service, IFileSystem fileSystem, ILogger logger).</remarks>
 		/// <param name="pathToArtifact">Path to the ".dmapp" or ".dmprotocol" file.</param>
 		/// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
 		/// <param name="metaData">Contains package metadata.</param>

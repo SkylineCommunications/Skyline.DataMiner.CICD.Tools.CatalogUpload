@@ -64,7 +64,7 @@
 
 			var branch = new Option<string>(
 			name: "--branch",
-			description: "Specifies what branch does this version of your package belong to, e.g. 'main', '1.0.0.X', '1.0.X', 'dev/somefeature', etc. Defaults to 'main' when not provided. "
+			description: "Specifies what branch does this version of your package belong to, e.g. 'main', '1.0.0.X', '1.0.X', 'dev/somefeature', etc. Defaults to 'main' when not provided. ")
 			{
 				IsRequired = false,
 			};
@@ -93,7 +93,7 @@
 			};
 
 			rootCommand.SetHandler(Process, pathToArtifact, dmCatalogToken, isDebug);
-			withRegistrationCommand.SetHandler(ProcessWithRegistration, pathToArtifact, dmCatalogToken, isDebug, registrationIdentifier, overrideVersion, branch, committerMail, releaseUri);
+			withRegistrationCommand.SetHandler(ProcessWithRegistrationAsync, pathToArtifact, dmCatalogToken, isDebug, registrationIdentifier, overrideVersion, branch, committerMail, releaseUri);
 
 			rootCommand.Add(withRegistrationCommand);
 			return await rootCommand.InvokeAsync(args);
@@ -101,14 +101,14 @@
 
 		private static async Task<int> Process(string pathToArtifact, string dmCatalogToken, bool isDebug)
 		{
-			return await ProcessWithRegistration(pathToArtifact, dmCatalogToken, isDebug, null, null, null, null, null);
+			return await ProcessWithRegistrationAsync(pathToArtifact, dmCatalogToken, isDebug, null, null, null, null, null);
 		}
 
 		private static async Task<int> ProcessWithRegistrationAsync(string pathToArtifact, string dmCatalogToken, bool isDebug, string registrationIdentifier, string overrideVersion, string branch, string committerMail, string releaseUri)
 		{
 			LoggerConfiguration logConfig;
 
-			if (isDebug)
+			if (!isDebug)
 			{
 				logConfig = new LoggerConfiguration().WriteTo.Console(Serilog.Events.LogEventLevel.Information);
 			}
