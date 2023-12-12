@@ -64,7 +64,7 @@
 
 			var branch = new Option<string>(
 			name: "--branch",
-			description: "Defaults to 'main' when not provided. What branch does this version of your package belong to? e.g. 'main', '1.0.0.X', '1.0.X', 'dev/somefeature', ...")
+			description: "Specifies what branch does this version of your package belong to, e.g. 'main', '1.0.0.X', '1.0.X', 'dev/somefeature', etc. Defaults to 'main' when not provided. "
 			{
 				IsRequired = false,
 			};
