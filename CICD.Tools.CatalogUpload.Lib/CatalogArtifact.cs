@@ -26,7 +26,7 @@
 		/// Creates an instance of <see cref="CatalogArtifact"/>.
 		/// It searches for an optional dmCatalogToken in the "dmcatalogtoken" or "dmcatalogtoken_encrypted" Environment Variable.
 		/// </summary>
-		/// <param name="pathToArtifact">Path to the ".dmapp" or ".dmprotocol" file.</param>
+		/// <param name="pathToArtifact">Path to the application package (.dmapp) or protocol package (.dmprotocol).</param>
 		/// <param name="service">An instance of <see cref="ICatalogService"/> used for communication.</param>
 		/// <param name="fileSystem">An instance of <see cref="IFileSystem"/> to access the filesystem. e.g. Skyline.DataMiner.CICD.FileSystem.Instance.</param>
 		/// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
@@ -47,7 +47,7 @@
 		/// It searches for an optional dmCatalogToken in the "dmcatalogtoken" or "dmcatalogtoken_encrypted" Environment Variable for authentication.
 		/// </summary>
 		/// <remarks>WARNING: when wishing to upload several Artifacts it's recommended to use the CatalogArtifact(string pathToArtifact, ICatalogService service, IFileSystem fileSystem, ILogger logger).</remarks>
-		/// <param name="pathToArtifact">Path to the ".dmapp" or ".dmprotocol" file.</param>
+		/// <param name="pathToArtifact">Path to the application package (.dmapp) or protocol package (.dmprotocol).</param>
 		/// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
 		/// <param name="metaData">Contains package metadata.</param>
 		public CatalogArtifact(string pathToArtifact, ILogger logger, CatalogMetaData metaData) : this(pathToArtifact, CatalogServiceFactory.CreateWithHttp(new System.Net.Http.HttpClient(), logger), FileSystem.Instance, logger, metaData)
