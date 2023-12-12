@@ -57,7 +57,7 @@
 
 			var overrideVersion = new Option<string>(
 			name: "--artifactVersion",
-			description: "Optional but recommended, include a different version then the internal package version to register your package under (this can be a pre-release version). e.g. '1.0.1', '1.0.1-prerelease1', '1.0.0.1'")
+			description: "Optional but recommended, include a different version than the internal package version to register your package under (this can be a pre-release version). e.g. '1.0.1', '1.0.1-prerelease1', '1.0.0.1'")
 			{
 				IsRequired = false,
 			};
