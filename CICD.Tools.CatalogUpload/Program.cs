@@ -104,7 +104,7 @@
 			return await ProcessWithRegistration(pathToArtifact, dmCatalogToken, isDebug, null, null, null, null, null);
 		}
 
-		private static async Task<int> ProcessWithRegistration(string pathToArtifact, string dmCatalogToken, bool isDebug, string registrationIdentifier, string overrideVersion, string branch, string committerMail, string releaseUri)
+		private static async Task<int> ProcessWithRegistrationAsync(string pathToArtifact, string dmCatalogToken, bool isDebug, string registrationIdentifier, string overrideVersion, string branch, string committerMail, string releaseUri)
 		{
 			LoggerConfiguration logConfig;
 
