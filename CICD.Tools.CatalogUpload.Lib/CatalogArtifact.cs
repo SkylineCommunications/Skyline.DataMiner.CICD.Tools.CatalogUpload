@@ -83,6 +83,11 @@
 		/// <returns>If the upload was successful or not.</returns>
 		public async Task<ArtifactUploadResult> UploadAsync(string dmCatalogToken)
 		{
+			if(dmCatalogToken != keyFromEnv)
+			{
+				_logger.LogDebug($"Attempting upload with provided argument as token for artifact: {PathToArtifact}...");
+			}
+
 			_logger.LogDebug($"Uploading {PathToArtifact}...");
 
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);

@@ -106,15 +106,15 @@
 
 		private static async Task<int> ProcessWithRegistrationAsync(string pathToArtifact, string dmCatalogToken, bool isDebug, string registrationIdentifier, string overrideVersion, string branch, string committerMail, string releaseUri)
 		{
-			LoggerConfiguration logConfig;
-
+			LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console();
 			if (!isDebug)
 			{
-				logConfig = new LoggerConfiguration().WriteTo.Console(Serilog.Events.LogEventLevel.Information);
+				logConfig.MinimumLevel.Information();
 			}
 			else
 			{
-				logConfig = new LoggerConfiguration().WriteTo.Console(Serilog.Events.LogEventLevel.Debug);
+
+				logConfig.MinimumLevel.Debug();
 			}
 
 			var seriLog = logConfig.CreateLogger();
