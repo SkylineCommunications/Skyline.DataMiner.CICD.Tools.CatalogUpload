@@ -30,7 +30,7 @@
 
 			var dmCatalogToken = new Option<string>(
 			name: "--dmCatalogToken",
-			description: "The key to upload to the catalog as defined in admin.dataminer.services. This is optional if the key can also be provided using the 'dmcatalogtoken' environment variable (unix/win) or using 'dmcatalogtoken_encrypted' configured with Skyline.DataMiner.CICD.Tools.WinEncryptedKeys (windows).")
+			description: "The key to upload to the catalog as defined in admin.dataminer.services. This is optional if the key can also be provided using the 'DATAMINER_CATALOG_TOKEN' environment variable (unix/win) or using 'DATAMINER_CATALOG_TOKEN_ENCRYPTED' configured with Skyline.DataMiner.CICD.Tools.WinEncryptedKeys (windows).")
 			{
 				IsRequired = false
 			};

@@ -14,8 +14,8 @@
 	/// <summary>
 	/// Allows Uploading an artifact to the Catalog using one of the below in order of priority:
 	///  <para>- provided key in upload argument (Unix/Windows)</para>
-	///  <para>- key stored as an Environment Variable called "dmcatalogtoken". (Unix/Windows)</para>
-	///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogtoken_encrypted" (Windows only)</para>
+	///  <para>- key stored as an Environment Variable called "DATAMINER_CATALOG_TOKEN". (Unix/Windows)</para>
+	///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "DATAMINER_CATALOG_TOKEN_ENCRYPTED" (Windows only)</para>
 	/// </summary>
 	public class CatalogArtifact
 	{
@@ -24,7 +24,7 @@
 
 		/// <summary>
 		/// Creates an instance of <see cref="CatalogArtifact"/>.
-		/// It searches for an optional dmCatalogToken in the "dmcatalogtoken" or "dmcatalogtoken_encrypted" Environment Variable.
+		/// It searches for an optional dmCatalogToken in the "DATAMINER_CATALOG_TOKEN" or "DATAMINER_CATALOG_TOKEN_ENCRYPTED" Environment Variable.
 		/// </summary>
 		/// <param name="pathToArtifact">Path to the application package (.dmapp) or protocol package (.dmprotocol).</param>
 		/// <param name="service">An instance of <see cref="ICatalogService"/> used for communication.</param>
@@ -44,7 +44,7 @@
 
 		/// <summary>
 		/// Creates an instance of <see cref="CatalogArtifact"/> using a default HttpCatalogService with a new HttpClient for communication.
-		/// It searches for an optional dmCatalogToken in the "dmcatalogtoken" or "dmcatalogtoken_encrypted" Environment Variable for authentication.
+		/// It searches for an optional dmCatalogToken in the "DATAMINER_CATALOG_TOKEN" or "DATAMINER_CATALOG_TOKEN_ENCRYPTED" Environment Variable for authentication.
 		/// </summary>
 		/// <remarks>WARNING: when wishing to upload several Artifacts it's recommended to use the CatalogArtifact(string pathToArtifact, ICatalogService service, IFileSystem fileSystem, ILogger logger).</remarks>
 		/// <param name="pathToArtifact">Path to the application package (.dmapp) or protocol package (.dmprotocol).</param>
@@ -99,7 +99,7 @@
 		}
 
 		/// <summary>
-		/// Uploads to the private catalog using the dmcatalogtoken or dmcatalogtoken environment variable as the token.
+		/// Uploads to the private catalog using the DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN environment variable as the token.
 		/// </summary>
 		/// <returns>If the upload was successful or not.</returns>
 		/// <exception cref="InvalidOperationException">Uploading failed.</exception>
@@ -108,7 +108,7 @@
 		{
 			if (String.IsNullOrWhiteSpace(keyFromEnv))
 			{
-				throw new InvalidOperationException("Uploading failed, missing token in environment variable dmcatalogtoken or dmcatalogtoken_encrypted.");
+				throw new InvalidOperationException("Uploading failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
 			}
 
 			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
@@ -117,8 +117,8 @@
 
 		/// <summary>
 		///  Attempts to find the necessary API key in Environment Variables. In order of priority:
-		///  <para>- key stored as an Environment Variable called "dmcatalogtoken". (unix/win)</para>
-		///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "dmcatalogtoken_encrypted" (windows only)</para>
+		///  <para>- key stored as an Environment Variable called "DATAMINER_CATALOG_TOKEN". (unix/win)</para>
+		///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "DATAMINER_CATALOG_TOKEN_ENCRYPTED" (windows only)</para>
 		/// </summary>
 		private void TryFindEnvironmentKey()
 		{
@@ -126,14 +126,14 @@
 			{
 				try
 				{
-					var encryptedKey = WinEncryptedKeys.Lib.Keys.RetrieveKey("dmcatalogtoken_encrypted");
+					var encryptedKey = WinEncryptedKeys.Lib.Keys.RetrieveKey("DATAMINER_CATALOG_TOKEN_ENCRYPTED");
 					if (encryptedKey != null)
 					{
 						string keyFromWinEncryptedKeys = new System.Net.NetworkCredential(string.Empty, encryptedKey).Password;
 
 						if (!String.IsNullOrWhiteSpace(keyFromWinEncryptedKeys))
 						{
-							_logger.LogDebug("OK: Found token in Env Variable: 'dmcatalogtoken_encrypted' created by WinEncryptedKeys.");
+							_logger.LogDebug("OK: Found token in Env Variable: 'DATAMINER_CATALOG_TOKEN_ENCRYPTED' created by WinEncryptedKeys.");
 							keyFromEnv = keyFromWinEncryptedKeys;
 						}
 					}
@@ -147,19 +147,19 @@
 			//var config = new ConfigurationBuilder()
 			//	.AddUserSecrets<CatalogArtifact>()
 			//	.Build();
-			//string keyFromEnvironment = config["dmcatalogtoken"];
+			//string keyFromEnvironment = config["DATAMINER_CATALOG_TOKEN"];
 
-			string keyFromEnvironment = Environment.GetEnvironmentVariable("dmcatalogtoken");
+			string keyFromEnvironment = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN");
 
 			if (!String.IsNullOrWhiteSpace(keyFromEnvironment))
 			{
 				if (!String.IsNullOrWhiteSpace(keyFromEnv))
 				{
-					_logger.LogDebug("OK: Overriding 'dmcatalogtoken_encrypted' with found token in Env Variable: 'dmcatalogtoken'.");
+					_logger.LogDebug("OK: Overriding 'DATAMINER_CATALOG_TOKEN_ENCRYPTED' with found token in Env Variable: 'DATAMINER_CATALOG_TOKEN'.");
 				}
 				else
 				{
-					_logger.LogDebug("OK: Found token in Env Variable: 'dmcatalogtoken'.");
+					_logger.LogDebug("OK: Found token in Env Variable: 'DATAMINER_CATALOG_TOKEN'.");
 				}
 
 				keyFromEnv = keyFromEnvironment;

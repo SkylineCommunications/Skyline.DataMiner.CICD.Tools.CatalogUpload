@@ -60,13 +60,13 @@
 				Version = "1.0.0.1-alpha"
 			};
 
-			var originalKey_encrypt = Environment.GetEnvironmentVariable("dmcatalogtoken_encrypted", EnvironmentVariableTarget.Machine) ?? "";
-			var originalKey = Environment.GetEnvironmentVariable("dmcatalogtoken") ?? "";
+			var originalKey_encrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
+			var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
 
 			try
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", "", EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("dmcatalogtoken", "");
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "", EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "");
 
 				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
 				Func<Task> uploadAction = async () => { await artifactModel.UploadAsync(); };
@@ -74,8 +74,8 @@
 			}
 			finally
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", originalKey_encrypt, EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("dmcatalogtoken", originalKey);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKey_encrypt, EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
 			}
 		}
 
@@ -107,14 +107,14 @@
 
 			fakeService.Setup(p => p.ArtifactUploadAsync(It.IsAny<byte[]>(), "encryptedFake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
-			var originalKey_encrypt = Environment.GetEnvironmentVariable("dmcatalogtoken_encrypted", EnvironmentVariableTarget.Machine) ?? "";
-			var originalKey = Environment.GetEnvironmentVariable("dmcatalogtoken") ?? "";
+			var originalKey_encrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
+			var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
 
 			try
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken", "");
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "");
 
-				WinEncryptedKeys.Lib.Keys.SetKey("dmcatalogtoken_encrypted", "encryptedFake");
+				WinEncryptedKeys.Lib.Keys.SetKey("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "encryptedFake");
 
 				// Act
 				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
@@ -130,8 +130,8 @@
 			}
 			finally
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", originalKey_encrypt, EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("dmcatalogtoken", originalKey);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKey_encrypt, EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
 			}
 		}
 
@@ -204,13 +204,13 @@
 
 			fakeService.Setup(p => p.ArtifactUploadAsync(It.IsAny<byte[]>(), "fake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
-			var originalKey_encrypt = Environment.GetEnvironmentVariable("dmcatalogtoken_encrypted", EnvironmentVariableTarget.Machine) ?? "";
-			var originalKey = Environment.GetEnvironmentVariable("dmcatalogtoken") ?? "";
+			var originalKey_encrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
+			var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
 
 			try
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", "", EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("dmcatalogtoken", "fake");
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "", EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "fake");
 
 				// Act
 				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
@@ -226,8 +226,8 @@
 			}
 			finally
 			{
-				Environment.SetEnvironmentVariable("dmcatalogtoken_encrypted", originalKey_encrypt, EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("dmcatalogtoken", originalKey);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKey_encrypt, EnvironmentVariableTarget.Machine);
+				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
 			}
 		}
 	}
