@@ -22,14 +22,14 @@
 		public static async Task<int> Main(string[] args)
 		{
 			var pathToArtifact = new Option<string>(
-				name: "--pathToArtifact",
+				name: "--path-to-artifact",
 				description: "Path to the application package (.dmapp) or protocol package (.dmprotocol).")
 			{
 				IsRequired = true
 			};
 
 			var dmCatalogToken = new Option<string>(
-			name: "--dmCatalogToken",
+			name: "--dm-catalog-token",
 			description: "The key to upload to the catalog as defined in admin.dataminer.services. This is optional if the key can also be provided using the 'DATAMINER_CATALOG_TOKEN' environment variable (unix/win) or using 'DATAMINER_CATALOG_TOKEN_ENCRYPTED' configured with Skyline.DataMiner.CICD.Tools.WinEncryptedKeys (windows).")
 			{
 				IsRequired = false
@@ -56,7 +56,7 @@
 			};
 
 			var overrideVersion = new Option<string>(
-			name: "--artifactVersion",
+			name: "--artifact-version",
 			description: "Optional but recommended, include a different version than the internal package version to register your package under (this can be a pre-release version). e.g. '1.0.1', '1.0.1-prerelease1', '1.0.0.1'")
 			{
 				IsRequired = false,
@@ -70,20 +70,20 @@
 			};
 
 			var committerMail = new Option<string>(
-			name: "--authorMail",
+			name: "--author-mail",
 			description: "Optionally include the e-mail of the uploader.")
 			{
 				IsRequired = false,
 			};
 
 			var releaseUri = new Option<string>(
-			name: "--releaseNotes",
+			name: "--release-notes",
 			description: "Optionally include a URL to the release notes. e.g. https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3")
 			{
 				IsRequired = false,
 			};
 
-			var withRegistrationCommand = new Command("WithRegistration", "Uploads artifacts to become visible in the Skyline DataMiner catalog (https://catalog.dataminer.services")
+			var withRegistrationCommand = new Command("with-registration", "Uploads artifacts to become visible in the Skyline DataMiner catalog (https://catalog.dataminer.services")
 			{
 				registrationIdentifier,
 				overrideVersion,

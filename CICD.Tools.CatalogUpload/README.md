@@ -39,14 +39,14 @@ This allows further usage only with the returned Artifact ID. The package will n
 Nothing will be registered but your cloud-connected agent will be able to get deployed with the package using the returned identifier.
 
 ```console
-dataminer-catalog-upload --pathToArtifact "pathToPackage.dmapp" --dmCatalogToken "cloudConnectedToken"
+dataminer-catalog-upload --path-to-artifact "pathToPackage.dmapp" --dm-catalog-token "cloudConnectedToken"
 ```
 
 ### Authentication and Tokens
 
 You can choose to add the DATAMINER_CATALOG_TOKEN to an environment variable instead and skip having to pass along the secure token.
 ```console
- dataminer-catalog-upload --pathToArtifact "pathToPackage.dmapp"
+ dataminer-catalog-upload --path-to-artifact "pathToPackage.dmapp"
 ```
  
  There are 2 options to store the key in an environment variable:
@@ -76,17 +76,17 @@ If you want to make your package visible on the catalog and provide the ability 
 The most basic command will be default anonymous and try to use the 'main' branch and the version defined in the artifact (either protocol version or dmapp version)
 
 ```console
- dataminer-catalog-upload WithRegistration --pathToArtifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo"
+ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo"
 ```
 
 Though optional, it is however highly recommended (due to current restrictions to the internal dmapp version syntax) to provide your own version tag.
 
 ```console
- dataminer-catalog-upload WithRegistration --pathToArtifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1"
+ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1"
 ```
 
 In addition you can provide additional optional information:
 
 ```console
- dataminer-catalog-upload WithRegistration --pathToArtifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1" --branch "dev/MyFeature" --authorMail "thunder@skyline.be" --releaseNotes "https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3"
+ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1" --branch "dev/MyFeature" --author-mail "thunder@skyline.be" --release-notes "https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3"
 ```
