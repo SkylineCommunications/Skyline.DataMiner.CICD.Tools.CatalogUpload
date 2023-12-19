@@ -1,5 +1,6 @@
 ﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload
 {
+	using System;
 	using System.CommandLine;
 	using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@
 	using Serilog;
 
 	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
+	using Skyline.DataMiner.CICD.Tools.Reporter;
 
 	/// <summary>
 	/// Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).
@@ -106,47 +108,83 @@
 
 		private static async Task<int> ProcessWithRegistrationAsync(string pathToArtifact, string dmCatalogToken, bool isDebug, string registrationIdentifier, string overrideVersion, string branch, string committerMail, string releaseUri)
 		{
-			LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console();
-			if (!isDebug)
+			// Skyline.DataMiner.CICD.Tools.CatalogUpload|with-registration:https://github.com/SomeRepo|Status:OK"
+			// Skyline.DataMiner.CICD.Tools.CatalogUpload|with-registration:https://github.com/SomeRepo|Status:Fail-blabla"
+			// Skyline.DataMiner.CICD.Tools.CatalogUpload|volatile|Status:OK"
+			// Skyline.DataMiner.CICD.Tools.CatalogUpload|volatile|Status:Fail-blabla"
+			string devopsMetricsMessage = "Skyline.DataMiner.CICD.Tools.CatalogUpload";
+
+			try
 			{
-				logConfig.MinimumLevel.Information();
+				LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console();
+				if (!isDebug)
+				{
+					logConfig.MinimumLevel.Information();
+				}
+				else
+				{
+
+					logConfig.MinimumLevel.Debug();
+				}
+
+				var seriLog = logConfig.CreateLogger();
+
+				LoggerFactory loggerFactory = new LoggerFactory();
+				loggerFactory.AddSerilog(seriLog);
+
+				var logger = loggerFactory.CreateLogger("Skyline.DataMiner.CICD.Tools.CatalogUpload");
+
+				CatalogMetaData metaData = CatalogMetaData.FromArtifact(pathToArtifact);
+
+				if (registrationIdentifier != null)
+				{
+					devopsMetricsMessage += "|with-registration:" + registrationIdentifier;
+					// Registration as a whole is optional. If there is no Identifier provided there will be no registration.
+					metaData.Identifier = registrationIdentifier; // Need from user <- optional unique identifier. Usually the path to the sourcecode on github/gitlab/git.
+
+					// These are optional. Only override if not null.
+					if (overrideVersion != null) metaData.Version = overrideVersion;
+					if (branch != null) metaData.Branch = branch;
+					if (committerMail != null) metaData.CommitterMail = committerMail;
+					if (releaseUri != null) metaData.ReleaseUri = releaseUri;
+				}
+				else
+				{
+					devopsMetricsMessage += "|volatile";
+				}
+
+				CatalogArtifact artifact = new CatalogArtifact(pathToArtifact, logger, metaData);
+
+				if (string.IsNullOrWhiteSpace(dmCatalogToken))
+				{
+					await artifact.UploadAsync();
+				}
+				else
+				{
+					await artifact.UploadAsync(dmCatalogToken);
+				}
+
+				devopsMetricsMessage += "|Status:OK";
 			}
-			else
+			catch (Exception e)
 			{
-
-				logConfig.MinimumLevel.Debug();
+				devopsMetricsMessage += "|" + "Status:Fail-" + e.Message;
+				throw;
 			}
-
-			var seriLog = logConfig.CreateLogger();
-
-			LoggerFactory loggerFactory = new LoggerFactory();
-			loggerFactory.AddSerilog(seriLog);
-
-			var logger = loggerFactory.CreateLogger("Skyline.DataMiner.CICD.Tools.CatalogUpload");
-
-			CatalogMetaData metaData = CatalogMetaData.FromArtifact(pathToArtifact);
-
-			if (registrationIdentifier != null)
+			finally
 			{
-				// Registration as a whole is optional. If there is no Identifier provided there will be no registration.
-				metaData.Identifier = registrationIdentifier; // Need from user <- optional unique identifier. Usually the path to the sourcecode on github/gitlab/git.
-
-				// These are optional. Only override if not null.
-				if (overrideVersion != null) metaData.Version = overrideVersion;
-				if (branch != null) metaData.Branch = branch;
-				if (committerMail != null) metaData.CommitterMail = committerMail;
-				if (releaseUri != null) metaData.ReleaseUri = releaseUri;
-			}
-
-			CatalogArtifact artifact = new CatalogArtifact(pathToArtifact, logger, metaData);
-
-			if (string.IsNullOrWhiteSpace(dmCatalogToken))
-			{
-				await artifact.UploadAsync();
-			}
-			else
-			{
-				await artifact.UploadAsync(dmCatalogToken);
+				if (!string.IsNullOrWhiteSpace(devopsMetricsMessage))
+				{
+					try
+					{
+						DevOpsMetrics devOpsMetrics = new DevOpsMetrics();
+						await devOpsMetrics.ReportAsync(devopsMetricsMessage);
+					}
+					catch
+					{
+						// Fire and forget.
+					}
+				}
 			}
 
 			return 0;
