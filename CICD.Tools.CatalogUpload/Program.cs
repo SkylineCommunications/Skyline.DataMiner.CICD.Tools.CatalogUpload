@@ -25,7 +25,7 @@
 		{
 			var pathToArtifact = new Option<string>(
 				name: "--path-to-artifact",
-				description: "Path to the application package (.dmapp) or protocol package (.dmprotocol).")
+				description: "Path to the application package (.dmapp). Important: does not support protocol packages (.dmprotocol).")
 			{
 				IsRequired = true
 			};
@@ -51,8 +51,8 @@
 
 			// subcommand "WithRegistration  with the required sourcecode then and optional other arguments.
 			var registrationIdentifier = new Option<string>(
-			name: "--sourcecode",
-			description: "A Uri for the globally unique location of your sourcecode. This is used as a unique identifier. e.g. https://github.com/SkylineCommunications/MyTestRepo")
+			name: "--uri-sourcecode",
+			description: "A Uri for the globally unique location of your sourcecode (not your local workspace). This is used as a unique identifier for registration. e.g. https://github.com/SkylineCommunications/MyTestRepo")
 			{
 				IsRequired = true,
 			};
@@ -108,6 +108,12 @@
 
 		private static async Task<int> ProcessWithRegistrationAsync(string pathToArtifact, string dmCatalogToken, bool isDebug, string registrationIdentifier, string overrideVersion, string branch, string committerMail, string releaseUri)
 		{
+
+			if (pathToArtifact.EndsWith(".dmprotocol", StringComparison.InvariantCultureIgnoreCase))
+			{
+				throw new ArgumentException("protocol packages (.dmprotocol) are currently not supported.");
+			}
+
 			// Skyline.DataMiner.CICD.Tools.CatalogUpload|with-registration:https://github.com/SomeRepo|Status:OK"
 			// Skyline.DataMiner.CICD.Tools.CatalogUpload|with-registration:https://github.com/SomeRepo|Status:Fail-blabla"
 			// Skyline.DataMiner.CICD.Tools.CatalogUpload|volatile|Status:OK"

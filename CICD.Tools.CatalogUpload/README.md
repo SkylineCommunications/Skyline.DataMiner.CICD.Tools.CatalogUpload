@@ -5,6 +5,11 @@
 Uploads and/or makes visible, artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).
 
 > **Note**
+> Currently this tool only works for DataMiner application packages (.dmapp) files.
+> 
+> Protocol packages (.dmprotocol) are not supported yet.
+
+> **Note**
 > Usage of this tool is tracked through non-personal metrics provided through a single https call on each use.
 >
 > These metrics may include, but are not limited to, the frequency of use and the primary purposes for which the Software is employed (e.g., automation, protocol analysis, visualization, etc.). By using the Software, you agree to allow Skyline to collect and analyze such metrics for the purpose of improving and enhancing the Software.
@@ -80,17 +85,17 @@ If you want to make your package visible on the catalog and provide the ability 
 The most basic command will be default anonymous and try to use the 'main' branch and the version defined in the artifact (either protocol version or dmapp version)
 
 ```console
- dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo"
+ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --uri-sourcecode "https://github.com/SkylineCommunications/MyTestRepo"
 ```
 
 Though optional, it is however highly recommended (due to current restrictions to the internal dmapp version syntax) to provide your own version tag.
 
 ```console
- dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1"
+ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --uri-sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1"
 ```
 
 In addition you can provide additional optional information:
 
 ```console
- dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1" --branch "dev/MyFeature" --author-mail "thunder@skyline.be" --release-notes "https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3"
+ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --uri-sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1" --branch "dev/MyFeature" --author-mail "thunder@skyline.be" --release-notes "https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3"
 ```
