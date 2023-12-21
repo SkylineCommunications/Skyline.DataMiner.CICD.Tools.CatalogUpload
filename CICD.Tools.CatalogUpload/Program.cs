@@ -122,7 +122,7 @@
 
 			try
 			{
-				LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console();
+				LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
 				if (!isDebug)
 				{
 					logConfig.MinimumLevel.Information();
