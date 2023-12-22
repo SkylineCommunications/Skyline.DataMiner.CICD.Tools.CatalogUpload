@@ -7,6 +7,7 @@
 	using Microsoft.Extensions.Logging;
 
 	using Serilog;
+	using Serilog.Core;
 
 	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
 	using Skyline.DataMiner.CICD.Tools.Reporter;
@@ -175,7 +176,8 @@
 			catch (Exception e)
 			{
 				devopsMetricsMessage += "|" + "Status:Fail-" + e.Message;
-				throw;
+				Console.WriteLine("Exception: " + e);
+				return 1;
 			}
 			finally
 			{
