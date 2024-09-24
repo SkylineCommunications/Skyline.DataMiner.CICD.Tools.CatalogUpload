@@ -5,24 +5,31 @@
 	using System.Linq;
 
 	/// <summary>
-	/// As known by the Azure Artifact Uploader
+	/// As known by the Catalog Registration
 	/// </summary>
 	internal enum ArtifactContentType
 	{
-		Unknown = 0,
-		DmScript = 1,
-		Package = 2,
-		Visio = 3,
-		Function = 4,
-		Dashboard = 5,
-		CustomSolution = 6,
-		Example = 7,
-		CompanionFile = 8,
-		ProfileLoadScript = 9,
-		GQIOperator = 10,
-		ProcessActivity = 11,
-		DataGrabber = 12,
-		AdHocDataSource = 13,
+		automationscript,
+		lifecycleserviceorchestration,
+		profileloadscript,
+		userdefinedapi,
+		adhocdatasource,
+		chatopsextension,
+		connector,
+		slamodel,
+		enhancedservicemodel,
+		visio,
+		solution,
+		testingsolution,
+		samplesolution,
+		standardsolution,
+		dashboard,
+		lowcodeapp,
+		datatransformer,
+		dataquery,
+		functiondefinition,
+		scriptedconnector,
+		bestpracticesanalyzer,
 	}
 
 	[System.Flags]
@@ -64,40 +71,40 @@
 			{
 				case PackageTypes.HasAutomation:
 				case PackageTypes.HasAutomation | PackageTypes.HasCompanionFiles:
-					Value = ArtifactContentType.DmScript.ToString();
+					Value = ArtifactContentType.automationscript.ToString();
 					break;
 
 				case PackageTypes.HasDashboards:
 				case PackageTypes.HasDashboards | PackageTypes.HasCompanionFiles:
-					Value = ArtifactContentType.Dashboard.ToString();
+					Value = ArtifactContentType.dashboard.ToString();
 					break;
 
 				case PackageTypes.HasOtherAppPackages:
-					Value = ArtifactContentType.Package.ToString();
+					Value = ArtifactContentType.solution.ToString();
 					break;
 
 				case PackageTypes.HasCompanionFiles:
-					Value = ArtifactContentType.CompanionFile.ToString();
+					Value = ArtifactContentType.solution.ToString();
 					break;
 
 				case PackageTypes.HasFunctions:
 				case PackageTypes.HasFunctions | PackageTypes.HasCompanionFiles:
-					Value = ArtifactContentType.Function.ToString();
+					Value = ArtifactContentType.functiondefinition.ToString();
 					break;
 
 				case PackageTypes.HasVisios:
 				case PackageTypes.HasVisios | PackageTypes.HasCompanionFiles:
-					Value = ArtifactContentType.Visio.ToString();
+					Value = ArtifactContentType.visio.ToString();
 					break;
 
 				case PackageTypes.HasProtocols:
 				case PackageTypes.HasProtocols | PackageTypes.HasCompanionFiles:
-					Value = ArtifactContentType.Package.ToString();
+					Value = ArtifactContentType.solution.ToString();
 					break;
 
 				default:
 					// Everything else is going to be a combination of more than one item so we can consider that to be a "package"
-					Value = ArtifactContentType.Package.ToString();
+					Value = ArtifactContentType.solution.ToString();
 					break;
 			}
 		}

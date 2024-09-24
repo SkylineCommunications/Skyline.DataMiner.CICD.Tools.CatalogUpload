@@ -4,7 +4,6 @@
 	using System.Net.Http;
 
 	using Microsoft.Extensions.Logging;
-	using Microsoft.Extensions.Options;
 
 	/// <summary>
 	/// Creates instances of <see cref="ICatalogService"/> to communicate with the Skyline DataMiner Catalog (https://catalog.dataminer.services/).
