@@ -1,6 +1,8 @@
 ﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib
 {
 	using System;
+	using System.IO.Compression;
+	using System.IO;
 	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -8,8 +10,9 @@
 	using Microsoft.Extensions.Logging;
 
 	using Newtonsoft.Json;
-
 	using Skyline.DataMiner.CICD.FileSystem;
+
+	using static System.Net.Mime.MediaTypeNames;
 
 	/// <summary>
 	/// Allows Uploading an artifact to the Catalog using one of the below in order of priority:
@@ -55,6 +58,29 @@
 		}
 
 		/// <summary>
+		/// Creates an instance of <see cref="CatalogArtifact"/> using a default HttpCatalogService with a new HttpClient for communication.
+		/// It searches for an optional dmCatalogToken in the "DATAMINER_CATALOG_TOKEN" or "DATAMINER_CATALOG_TOKEN_ENCRYPTED" Environment Variable for authentication.
+		/// </summary>
+		/// <remarks>WARNING: when wishing to upload several Artifacts it's recommended to use the CatalogArtifact(string pathToArtifact, ICatalogService service, IFileSystem fileSystem, ILogger logger).</remarks>
+		/// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
+		/// <param name="metaData">Contains package metadata.</param>
+		public CatalogArtifact(ILogger logger, CatalogMetaData metaData) : this(null, CatalogServiceFactory.CreateWithHttp(new System.Net.Http.HttpClient(), logger), FileSystem.Instance, logger, metaData)
+		{
+		}
+
+		/// <summary>
+		/// Creates an instance of <see cref="CatalogArtifact"/>.
+		/// It searches for an optional dmCatalogToken in the "DATAMINER_CATALOG_TOKEN" or "DATAMINER_CATALOG_TOKEN_ENCRYPTED" Environment Variable.
+		/// </summary>
+		/// <param name="service">An instance of <see cref="ICatalogService"/> used for communication.</param>
+		/// <param name="fileSystem">An instance of <see cref="IFileSystem"/> to access the filesystem. e.g. Skyline.DataMiner.CICD.FileSystem.Instance.</param>
+		/// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
+		/// <param name="metaData">Contains package metadata.</param>
+		public CatalogArtifact(ICatalogService service, IFileSystem fileSystem, ILogger logger, CatalogMetaData metaData) : this(null, service, fileSystem, logger, metaData)
+		{
+		}
+
+		/// <summary>
 		/// Path to the application package (.dmapp) or protocol package (.dmprotocol).
 		/// </summary>
 		public string PathToArtifact { get; private set; }
@@ -76,14 +102,59 @@
 			cancellationTokenSource.Cancel();
 		}
 
+		public async Task<ArtifactUploadResult> RegisterAsync(string dmCatalogToken)
+		{
+			var zipArray = await metaData.ToCatalogZipAsync();
+			return await catalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, cancellationTokenSource.Token);
+		}
+
+		public async Task<ArtifactUploadResult> RegisterAsync()
+		{
+			if (String.IsNullOrWhiteSpace(keyFromEnv))
+			{
+				throw new InvalidOperationException("Registration failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
+			}
+
+			// Register the catalog
+			var zipArray = await metaData.ToCatalogZipAsync();
+			return await catalogService.RegisterCatalogAsync(zipArray, keyFromEnv, cancellationTokenSource.Token);
+		}
+
+		public async Task<ArtifactUploadResult> UploadAndRegisterAsync(string dmCatalogToken)
+		{
+			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+
+			// Upload the version to the cloud.
+			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
+			var uploadResult = await catalogService.UploadVersionAsync(packageData, metaData.Name, dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, cancellationTokenSource.Token);
+			// Register the new version on the catalog.
+			var registrationResult = await RegisterAsync(dmCatalogToken);
+
+			return uploadResult;
+		}
+		public async Task<ArtifactUploadResult> UploadAndRegisterAsync()
+		{
+			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+
+			if (String.IsNullOrWhiteSpace(keyFromEnv))
+			{
+				throw new InvalidOperationException("Uploading failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
+			}
+
+			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
+			return await UploadAndRegisterAsync(keyFromEnv).ConfigureAwait(false);
+		}
+
 		/// <summary>
-		/// Uploads to the private catalog using the provided dmCatalogToken.
+		/// Uploads to the private catalog using the provided dmCatalogToken. Does not perform registration on the catalog.
 		/// </summary>
 		/// <param name="dmCatalogToken">A provided token for the agent or organization as defined in https://admin.dataminer.services/.</param>
 		/// <returns>If the upload was successful or not.</returns>
-		public async Task<ArtifactUploadResult> UploadAsync(string dmCatalogToken)
+		public async Task<ArtifactUploadResult> VolatatileUploadAsync(string dmCatalogToken)
 		{
-			if(dmCatalogToken != keyFromEnv)
+			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+
+			if (dmCatalogToken != keyFromEnv)
 			{
 				_logger.LogDebug($"Attempting upload with provided argument as token for artifact: {PathToArtifact}...");
 			}
@@ -91,7 +162,7 @@
 			_logger.LogDebug($"Uploading {PathToArtifact}...");
 
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
-			var result = await catalogService.ArtifactUploadAsync(packageData, dmCatalogToken, metaData, cancellationTokenSource.Token).ConfigureAwait(false);
+			var result = await catalogService.VolatileArtifactUploadAsync(packageData, dmCatalogToken, metaData, cancellationTokenSource.Token).ConfigureAwait(false);
 			_logger.LogDebug($"Finished Uploading {PathToArtifact}");
 
 			_logger.LogInformation(JsonConvert.SerializeObject(result));
@@ -104,15 +175,17 @@
 		/// <returns>If the upload was successful or not.</returns>
 		/// <exception cref="InvalidOperationException">Uploading failed.</exception>
 		/// <exception cref="UnauthorizedAccessException">Uploading failed due to invalid Token.</exception>
-		public async Task<ArtifactUploadResult> UploadAsync()
+		public async Task<ArtifactUploadResult> VolatatileUploadAsync()
 		{
+			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+
 			if (String.IsNullOrWhiteSpace(keyFromEnv))
 			{
 				throw new InvalidOperationException("Uploading failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
 			}
 
 			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
-			return await UploadAsync(keyFromEnv).ConfigureAwait(false);
+			return await VolatatileUploadAsync(keyFromEnv).ConfigureAwait(false);
 		}
 
 		/// <summary>

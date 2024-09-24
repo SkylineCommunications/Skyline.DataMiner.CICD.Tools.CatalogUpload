@@ -3,14 +3,23 @@
 	using System;
 	using System.CommandLine;
 	using System.Threading.Tasks;
+	using System.Xml.XPath;
+
+	using CICD.Tools.CatalogUpload;
+
+	using global::CICD.Tools.CatalogUpload;
 
 	using Microsoft.Extensions.Logging;
+	using Microsoft.Extensions.Options;
 
 	using Serilog;
 	using Serilog.Core;
 
+	using Skyline.DataMiner.CICD.FileSystem;
 	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
 	using Skyline.DataMiner.CICD.Tools.Reporter;
+
+	using static System.Net.Mime.MediaTypeNames;
 
 	/// <summary>
 	/// Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).
@@ -24,12 +33,20 @@
 		/// <returns>0 if successful.</returns>
 		public static async Task<int> Main(string[] args)
 		{
-			var pathToArtifact = new Option<string>(
+			var pathToArtifactRequired = new Option<string>(
 				name: "--path-to-artifact",
-				description: "Path to the application package (.dmapp). Important: does not support protocol packages (.dmprotocol).")
+				description: "Path to the application package (.dmapp).")
 			{
 				IsRequired = true
 			};
+
+			var pathToArtifactOptional = new Option<string>(
+			name: "--path-to-artifact",
+			description: "Path to the application package (.dmapp).")
+			{
+				IsRequired = false
+			};
+
 
 			var dmCatalogToken = new Option<string>(
 			name: "--dm-catalog-token",
@@ -45,13 +62,9 @@
 				IsRequired = false,
 			};
 
-			var rootCommand = new RootCommand("Uploads artifacts to the artifact cloud. (The default upload has no additional registration and no visibility on the catalog. Use the returned Artifact ID for deployment or download.)");
-			rootCommand.AddGlobalOption(pathToArtifact);
-			rootCommand.AddGlobalOption(dmCatalogToken);
-			rootCommand.AddGlobalOption(isDebug);
 
 			// subcommand "WithRegistration  with the required sourcecode then and optional other arguments.
-			var registrationIdentifier = new Option<string>(
+			var uriSourceCode = new Option<string>(
 			name: "--uri-sourcecode",
 			description: "A Uri for the globally unique location of your sourcecode (not your local workspace). This is used as a unique identifier for registration. e.g. https://github.com/SkylineCommunications/MyTestRepo")
 			{
@@ -86,116 +99,75 @@
 				IsRequired = false,
 			};
 
+			var catalogDetailsYml = new Option<string>(
+			name: "--path-to-catalog-yml",
+			description: "Path to a yml file containing catalog details as described here https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file")
+			{
+				IsRequired = true,
+			};
+
+			var readme = new Option<string>(
+			name: "--path-to-readme",
+			description: "Path to a readme file written in markdown.")
+			{
+				IsRequired = true,
+			};
+
+			var images = new Option<string>(
+			name: "--path-to-images",
+			description: "Path to a folder with images used in the readme file.")
+			{
+				IsRequired = true,
+			};
+
+			// dataminer-catalog-upload
+			var rootCommand = new RootCommand("Uploads artifacts or their registration info to the artifact storage for the DataMiner Catalog and Cloud Connected Systems. (The default upload has no additional registration and no visibility on the catalog. Use the returned Artifact ID for deployment or download.)");
+			rootCommand.AddOption(pathToArtifactRequired); // No longer global due to onlyRegistration option
+			rootCommand.AddGlobalOption(dmCatalogToken);
+			rootCommand.AddGlobalOption(isDebug);
+
 			var withRegistrationCommand = new Command("with-registration", "Uploads artifacts to become visible in the Skyline DataMiner catalog (https://catalog.dataminer.services")
 			{
-				registrationIdentifier,
+				pathToArtifactOptional,
+				uriSourceCode,
 				overrideVersion,
 				branch,
 				committerMail,
 				releaseUri
 			};
 
-			rootCommand.SetHandler(Process, pathToArtifact, dmCatalogToken, isDebug);
-			withRegistrationCommand.SetHandler(ProcessWithRegistrationAsync, pathToArtifact, dmCatalogToken, isDebug, registrationIdentifier, overrideVersion, branch, committerMail, releaseUri);
+			var withOnlyRegistrationCommand = new Command("with-only-registration", "Uploads only the registration information for a Skyline DataMiner catalog (https://catalog.dataminer.services) item.")
+			{
+				catalogDetailsYml,
+				readme,
+				images
+			};
 
+			rootCommand.SetHandler(ProcessVolatile, pathToArtifactRequired, dmCatalogToken, isDebug);
+			withRegistrationCommand.SetHandler(ProcessWithRegistrationAsync, dmCatalogToken, isDebug, pathToArtifactOptional, uriSourceCode, overrideVersion, branch, committerMail, releaseUri);
+			withOnlyRegistrationCommand.SetHandler(ProcessYmlRegistrationAsync, dmCatalogToken, isDebug, catalogDetailsYml, readme, images);
+
+			rootCommand.Add(withOnlyRegistrationCommand);
 			rootCommand.Add(withRegistrationCommand);
 			return await rootCommand.InvokeAsync(args);
 		}
 
-		private static async Task<int> Process(string pathToArtifact, string dmCatalogToken, bool isDebug)
+		private static async Task<int> ProcessYmlRegistrationAsync(string dmCatalogToken, bool isDebug, string catalogDetailsYml, string readme, string images)
 		{
-			return await ProcessWithRegistrationAsync(pathToArtifact, dmCatalogToken, isDebug, null, null, null, null, null);
+			Uploader uploader = new Uploader(isDebug);
+			return await uploader.ProcessYmlRegistrationAsync(dmCatalogToken, catalogDetailsYml, readme, images);
 		}
 
-		private static async Task<int> ProcessWithRegistrationAsync(string pathToArtifact, string dmCatalogToken, bool isDebug, string registrationIdentifier, string overrideVersion, string branch, string committerMail, string releaseUri)
+		private static async Task<int> ProcessVolatile(string pathToArtifact, string dmCatalogToken, bool isDebug)
 		{
+			Uploader uploader = new Uploader(isDebug);
+			return await uploader.ProcessVolatile(pathToArtifact, dmCatalogToken);
+		}
 
-			if (pathToArtifact.EndsWith(".dmprotocol", StringComparison.InvariantCultureIgnoreCase))
-			{
-				throw new ArgumentException("protocol packages (.dmprotocol) are currently not supported.");
-			}
-
-			// Skyline.DataMiner.CICD.Tools.CatalogUpload|with-registration:https://github.com/SomeRepo|Status:OK"
-			// Skyline.DataMiner.CICD.Tools.CatalogUpload|with-registration:https://github.com/SomeRepo|Status:Fail-blabla"
-			// Skyline.DataMiner.CICD.Tools.CatalogUpload|volatile|Status:OK"
-			// Skyline.DataMiner.CICD.Tools.CatalogUpload|volatile|Status:Fail-blabla"
-			string devopsMetricsMessage = "Skyline.DataMiner.CICD.Tools.CatalogUpload";
-
-			try
-			{
-				LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
-				if (!isDebug)
-				{
-					logConfig.MinimumLevel.Information();
-				}
-				else
-				{
-
-					logConfig.MinimumLevel.Debug();
-				}
-
-				var seriLog = logConfig.CreateLogger();
-
-				LoggerFactory loggerFactory = new LoggerFactory();
-				loggerFactory.AddSerilog(seriLog);
-
-				var logger = loggerFactory.CreateLogger("Skyline.DataMiner.CICD.Tools.CatalogUpload");
-
-				CatalogMetaData metaData = CatalogMetaData.FromArtifact(pathToArtifact);
-
-				if (registrationIdentifier != null)
-				{
-					devopsMetricsMessage += "|with-registration:" + registrationIdentifier;
-					// Registration as a whole is optional. If there is no Identifier provided there will be no registration.
-					metaData.Identifier = registrationIdentifier; // Need from user <- optional unique identifier. Usually the path to the sourcecode on github/gitlab/git.
-
-					// These are optional. Only override if not null.
-					if (overrideVersion != null) metaData.Version = overrideVersion;
-					if (branch != null) metaData.Branch = branch;
-					if (committerMail != null) metaData.CommitterMail = committerMail;
-					if (releaseUri != null) metaData.ReleaseUri = releaseUri;
-				}
-				else
-				{
-					devopsMetricsMessage += "|volatile";
-				}
-
-				CatalogArtifact artifact = new CatalogArtifact(pathToArtifact, logger, metaData);
-
-				if (string.IsNullOrWhiteSpace(dmCatalogToken))
-				{
-					await artifact.UploadAsync();
-				}
-				else
-				{
-					await artifact.UploadAsync(dmCatalogToken);
-				}
-
-				devopsMetricsMessage += "|Status:OK";
-			}
-			catch (Exception e)
-			{
-				devopsMetricsMessage += "|" + "Status:Fail-" + e.Message;
-				Console.WriteLine("Exception: " + e);
-				return 1;
-			}
-			finally
-			{
-				if (!string.IsNullOrWhiteSpace(devopsMetricsMessage))
-				{
-					try
-					{
-						DevOpsMetrics devOpsMetrics = new DevOpsMetrics();
-						await devOpsMetrics.ReportAsync(devopsMetricsMessage);
-					}
-					catch
-					{
-						// Fire and forget.
-					}
-				}
-			}
-
-			return 0;
+		private static async Task<int> ProcessWithRegistrationAsync(string dmCatalogToken, bool isDebug, string pathToArtifact, string uriSourceCode, string overrideVersion, string branch, string committerMail, string releaseUri)
+		{
+			Uploader uploader = new Uploader(isDebug);
+			return await uploader.ProcessWithRegistrationAsync(dmCatalogToken, pathToArtifact, uriSourceCode, overrideVersion, branch, committerMail, releaseUri);
 		}
 	}
 }

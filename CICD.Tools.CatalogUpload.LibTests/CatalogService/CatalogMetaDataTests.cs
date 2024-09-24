@@ -22,7 +22,10 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			{
 				ContentType = "Package",
 				Name = "SLNetSubscriptionsBenchmarking",
-				Version = "1.0.1-B15",
+				Version = new CatalogVersionMetaData()
+				{
+					Value = "1.0.1-B15",
+				}
 			};
 
 			result.Should().Be(expected);
@@ -44,7 +47,10 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			{
 				ContentType = "DmScript",
 				Name = "Demo InterAppCalls",
-				Version = "1.0.0-CU1",
+				Version = new CatalogVersionMetaData()
+				{
+					Value = "1.0.0-CU1",
+				}
 			};
 
 			result.Should().Be(expected);
@@ -66,7 +72,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			{
 				ContentType = "Dashboard",
 				Name = "Tandberg RX1290",
-				Version = "1.0.0-CU1",
+				Version = new CatalogVersionMetaData() { Value = "1.0.0-CU1" },
 			};
 
 			result.Should().Be(expected);
@@ -88,7 +94,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			{
 				ContentType = "Visio",
 				Name = "Microsoft Platform",
-				Version = "1.0.0-CU4",
+				Version = new CatalogVersionMetaData() { Value = "1.0.0-CU4" },
 			};
 
 			result.Should().Be(expected);
