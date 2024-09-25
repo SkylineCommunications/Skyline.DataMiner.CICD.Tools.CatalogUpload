@@ -149,25 +149,25 @@
 
 			rootCommand.Add(withOnlyRegistrationCommand);
 			rootCommand.Add(withRegistrationCommand);
-			return await rootCommand.InvokeAsync(args);
+			return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
 		}
 
 		private static async Task<int> ProcessYmlRegistrationAsync(string dmCatalogToken, bool isDebug, string catalogDetailsYml, string readme, string images)
 		{
 			Uploader uploader = new Uploader(isDebug);
-			return await uploader.ProcessYmlRegistrationAsync(dmCatalogToken, catalogDetailsYml, readme, images);
+			return await uploader.ProcessYmlRegistrationAsync(dmCatalogToken, catalogDetailsYml, readme, images).ConfigureAwait(false);
 		}
 
 		private static async Task<int> ProcessVolatile(string pathToArtifact, string dmCatalogToken, bool isDebug)
 		{
 			Uploader uploader = new Uploader(isDebug);
-			return await uploader.ProcessVolatile(pathToArtifact, dmCatalogToken);
+			return await uploader.ProcessVolatile(pathToArtifact, dmCatalogToken).ConfigureAwait(false);
 		}
 
 		private static async Task<int> ProcessWithRegistrationAsync(string dmCatalogToken, bool isDebug, string pathToArtifact, string uriSourceCode, string overrideVersion, string branch, string committerMail, string releaseUri)
 		{
 			Uploader uploader = new Uploader(isDebug);
-			return await uploader.ProcessWithRegistrationAsync(dmCatalogToken, pathToArtifact, uriSourceCode, overrideVersion, branch, committerMail, releaseUri);
+			return await uploader.ProcessWithRegistrationAsync(dmCatalogToken, pathToArtifact, uriSourceCode, overrideVersion, branch, committerMail, releaseUri).ConfigureAwait(false);
 		}
 	}
 }
