@@ -22,8 +22,8 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			// Arrange
 			string pathToArtifact = "TestData/withProtocols.dmapp";
 
-			// Act
-			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
+			// Act		
+			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
 			// Assert
 
@@ -48,7 +48,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			string pathToArtifact = "TestData/withAutomation.dmapp";
 
 			// Act
-			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
+			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
 			// Assert
 
@@ -73,7 +73,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			string pathToArtifact = "TestData/withDashboard.dmapp";
 
 			// Act
-			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
+			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
 			// Assert
 
@@ -95,7 +95,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			string pathToArtifact = "TestData/withVisio.dmapp";
 
 			// Act
-			CatalogMetaData result = CatalogMetaData.FromArtifact(pathToArtifact);
+			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
 			// Assert
 
@@ -133,7 +133,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
 			mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
 			// Act
-			var result = CatalogMetaData.FromCatalogYaml(mockFileSystem.Object, "test/path");
+			var result = new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
 
 			// Assert
 			result.CatalogIdentifier.Should().Be("catalog-id-1234");
@@ -154,7 +154,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
 
 			// Act
-			Action act = () => CatalogMetaData.FromCatalogYaml(mockFileSystem.Object, "test/path");
+			Action act = () => new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
 
 			// Assert
 			act.Should().Throw<InvalidOperationException>().WithMessage("Unable to locate a catalog.yml or manifest.yml file within the provided directory/file or up to 5 parent directories.");

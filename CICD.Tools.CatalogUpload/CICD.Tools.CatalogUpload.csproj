@@ -7,8 +7,8 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>disable</Nullable>
 		<AssemblyName>Skyline.DataMiner.CICD.Tools.CatalogUpload</AssemblyName>
-		<PackageVersion>1.0.1-alpaha1</PackageVersion>
-		<Version>1.0.1-alpaha1</Version>
+		<PackageVersion>1.0.1-alpaha2</PackageVersion>
+		<Version>1.0.1-alpaha2</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
