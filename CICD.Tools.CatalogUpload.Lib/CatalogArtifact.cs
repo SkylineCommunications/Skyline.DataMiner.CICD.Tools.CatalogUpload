@@ -1,8 +1,6 @@
 ﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib
 {
 	using System;
-	using System.IO.Compression;
-	using System.IO;
 	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -10,9 +8,10 @@
 	using Microsoft.Extensions.Logging;
 
 	using Newtonsoft.Json;
-	using Skyline.DataMiner.CICD.FileSystem;
 
-	using static System.Net.Mime.MediaTypeNames;
+	using Skyline.DataMiner.CICD.FileSystem;
+	using YamlDotNet.Serialization.NamingConventions;
+	using YamlDotNet.Serialization;
 
 	/// <summary>
 	/// Allows Uploading an artifact to the Catalog using one of the below in order of priority:
@@ -24,6 +23,7 @@
 	{
 		private readonly ILogger _logger;
 		private readonly CatalogMetaData metaData;
+		private readonly ISerializer serializer;
 
 		/// <summary>
 		/// Creates an instance of <see cref="CatalogArtifact"/>.
@@ -39,9 +39,12 @@
 			this.metaData = metaData;
 			_logger = logger;
 			Fs = fileSystem;
-			cancellationTokenSource = new CancellationTokenSource();
-			catalogService = service;
+			Cts = new CancellationTokenSource();
+			CatalogService = service;
 			PathToArtifact = pathToArtifact;
+			serializer = new SerializerBuilder()
+				.WithNamingConvention(CamelCaseNamingConvention.Instance)
+				.Build();
 			TryFindEnvironmentKey();
 		}
 
@@ -85,13 +88,13 @@
 		/// </summary>
 		public string PathToArtifact { get; private set; }
 
-		private CancellationTokenSource cancellationTokenSource { get; set; }
+		private CancellationTokenSource Cts { get; set; }
 
-		private ICatalogService catalogService { get; set; }
+		private ICatalogService CatalogService { get; set; }
 
 		private IFileSystem Fs { get; set; }
 
-		private string keyFromEnv { get; set; }
+		private string KeyFromEnv { get; set; }
 
 		/// <summary>
 		/// Cancels an ongoing upload. Create a new CatalogArtifact to attempt a new upload.
@@ -99,50 +102,77 @@
 		public void CancelUpload()
 		{
 			_logger.LogDebug($"Upload cancellation requested for {PathToArtifact}");
-			cancellationTokenSource.Cancel();
+			Cts.Cancel();
 		}
 
+		/// <summary>
+		/// Registers the catalog metadata asynchronously using the provided catalog token.
+		/// </summary>
+		/// <param name="dmCatalogToken">The token for authenticating with the catalog service.</param>
+		/// <returns>An <see cref="ArtifactUploadResult"/> containing the result of the registration.</returns>
 		public async Task<ArtifactUploadResult> RegisterAsync(string dmCatalogToken)
 		{
-			var zipArray = await metaData.ToCatalogZipAsync();
-			return await catalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, cancellationTokenSource.Token);
+			var zipArray = await metaData.ToCatalogZipAsync(Fs, serializer).ConfigureAwait(false);
+			return await CatalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, Cts.Token).ConfigureAwait(false);
 		}
 
+		/// <summary>
+		/// Registers the catalog metadata asynchronously using the token retrieved from environment variables.
+		/// </summary>
+		/// <returns>An <see cref="ArtifactUploadResult"/> containing the result of the registration.</returns>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the required environment variable for the catalog token is missing.
+		/// </exception>
 		public async Task<ArtifactUploadResult> RegisterAsync()
 		{
-			if (String.IsNullOrWhiteSpace(keyFromEnv))
+			if (String.IsNullOrWhiteSpace(KeyFromEnv))
 			{
 				throw new InvalidOperationException("Registration failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
 			}
 
 			// Register the catalog
-			var zipArray = await metaData.ToCatalogZipAsync();
-			return await catalogService.RegisterCatalogAsync(zipArray, keyFromEnv, cancellationTokenSource.Token);
+			var zipArray = await metaData.ToCatalogZipAsync(Fs, serializer).ConfigureAwait(false);
+			return await CatalogService.RegisterCatalogAsync(zipArray, KeyFromEnv, Cts.Token).ConfigureAwait(false);
 		}
 
+		/// <summary>
+		/// Uploads the artifact and registers the catalog metadata asynchronously using the provided catalog token.
+		/// </summary>
+		/// <param name="dmCatalogToken">The token for authenticating with the catalog service.</param>
+		/// <returns>An <see cref="ArtifactUploadResult"/> containing the result of the upload and registration.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the path to the artifact is null.</exception>
 		public async Task<ArtifactUploadResult> UploadAndRegisterAsync(string dmCatalogToken)
 		{
 			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
 
 			// Upload the version to the cloud.
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
-			var uploadResult = await catalogService.UploadVersionAsync(packageData, metaData.Name, dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, cancellationTokenSource.Token);
+			var uploadResult = await CatalogService.UploadVersionAsync(packageData, metaData.Name, dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, Cts.Token).ConfigureAwait(false);
 			// Register the new version on the catalog.
-			var registrationResult = await RegisterAsync(dmCatalogToken);
+			await RegisterAsync(dmCatalogToken).ConfigureAwait(false);
 
 			return uploadResult;
 		}
+
+		/// <summary>
+		/// Uploads the artifact and registers the catalog metadata asynchronously using the token retrieved from environment variables.
+		/// </summary>
+		/// <returns>An <see cref="ArtifactUploadResult"/> containing the result of the upload and registration.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the path to the artifact is null.</exception>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the required environment variable for the catalog token is missing.
+		/// </exception>
 		public async Task<ArtifactUploadResult> UploadAndRegisterAsync()
 		{
 			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
 
-			if (String.IsNullOrWhiteSpace(keyFromEnv))
+			if (String.IsNullOrWhiteSpace(KeyFromEnv))
 			{
 				throw new InvalidOperationException("Uploading failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
 			}
 
 			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
-			return await UploadAndRegisterAsync(keyFromEnv).ConfigureAwait(false);
+			return await UploadAndRegisterAsync(KeyFromEnv).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -154,7 +184,7 @@
 		{
 			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
 
-			if (dmCatalogToken != keyFromEnv)
+			if (dmCatalogToken != KeyFromEnv)
 			{
 				_logger.LogDebug($"Attempting upload with provided argument as token for artifact: {PathToArtifact}...");
 			}
@@ -162,7 +192,7 @@
 			_logger.LogDebug($"Uploading {PathToArtifact}...");
 
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
-			var result = await catalogService.VolatileArtifactUploadAsync(packageData, dmCatalogToken, metaData, cancellationTokenSource.Token).ConfigureAwait(false);
+			var result = await CatalogService.VolatileArtifactUploadAsync(packageData, dmCatalogToken, metaData, Cts.Token).ConfigureAwait(false);
 			_logger.LogDebug($"Finished Uploading {PathToArtifact}");
 
 			_logger.LogInformation(JsonConvert.SerializeObject(result));
@@ -179,13 +209,13 @@
 		{
 			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
 
-			if (String.IsNullOrWhiteSpace(keyFromEnv))
+			if (String.IsNullOrWhiteSpace(KeyFromEnv))
 			{
 				throw new InvalidOperationException("Uploading failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
 			}
 
 			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
-			return await VolatatileUploadAsync(keyFromEnv).ConfigureAwait(false);
+			return await VolatatileUploadAsync(KeyFromEnv).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -207,7 +237,7 @@
 						if (!String.IsNullOrWhiteSpace(keyFromWinEncryptedKeys))
 						{
 							_logger.LogDebug("OK: Found token in Env Variable: 'DATAMINER_CATALOG_TOKEN_ENCRYPTED' created by WinEncryptedKeys.");
-							keyFromEnv = keyFromWinEncryptedKeys;
+							KeyFromEnv = keyFromWinEncryptedKeys;
 						}
 					}
 				}
@@ -226,7 +256,7 @@
 
 			if (!String.IsNullOrWhiteSpace(keyFromEnvironment))
 			{
-				if (!String.IsNullOrWhiteSpace(keyFromEnv))
+				if (!String.IsNullOrWhiteSpace(KeyFromEnv))
 				{
 					_logger.LogDebug("OK: Overriding 'DATAMINER_CATALOG_TOKEN_ENCRYPTED' with found token in Env Variable: 'DATAMINER_CATALOG_TOKEN'.");
 				}
@@ -235,7 +265,7 @@
 					_logger.LogDebug("OK: Found token in Env Variable: 'DATAMINER_CATALOG_TOKEN'.");
 				}
 
-				keyFromEnv = keyFromEnvironment;
+				KeyFromEnv = keyFromEnvironment;
 			}
 		}
 	}

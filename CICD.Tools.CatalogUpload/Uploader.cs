@@ -47,7 +47,7 @@
 
 			try
 			{
-				CatalogMetaData metaData = CatalogMetaData.FromCatalogYaml(catalogDetailsYml, readme, images);
+				CatalogMetaData metaData = CatalogMetaData.FromCatalogYaml(fs, catalogDetailsYml, readme, images);
 
 				devopsMetricsMessage += $"|Status:OK";
 			}
@@ -64,7 +64,7 @@
 					try
 					{
 						DevOpsMetrics devOpsMetrics = new DevOpsMetrics();
-						await devOpsMetrics.ReportAsync(devopsMetricsMessage);
+						await devOpsMetrics.ReportAsync(devopsMetricsMessage).ConfigureAwait(false);
 					}
 					catch
 					{
@@ -91,11 +91,11 @@
 				ArtifactUploadResult result;
 				if (dmCatalogToken != null)
 				{
-					result = await artifact.VolatatileUploadAsync(dmCatalogToken);
+					result = await artifact.VolatatileUploadAsync(dmCatalogToken).ConfigureAwait(false);
 				}
 				else
 				{
-					result = await artifact.VolatatileUploadAsync();
+					result = await artifact.VolatatileUploadAsync().ConfigureAwait(false);
 				}
 
 				devopsMetricsMessage += $"|Status:OK|ArtifactId:{result.ArtifactId}";
@@ -113,7 +113,7 @@
 					try
 					{
 						DevOpsMetrics devOpsMetrics = new DevOpsMetrics();
-						await devOpsMetrics.ReportAsync(devopsMetricsMessage);
+						await devOpsMetrics.ReportAsync(devopsMetricsMessage).ConfigureAwait(false);
 					}
 					catch
 					{
@@ -142,11 +142,11 @@
 				ArtifactUploadResult result;
 				if (dmCatalogToken != null)
 				{
-					result = await artifact.UploadAndRegisterAsync(dmCatalogToken);
+					result = await artifact.UploadAndRegisterAsync(dmCatalogToken).ConfigureAwait(false);
 				}
 				else
 				{
-					result = await artifact.UploadAndRegisterAsync();
+					result = await artifact.UploadAndRegisterAsync().ConfigureAwait(false);
 				}
 
 				devopsMetricsMessage += $"|Status:OK|ArtifactId:{result.ArtifactId}";
@@ -164,7 +164,7 @@
 					try
 					{
 						DevOpsMetrics devOpsMetrics = new DevOpsMetrics();
-						await devOpsMetrics.ReportAsync(devopsMetricsMessage);
+						await devOpsMetrics.ReportAsync(devopsMetricsMessage).ConfigureAwait(false);
 					}
 					catch
 					{
