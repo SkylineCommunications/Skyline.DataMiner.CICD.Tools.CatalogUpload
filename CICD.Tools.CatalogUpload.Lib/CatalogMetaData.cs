@@ -387,7 +387,7 @@
 			foreach (var file in fs.Directory.EnumerateFiles(directory))
 			{
 				string fileName = fs.Path.GetFileName(file);
-				if (fileName != null && fileName.Equals("manifest.yml", StringComparison.InvariantCultureIgnoreCase) || fileName.Equals("catalog.yml"))
+				if (fileName != null && (fileName.Equals("manifest.yml", StringComparison.InvariantCultureIgnoreCase) || fileName.Equals("catalog.yml")))
 				{
 					return file;
 				}
@@ -499,6 +499,13 @@
 	/// </summary>
 	public class CatalogVersionMetaData
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CatalogVersionMetaData"/> class.
+		/// </summary>
+		/// <remarks>
+		/// This constructor sets default values for the version metadata.
+		/// The version value is initialized as an empty string, and the description is set to "No Description."
+		/// </remarks>
 		public CatalogVersionMetaData()
 		{
 			// Required values for new version registrations.

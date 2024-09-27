@@ -143,7 +143,7 @@
 		/// <exception cref="ArgumentNullException">Thrown when the path to the artifact is null.</exception>
 		public async Task<ArtifactUploadResult> UploadAndRegisterAsync(string dmCatalogToken)
 		{
-			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+			if (PathToArtifact == null) throw new InvalidOperationException($"{nameof(PathToArtifact)} cannot be null.");
 
 			// Upload the version to the cloud.
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
@@ -165,7 +165,7 @@
 		/// </exception>
 		public async Task<ArtifactUploadResult> UploadAndRegisterAsync()
 		{
-			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+			if (PathToArtifact == null) throw new InvalidOperationException($"{nameof(PathToArtifact)} cannot be null.");
 
 			if (String.IsNullOrWhiteSpace(KeyFromEnv))
 			{
@@ -183,7 +183,7 @@
 		/// <returns>If the upload was successful or not.</returns>
 		public async Task<ArtifactUploadResult> VolatatileUploadAsync(string dmCatalogToken)
 		{
-			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+			if (PathToArtifact == null) throw new InvalidOperationException($"{nameof(PathToArtifact)} cannot be null.");
 
 			if (dmCatalogToken != KeyFromEnv)
 			{
@@ -208,7 +208,7 @@
 		/// <exception cref="UnauthorizedAccessException">Uploading failed due to invalid Token.</exception>
 		public async Task<ArtifactUploadResult> VolatatileUploadAsync()
 		{
-			if (PathToArtifact == null) throw new ArgumentNullException(nameof(PathToArtifact));
+			if (PathToArtifact == null) throw new InvalidOperationException($"{nameof(PathToArtifact)} cannot be null.");
 
 			if (String.IsNullOrWhiteSpace(KeyFromEnv))
 			{
@@ -247,11 +247,6 @@
 					// Gobble up, no key means we try the next thing.
 				}
 			}
-
-			//var config = new ConfigurationBuilder()
-			//	.AddUserSecrets<CatalogArtifact>()
-			//	.Build();
-			//string keyFromEnvironment = config["DATAMINER_CATALOG_TOKEN"];
 
 			string keyFromEnvironment = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN");
 
