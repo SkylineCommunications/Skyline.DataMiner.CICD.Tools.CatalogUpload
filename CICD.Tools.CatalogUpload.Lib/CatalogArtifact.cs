@@ -147,7 +147,8 @@
 
 			// Upload the version to the cloud.
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
-			var uploadResult = await CatalogService.UploadVersionAsync(packageData, metaData.Name, dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, Cts.Token).ConfigureAwait(false);
+
+			var uploadResult = await CatalogService.UploadVersionAsync(packageData, Fs.Path.GetFileName(PathToArtifact), dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, Cts.Token).ConfigureAwait(false);
 			// Register the new version on the catalog.
 			await RegisterAsync(dmCatalogToken).ConfigureAwait(false);
 

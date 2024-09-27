@@ -17,6 +17,34 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 	public class CatalogMetaDataTests
 	{
 		[TestMethod()]
+		public void FromArtifactTest_FromDMProtocol()
+		{
+			// Arrange
+			string pathToArtifact = "TestData/Arris_E6000_2_0_0_17_B3.dmprotocol";
+
+			// Act		
+			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+
+			// Assert
+
+			CatalogMetaData expected = new CatalogMetaData()
+			{
+				ContentType = "connector",
+				Name = "Arris E6000",
+				Version = new CatalogVersionMetaData()
+				{
+					Value = "2.0.0.17_B3",
+					VersionDescription = "Fix:Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature:Added Video Counts table.\r\nNewFeature:Added Global Video Input Streams table.\r\nNewFeature:Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature:Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrough, S...",
+					//VersionDescription = "Fix:Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature:Added Video Counts table.\r\nNewFeature:Added Global Video Input Streams table.\r\nNewFeature:Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature:Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrough, Stream Type, Broadcast Channel Container, RTP Packet Count, RTP Bad Sequence Number Count, Last Received Packet to UDP IP Streams table.\r\nChange:Enabled alarming and trending on Video Streams and Video Stream Programs tables.",
+				}
+			};
+
+			result.Should().Be(expected);
+			result.IsPreRelease().Should().BeTrue();
+		}
+
+
+		[TestMethod()]
 		public void FromArtifactTest_BuildPreReleaseDmappWithProtocols()
 		{
 			// Arrange
@@ -34,6 +62,8 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 				Version = new CatalogVersionMetaData()
 				{
 					Value = "1.0.1-B15",
+					VersionDescription = "Pre-Release (Unofficial) version.\r\nMinimum DataMiner Version: 10.0.10.0-9414\r\n---------------------------------\r\nPackage creation time: 2023-11-15 13:04:54\r\n---------------------------------\r\nFile Versions:\r\nProtocol\\Metrics Subscription Event Generator:1.0.0.1_B77\r\nProtocol\\Metrics Subscription Monitor A:1.0.0.1_B74\r\nProtocol\\Metrics Subscription Monitor B:1.0.0.1_B62\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for protocol:Me...",
+					//VersionDescription = "Pre-Release (Unofficial) version.\r\nMinimum DataMiner Version: 10.0.10.0-9414\r\n---------------------------------\r\nPackage creation time: 2023-11-15 13:04:54\r\n---------------------------------\r\nFile Versions:\r\nProtocol\\Metrics Subscription Event Generator:1.0.0.1_B77\r\nProtocol\\Metrics Subscription Monitor A:1.0.0.1_B74\r\nProtocol\\Metrics Subscription Monitor B:1.0.0.1_B62\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\system.threading.tasks.dataflow\\7.0.0\\lib\\net462\\System.Threading.Tasks.Dataflow.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.common\\1.0.0-dev.monitorpartialtablesupport.6\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Common.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.protocol\\1.0.0-dev.monitorpartialtablesupport.6\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Protocol.dll for protocol:Metrics Subscription Event Generator\r\n",
 				}
 			};
 
@@ -59,6 +89,8 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 				Version = new CatalogVersionMetaData()
 				{
 					Value = "1.0.0-CU1",
+					VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-07-24 17:00:19\r\n---------------------------------\r\nFile Versions:\r\nScript\\MWCore-InterAppDemo-Streams:1.0.0-CU1\r\nScript\\MWCore-InterAppDemo-InputsOutputs:1.0.0-CU1\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.3\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.data...",
+					//VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-07-24 17:00:19\r\n---------------------------------\r\nFile Versions:\r\nScript\\MWCore-InterAppDemo-Streams:1.0.0-CU1\r\nScript\\MWCore-InterAppDemo-InputsOutputs:1.0.0-CU1\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.3\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.common\\1.0.0.2\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Common.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.interappcalls.common\\1.0.0.2\\lib\\net462\\Skyline.DataMiner.Core.InterAppCalls.Common.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.utils.connectorapi.techex.mwcore\\1.0.1\\lib\\net462\\Skyline.DataMiner.Utils.ConnectorAPI.Techex.MWCore.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\n",
 				}
 			};
 
@@ -81,7 +113,11 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			{
 				ContentType = "dashboard",
 				Name = "Tandberg RX1290",
-				Version = new CatalogVersionMetaData() { Value = "1.0.0-CU1" },
+				Version = new CatalogVersionMetaData()
+				{
+					Value = "1.0.0-CU1",
+					VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-09-28 15:37:14\r\n---------------------------------\r\nFile Versions:\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg KPI Overview.dmadb.json\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg KPI.dmadb.json\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg Status Overview.dmadb.json\r\n",
+				},
 			};
 
 			result.Should().Be(expected);
@@ -103,7 +139,11 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			{
 				ContentType = "visio",
 				Name = "Microsoft Platform",
-				Version = new CatalogVersionMetaData() { Value = "1.0.0-CU4" },
+				Version = new CatalogVersionMetaData()
+				{
+					Value = "1.0.0-CU4",
+					VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-11-28 10:30:46\r\n---------------------------------\r\nFile Versions:\r\nVisio\\skyline_Microsoft Platform:1.0.0-CU4\r\n",
+				},
 			};
 
 			result.Should().Be(expected);

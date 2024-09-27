@@ -66,9 +66,9 @@
 			// subcommand "WithRegistration  with the required sourcecode then and optional other arguments.
 			var uriSourceCode = new Option<string>(
 			name: "--uri-sourcecode",
-			description: "A Uri for the globally unique location of your sourcecode (not your local workspace). This is used as a unique identifier for registration. e.g. https://github.com/SkylineCommunications/MyTestRepo")
+			description: "A Uri for the globally unique location of your sourcecode (not your local workspace). This can be used as a backup to find your artifact. e.g. https://github.com/SkylineCommunications/MyTestRepo")
 			{
-				IsRequired = true,
+				IsRequired = false,
 			};
 
 			var overrideVersion = new Option<string>(
