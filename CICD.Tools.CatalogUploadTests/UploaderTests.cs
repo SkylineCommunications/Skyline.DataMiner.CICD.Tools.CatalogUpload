@@ -17,7 +17,6 @@ namespace CICD.Tools.CatalogUpload.Tests
 		{
 			// Arrange
 			var mockFileSystem = new Mock<IFileSystem>();
-			var mockLogger = new Mock<ILogger>();
 			var mockCatalogMetaDataFactory = new Mock<ICatalogMetaDataFactory>();
 
 			// Mock the initial artifact metadata

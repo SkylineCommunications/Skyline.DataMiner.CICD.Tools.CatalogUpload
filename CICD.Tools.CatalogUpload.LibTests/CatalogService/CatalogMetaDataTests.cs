@@ -368,6 +368,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 					// Check manifest.yml exists
 					var manifestEntry = zip.GetEntry("manifest.yml");
 					manifestEntry.Should().NotBeNull();
+					if (manifestEntry == null) return;
 					using (var reader = new StreamReader(manifestEntry.Open()))
 					{
 						var content = reader.ReadToEnd();
@@ -378,6 +379,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 					// Check README.md exists
 					var readmeEntry = zip.GetEntry("README.md");
 					readmeEntry.Should().NotBeNull();
+					if (readmeEntry == null) return;
 					using (var reader = new StreamReader(readmeEntry.Open()))
 					{
 						var content = reader.ReadToEnd();
@@ -387,6 +389,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 					// Check Images folder and files exist
 					var image1Entry = zip.GetEntry("Images/image1.png");
 					image1Entry.Should().NotBeNull();
+					if (image1Entry == null) return;
 					using (var reader = new StreamReader(image1Entry.Open()))
 					{
 						var content = reader.ReadToEnd();
@@ -395,6 +398,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 
 					var image2Entry = zip.GetEntry("Images/image2.png");
 					image2Entry.Should().NotBeNull();
+					if (image2Entry == null) return;
 					using (var reader = new StreamReader(image2Entry.Open()))
 					{
 						var content = reader.ReadToEnd();
@@ -444,6 +448,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 					// Check manifest.yml exists
 					var manifestEntry = zip.GetEntry("manifest.yml");
 					manifestEntry.Should().NotBeNull();
+					if (manifestEntry == null) return;
 					using (var reader = new StreamReader(manifestEntry.Open()))
 					{
 						var content = reader.ReadToEnd();
@@ -458,6 +463,7 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 					// Check Images folder and files exist
 					var image1Entry = zip.GetEntry("Images/image1.png");
 					image1Entry.Should().NotBeNull();
+					if (image1Entry == null) return;
 					using (var reader = new StreamReader(image1Entry.Open()))
 					{
 						var content = reader.ReadToEnd();
