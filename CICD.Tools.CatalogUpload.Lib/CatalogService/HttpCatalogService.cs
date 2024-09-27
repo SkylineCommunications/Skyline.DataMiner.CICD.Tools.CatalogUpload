@@ -4,6 +4,7 @@
 	using System.IO;
 	using System.Net;
 	using System.Net.Http;
+	using System.Net.Http.Headers;
 	using System.Security.Authentication;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -37,16 +38,21 @@
 			using var formData = new MultipartFormDataContent();
 			formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
 
-			using MemoryStream ms = new MemoryStream();
+			// Add file
+			using MemoryStream ms = new MemoryStream(catalogDetailsZip);
 			ms.Write(catalogDetailsZip, 0, catalogDetailsZip.Length);
-
-			// Reset position so it can be read out again.
 			ms.Position = 0;
 			formData.Add(new StreamContent(ms), "file", "catalogDetails.zip");
-			_logger.LogDebug($"Posting catalogDetails.zip ({ms.Length} bytes) to {RegistrationPath}");
 
-			var response = await _httpClient.PostAsync(RegistrationPath, formData, cancellationToken).ConfigureAwait(false);
+			_logger.LogDebug($"Uploading catalogDetails.zip ({ms.Length} bytes) to {RegistrationPath}");
+
+			// Make PUT request
+			var response = await _httpClient.PutAsync(RegistrationPath, formData, cancellationToken).ConfigureAwait(false);
+
+			// Get the response body
 			var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+			_logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
 
 			if (response.IsSuccessStatusCode)
 			{
@@ -67,23 +73,40 @@
 
 		public async Task<ArtifactUploadResult> UploadVersionAsync(byte[] package, string fileName, string key, string catalogId, string version, string description, CancellationToken cancellationToken)
 		{
+			if (String.IsNullOrWhiteSpace(version)) throw new ArgumentNullException(nameof(version));
+
 			string versionUploadPath = $"{VersionUploadPathStart}{catalogId}{VersionUploadPathEnd}";
 			using var formData = new MultipartFormDataContent();
 			formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
 
-			using MemoryStream ms = new MemoryStream();
-			ms.Write(package, 0, package.Length);
+			// Add the package (zip file) to the form data
+			using MemoryStream ms = new MemoryStream(package);
+			ms.Position = 0; // Reset the stream position after writing
 
-			// Reset position so it can be read out again.
-			ms.Position = 0;
-			formData.Add(new StreamContent(ms), "file", fileName);
+			// Set up StreamContent with correct headers for the file
+			var fileContent = new StreamContent(ms);
+
+			fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+			{
+				Name = "\"file\"",
+				FileName = "\"" + fileName + "\""
+			};
+			formData.Add(fileContent);
+
+			// Add version information to the form data
 			formData.Add(new StringContent(version), "versionNumber");
 			formData.Add(new StringContent(description), "versionDescription");
-			string logInfo = $"--versionNumber {version} --versionDescription {description}";
-			_logger.LogDebug("HTTP Post with info:" + logInfo);
 
+			// Log the info for debugging
+			string logInfo = $"name {fileName} --versionNumber {version} --versionDescription {description}";
+			_logger.LogDebug("HTTP Post with info: " + logInfo);
+
+			// Make the HTTP POST request
 			var response = await _httpClient.PostAsync(versionUploadPath, formData, cancellationToken).ConfigureAwait(false);
+
+			// Read and log the response body
 			var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+			_logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
 
 			if (response.IsSuccessStatusCode)
 			{
@@ -106,7 +129,11 @@
 			formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
 			formData.Add(new StringContent(catalog.Name), "name");
 			formData.Add(new StringContent(catalog.Version.Value), "version");
-			formData.Add(new StringContent(catalog.ContentType), "contentType");
+
+			// ContentType of old API doesn't match new API. Switch it to what we do know here. Doesn't matter.
+			string oldApiContentType = "DmScript";
+
+			formData.Add(new StringContent(oldApiContentType), "contentType");
 
 			using MemoryStream ms = new MemoryStream();
 			ms.Write(package, 0, package.Length);
@@ -115,7 +142,7 @@
 			ms.Position = 0;
 			formData.Add(new StreamContent(ms), "file", catalog.Name);
 
-			string logInfo = $"--name {catalog.Name} --version {catalog.Version} --contentType {catalog.ContentType}  --file {catalog.Name}";
+			string logInfo = $"--name {catalog.Name} --version {catalog.Version.Value} --contentType {catalog.ContentType}  --file {catalog.Name}";
 
 			_logger.LogDebug("HTTP Post with info:" + logInfo);
 

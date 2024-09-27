@@ -499,6 +499,13 @@
 	/// </summary>
 	public class CatalogVersionMetaData
 	{
+		public CatalogVersionMetaData()
+		{
+			// Required values for new version registrations.
+			Value = String.Empty;
+			VersionDescription = "No Description.";
+		}
+
 		/// <summary>
 		/// The Branch/Range/Category this version belongs to. Defaults to "main"
 		/// </summary>

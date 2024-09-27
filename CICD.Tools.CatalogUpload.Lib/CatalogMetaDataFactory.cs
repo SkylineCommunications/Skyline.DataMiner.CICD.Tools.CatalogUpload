@@ -10,6 +10,9 @@
 	using System.Xml.Linq;
 
 	using Skyline.DataMiner.CICD.FileSystem;
+	using Skyline.DataMiner.CICD.Parsers.Protocol.Xml;
+	using System.Xml;
+	using Skyline.DataMiner.CICD.Parsers.Common.Xml;
 
 	/// <summary>
 	/// A factory class responsible for creating instances of <see cref="CatalogMetaData"/>.
@@ -126,6 +129,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 
 			string appInfoRaw;
 			string contentType;
+			string description = null;
 
 			using (var zipFile = ZipFile.OpenRead(pathToDmapp))
 			{
@@ -140,6 +144,18 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 					}
 				}
 
+				ZipArchiveEntry foundDescriptionFile = zipFile.GetEntry("Description.txt");
+				if (foundDescriptionFile != null)
+				{
+					using (var stream = foundDescriptionFile.Open())
+					{
+						using (var memoryStream = new StreamReader(stream))
+						{
+							description = memoryStream.ReadToEnd();
+						}
+					}
+				}
+
 				ContentType contentFromPackagContent = new ContentType(zipFile);
 				contentType = contentFromPackagContent.Value;
 			}
@@ -149,6 +165,23 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 			meta.Name = appInfo.Element("DisplayName")?.Value;
 
 			var buildNumber = appInfo.Element("Build")?.Value;
+			var minimumDmaVersion = appInfo.Element("MinDmaVersion")?.Value;
+
+			// cleanup first line from descriptionFromPackage if it contains version. We dont want that hardcoded version when the version might change later.
+			if (!string.IsNullOrEmpty(description))
+			{
+				// Split the string by newlines to work with the first line
+				string[] lines = description.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+				// Check if the first line contains "version:"
+				if (lines[0].Contains("version:", StringComparison.OrdinalIgnoreCase))
+				{
+					// Remove the first line and join the remaining lines back into a single string
+					description = string.Join(Environment.NewLine, lines.Skip(1));
+				}
+			}
+
+			description = ($"Minimum DataMiner Version: {minimumDmaVersion}\r\n{description}");
 
 			if (!String.IsNullOrWhiteSpace(buildNumber))
 			{
@@ -165,14 +198,20 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 					}
 
 					meta.Version.Value = version + "-B" + buildNumber;
+					description = $"Pre-Release (Unofficial) version.\r\n{description}";
 				}
 			}
 			else
 			{
 				meta.ArtifactHadBuildNumber = false;
 				meta.Version.Value = appInfo.Element("Version")?.Value;
+				description = $"{description ?? "No Description."}";
 			}
 
+			if (description.Length > 500) description = description.Substring(0, 497) + "...";
+
+
+			meta.Version.VersionDescription = description;
 			meta.ContentType = contentType;
 			return meta;
 		}
@@ -181,41 +220,54 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 		{
 			// Description.txt
 			/*
-		Protocol Name: Microsoft Platform
-		Protocol Version: 6.0.0.4_B2
+				Protocol Name: Microsoft Platform
+				Protocol Version: 6.0.0.4_B2
 			 * */
 
-			string descriptionText;
+			string descriptionFileDMProtocolText;
+			string protocolXmlString;
 
 			using (var zipFile = ZipFile.OpenRead(pathToDmprotocol))
 			{
 				var foundFile = zipFile.Entries.FirstOrDefault(x => x.Name.Equals("Description.txt", StringComparison.InvariantCulture));
-				if (foundFile == null) throw new InvalidOperationException("Could not find Description.txt in the .dmapp.");
+				if (foundFile == null) throw new InvalidOperationException("Could not find Description.txt in the .dmprotocol.");
 
 				using (var stream = foundFile.Open())
 				{
 					using (var memoryStream = new StreamReader(stream))
 					{
-						descriptionText = memoryStream.ReadToEnd();
+						descriptionFileDMProtocolText = memoryStream.ReadToEnd();
+					}
+				}
+
+				var foundProtocol = zipFile.Entries.FirstOrDefault(x => x.Name.EndsWith("Protocol.xml", StringComparison.InvariantCulture));
+				if (foundProtocol == null) throw new InvalidOperationException("Could not find Protocol.xml in the .dmprotocol.");
+
+				using (var stream = foundProtocol.Open())
+				{
+					using (var memoryStream = new StreamReader(stream))
+					{
+						protocolXmlString = memoryStream.ReadToEnd();
 					}
 				}
 			}
 
 			CatalogMetaData meta = new CatalogMetaData();
 
-			using (var reader = new StringReader(descriptionText))
+			var lines = descriptionFileDMProtocolText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+			foreach (var line in lines)
 			{
-				var line = reader.ReadLine();
 				var splitLine = line.Split(':');
 
 				switch (splitLine[0])
 				{
 					case "Protocol Name":
-						meta.Name = splitLine[1];
+						meta.Name = splitLine[1].Trim();
 						break;
 
 					case "Protocol Version":
-						meta.Version.Value = splitLine[1];
+						meta.Version.Value = splitLine[1].Trim();
 						break;
 
 					default:
@@ -223,6 +275,49 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 				}
 			}
 
+			// Note. Tried using Skyline.DataMiner.CICD.Parsers but could not find a method to get VersionHistory.
+			// So... doing this again... sigh.
+
+			var protocolDoc = XDocument.Parse(protocolXmlString);
+			var ns = protocolDoc.Root.GetDefaultNamespace();
+			// find the current configured version.
+			var currentVersion = protocolDoc.Root.Element(ns + "Version")?.Value;
+			var versionHistory = protocolDoc.Root.Element(ns + "VersionHistory");
+
+
+			string versionDescription = "No Description";
+			if (currentVersion != null && versionHistory != null)
+			{
+				var splitVersion = currentVersion.Split(".");
+
+				if (splitVersion.Length > 3)
+				{
+					var branch = splitVersion[0];
+					var system = splitVersion[1];
+					var major = splitVersion[2];
+					var minor = splitVersion[3].Split("_")[0];
+
+					var branchXml = versionHistory.Element(ns + "Branches")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == branch);
+					var systemXml = branchXml?.Element(ns + "SystemVersions")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == system);
+					var majorXml = systemXml?.Element(ns + "MajorVersions")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == major);
+					var minorXml = majorXml?.Element(ns + "MinorVersions")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == minor);
+
+					if (minorXml != null)
+					{
+						var allChanges = minorXml.Element(ns + "Changes")?.Elements();
+						if (allChanges != null && allChanges.Any())
+						{
+							versionDescription = string.Join(Environment.NewLine, allChanges.Select(change => $"{change.Name.LocalName}:{change.Value.Trim()}"));
+						}
+					}
+				}
+			}
+
+			if (versionDescription.Length > 500) versionDescription = versionDescription.Substring(0, 497) + "...";
+
+			meta.Version.VersionDescription = versionDescription;
+
+			if (meta.Version.Value.Contains("_")) meta.ArtifactHadBuildNumber = true;
 			meta.ContentType = "connector";
 			return meta;
 		}
