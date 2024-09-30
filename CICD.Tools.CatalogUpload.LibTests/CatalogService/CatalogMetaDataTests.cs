@@ -29,13 +29,13 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 
 			CatalogMetaData expected = new CatalogMetaData()
 			{
+				ArtifactHadBuildNumber = true,
 				ContentType = "connector",
 				Name = "Arris E6000",
 				Version = new CatalogVersionMetaData()
 				{
 					Value = "2.0.0.17_B3",
-					VersionDescription = "Fix:Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature:Added Video Counts table.\r\nNewFeature:Added Global Video Input Streams table.\r\nNewFeature:Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature:Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrough, S...",
-					//VersionDescription = "Fix:Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature:Added Video Counts table.\r\nNewFeature:Added Global Video Input Streams table.\r\nNewFeature:Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature:Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrough, Stream Type, Broadcast Channel Container, RTP Packet Count, RTP Bad Sequence Number Count, Last Received Packet to UDP IP Streams table.\r\nChange:Enabled alarming and trending on Video Streams and Video Stream Programs tables.",
+					VersionDescription = "Fix: Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature: Added Video Counts table.\r\nNewFeature: Added Global Video Input Streams table.\r\nNewFeature: Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature: Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrou..."
 				}
 			};
 
