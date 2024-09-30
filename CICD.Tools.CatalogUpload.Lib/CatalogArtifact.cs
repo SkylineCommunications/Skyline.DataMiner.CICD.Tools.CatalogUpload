@@ -88,9 +88,9 @@
 		/// </summary>
 		public string PathToArtifact { get; private set; }
 
-		private CancellationTokenSource Cts { get; set; }
-
 		private ICatalogService CatalogService { get; set; }
+
+		private CancellationTokenSource Cts { get; set; }
 
 		private IFileSystem Fs { get; set; }
 
@@ -112,6 +112,8 @@
 		/// <returns>An <see cref="ArtifactUploadResult"/> containing the result of the registration.</returns>
 		public async Task<ArtifactUploadResult> RegisterAsync(string dmCatalogToken)
 		{
+			CheckCatalogIdentifier(metaData.CatalogIdentifier);
+
 			var zipArray = await metaData.ToCatalogZipAsync(Fs, serializer).ConfigureAwait(false);
 			return await CatalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, Cts.Token).ConfigureAwait(false);
 		}
@@ -130,7 +132,7 @@
 				throw new InvalidOperationException("Registration failed, missing token in environment variable DATAMINER_CATALOG_TOKEN or DATAMINER_CATALOG_TOKEN_ENCRYPTED.");
 			}
 
-			// Register the catalog
+			CheckCatalogIdentifier(metaData.CatalogIdentifier);
 			var zipArray = await metaData.ToCatalogZipAsync(Fs, serializer).ConfigureAwait(false);
 			return await CatalogService.RegisterCatalogAsync(zipArray, KeyFromEnv, Cts.Token).ConfigureAwait(false);
 		}
@@ -147,6 +149,8 @@
 
 			// Upload the version to the cloud.
 			byte[] packageData = Fs.File.ReadAllBytes(PathToArtifact);
+
+			CheckCatalogIdentifier(metaData.CatalogIdentifier);
 
 			var uploadResult = await CatalogService.UploadVersionAsync(packageData, Fs.Path.GetFileName(PathToArtifact), dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, Cts.Token).ConfigureAwait(false);
 			// Register the new version on the catalog.
@@ -217,6 +221,23 @@
 
 			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
 			return await VolatatileUploadAsync(KeyFromEnv).ConfigureAwait(false);
+		}
+
+		/// <summary>
+		/// Validates the provided catalog identifier.
+		/// </summary>
+		/// <param name="id">The catalog identifier (GUID) to check.</param>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the catalog identifier is null, empty, or consists only of whitespace.
+		/// A valid catalog ID (GUID) must be provided either through the '--catalog-identifier' argument 
+		/// or the 'id' variable in the 'catalog.yml'.
+		/// </exception>
+		private static void CheckCatalogIdentifier(string id)
+		{
+			if (String.IsNullOrWhiteSpace(id))
+			{
+				throw new InvalidOperationException("Please provide either an existing or a new catalog ID (GUID) through the '--catalog-identifier' argument or the 'id' variable in the 'catalog.yml'.");
+			}
 		}
 
 		/// <summary>

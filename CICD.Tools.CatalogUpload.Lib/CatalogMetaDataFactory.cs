@@ -307,7 +307,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 						var allChanges = minorXml.Element(ns + "Changes")?.Elements();
 						if (allChanges != null && allChanges.Any())
 						{
-							versionDescription = string.Join(Environment.NewLine, allChanges.Select(change => $"{change.Name.LocalName}:{change.Value.Trim()}"));
+							versionDescription = string.Join(Environment.NewLine, allChanges.Select(change => $"{change.Name.LocalName}: {change.Value.Trim()}"));
 						}
 					}
 				}

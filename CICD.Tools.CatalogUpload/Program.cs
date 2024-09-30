@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.CommandLine;
+	using System.CommandLine.Binding;
+	using System.Diagnostics;
 	using System.Threading.Tasks;
 	using System.Xml.XPath;
 
@@ -19,12 +21,14 @@
 	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
 	using Skyline.DataMiner.CICD.Tools.Reporter;
 
+	using YamlDotNet.Core;
+
 	using static System.Net.Mime.MediaTypeNames;
 
 	/// <summary>
 	/// Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).
 	/// </summary>
-	public static class Program
+	public static partial class Program
 	{
 		/// <summary>
 		/// Code that will be called when running the tool.
@@ -99,6 +103,13 @@
 				IsRequired = false,
 			};
 
+			var catalogIdentifier = new Option<string>(
+			name: "--catalog-identifier",
+			description: "The GUID identifying the catalog item on https://catalog.dataminer.services/. When not provided, this should be present through a catalog.yml file as described here https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file.")
+			{
+				IsRequired = false,
+			};
+
 			var catalogDetailsYml = new Option<string>(
 			name: "--path-to-catalog-yml",
 			description: "Path to a yml file containing catalog details as described here https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file")
@@ -133,7 +144,8 @@
 				overrideVersion,
 				branch,
 				committerMail,
-				releaseUri
+				releaseUri,
+				catalogIdentifier
 			};
 
 			var withOnlyRegistrationCommand = new Command("with-only-registration", "Uploads only the registration information for a Skyline DataMiner catalog (https://catalog.dataminer.services) item.")
@@ -144,7 +156,7 @@
 			};
 
 			rootCommand.SetHandler(ProcessVolatile, pathToArtifactRequired, dmCatalogToken, isDebug);
-			withRegistrationCommand.SetHandler(ProcessWithRegistrationAsync, dmCatalogToken, isDebug, pathToArtifactOptional, uriSourceCode, overrideVersion, branch, committerMail, releaseUri);
+			withRegistrationCommand.SetHandler(ProcessWithRegistrationAsync, dmCatalogToken, isDebug, pathToArtifactOptional, new OptionalRegistrationArgumentsBinder(uriSourceCode, overrideVersion, branch, committerMail, releaseUri, catalogIdentifier));
 			withOnlyRegistrationCommand.SetHandler(ProcessYmlRegistrationAsync, dmCatalogToken, isDebug, catalogDetailsYml, readme, images);
 
 			rootCommand.Add(withOnlyRegistrationCommand);
@@ -152,11 +164,33 @@
 			return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
 		}
 
+		private static Microsoft.Extensions.Logging.ILogger CreateLogger(bool isDebug)
+		{
+			LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
+			if (!isDebug)
+			{
+				logConfig.MinimumLevel.Information();
+			}
+			else
+			{
+				logConfig.MinimumLevel.Debug();
+			}
+
+			var seriLog = logConfig.CreateLogger();
+
+			LoggerFactory loggerFactory = new LoggerFactory();
+			loggerFactory.AddSerilog(seriLog);
+
+			return loggerFactory.CreateLogger("Skyline.DataMiner.CICD.Tools.CatalogUpload");
+		}
+
 		private static async Task<int> ProcessYmlRegistrationAsync(string dmCatalogToken, bool isDebug, string catalogDetailsYml, string readme, string images)
 		{
 			IFileSystem fs = FileSystem.Instance;
 			var catalogMetaDataFactory = new CatalogMetaDataFactory();
-			Uploader uploader = new Uploader(fs, isDebug, catalogMetaDataFactory);
+			var logger = CreateLogger(isDebug);
+			var catalogService = CatalogServiceFactory.CreateWithHttp(new System.Net.Http.HttpClient(), logger);
+			Uploader uploader = new Uploader(fs, logger, catalogService, catalogMetaDataFactory);
 			return await uploader.ProcessYmlRegistrationAsync(dmCatalogToken, catalogDetailsYml, readme, images).ConfigureAwait(false);
 		}
 
@@ -164,16 +198,20 @@
 		{
 			IFileSystem fs = FileSystem.Instance;
 			var catalogMetaDataFactory = new CatalogMetaDataFactory();
-			Uploader uploader = new Uploader(fs, isDebug, catalogMetaDataFactory);
+			var logger = CreateLogger(isDebug);
+			var catalogService = CatalogServiceFactory.CreateWithHttp(new System.Net.Http.HttpClient(), logger);
+			Uploader uploader = new Uploader(fs, logger, catalogService, catalogMetaDataFactory);
 			return await uploader.ProcessVolatile(pathToArtifact, dmCatalogToken).ConfigureAwait(false);
 		}
 
-		private static async Task<int> ProcessWithRegistrationAsync(string dmCatalogToken, bool isDebug, string pathToArtifact, string uriSourceCode, string overrideVersion, string branch, string committerMail, string releaseUri)
+		private static async Task<int> ProcessWithRegistrationAsync(string dmCatalogToken, bool isDebug, string pathToArtifact, OptionalRegistrationArguments optionalArguments)
 		{
 			IFileSystem fs = FileSystem.Instance;
 			var catalogMetaDataFactory = new CatalogMetaDataFactory();
-			Uploader uploader = new Uploader(fs, isDebug, catalogMetaDataFactory);
-			return await uploader.ProcessWithRegistrationAsync(dmCatalogToken, pathToArtifact, uriSourceCode, overrideVersion, branch, committerMail, releaseUri).ConfigureAwait(false);
+			var logger = CreateLogger(isDebug);
+			var catalogService = CatalogServiceFactory.CreateWithHttp(new System.Net.Http.HttpClient(), logger);
+			Uploader uploader = new Uploader(fs, logger, catalogService, catalogMetaDataFactory);
+			return await uploader.ProcessWithRegistrationAsync(dmCatalogToken, pathToArtifact, optionalArguments).ConfigureAwait(false);
 		}
 	}
 }

@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
 using FluentAssertions;
 using System.Threading.Tasks;
+using Skyline.DataMiner.CICD.Tools.CatalogUpload;
+using System.Diagnostics;
 
 namespace CICD.Tools.CatalogUpload.Tests
 {
@@ -44,16 +46,23 @@ namespace CICD.Tools.CatalogUpload.Tests
 			mockFileSystem.Setup(fs => fs.Path.GetFileName("catalog.yml")).Returns("catalog.yml");
 
 			// Act
-			var uploader = new Uploader(mockFileSystem.Object, true, mockCatalogMetaDataFactory.Object);
+			Mock<ILogger> fakeLogger = new Mock<ILogger>();
+			Mock<ICatalogService> fakeCatalogService = new Mock<ICatalogService>();
+			var uploader = new Uploader(mockFileSystem.Object, fakeLogger.Object, fakeCatalogService.Object, mockCatalogMetaDataFactory.Object);
+
+			OptionalRegistrationArguments optional = new OptionalRegistrationArguments()
+			{
+				UriSourceCode = null,
+				OverrideVersion = "argument-version",// This should override the artifact and YAML version
+				Branch = "argument-branch",// This should be applied
+				CommitterMail = "argument-committer", // This should be applied
+				ReleaseUri = "argument-release-uri", // This should be applied
+			};
 
 			await uploader.ProcessWithRegistrationAsync(
 				dmCatalogToken: "dummyToken",
 				pathToArtifact: "test/pathToArtifact.dmapp",
-				uriSourceCode: null,
-				overrideVersion: "argument-version", // This should override the artifact and YAML version
-				branch: "argument-branch", // This should be applied
-				committerMail: "argument-committer", // This should be applied
-				releaseUri: "argument-release-uri" // This should be applied
+				optionalArguments: optional
 			);
 
 			// Assert
