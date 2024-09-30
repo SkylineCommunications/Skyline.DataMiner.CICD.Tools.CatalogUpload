@@ -1,6 +1,7 @@
 ﻿namespace CICD.Tools.CatalogUpload
 {
 	using System;
+	using System.IO;
 	using System.Threading.Tasks;
 
 	using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@
 	using Serilog;
 
 	using Skyline.DataMiner.CICD.FileSystem;
+	using Skyline.DataMiner.CICD.Tools.CatalogUpload;
 	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
 	using Skyline.DataMiner.CICD.Tools.Reporter;
 
@@ -19,33 +21,21 @@
 		private readonly IFileSystem fs;
 		private readonly Microsoft.Extensions.Logging.ILogger logger;
 		private readonly ICatalogMetaDataFactory catalogMetaDataFactory;
+		private readonly ICatalogService service;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Uploader"/> class.
 		/// </summary>
-		/// <param name="fileSystem">The file system interface used for accessing files and directories.</param>
-		/// <param name="isDebug">Specifies whether debug logging is enabled.</param>
-		/// <param name="catalogMetaDataFactory">Factory to create catalog metadata instances.</param>
-		public Uploader(IFileSystem fileSystem, bool isDebug, ICatalogMetaDataFactory catalogMetaDataFactory)
+		/// <param name="fileSystem">The file system interface used for accessing files and directories, providing functionality for reading and writing files.</param>
+		/// <param name="logger">The logger instance used for logging informational, warning, and error messages throughout the upload process.</param>
+		/// <param name="service">The catalog service used to interact with the catalog, such as uploading artifacts and retrieving metadata.</param>
+		/// <param name="catalogMetaDataFactory">Factory responsible for creating instances of catalog metadata, used during artifact registration.</param>
+		public Uploader(IFileSystem fileSystem, Microsoft.Extensions.Logging.ILogger logger, ICatalogService service, ICatalogMetaDataFactory catalogMetaDataFactory)
 		{
+			this.service = service;
 			fs = fileSystem;
 			this.catalogMetaDataFactory = catalogMetaDataFactory;
-			LoggerConfiguration logConfig = new LoggerConfiguration().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
-			if (!isDebug)
-			{
-				logConfig.MinimumLevel.Information();
-			}
-			else
-			{
-				logConfig.MinimumLevel.Debug();
-			}
-
-			var seriLog = logConfig.CreateLogger();
-
-			LoggerFactory loggerFactory = new LoggerFactory();
-			loggerFactory.AddSerilog(seriLog);
-
-			logger = loggerFactory.CreateLogger("Skyline.DataMiner.CICD.Tools.CatalogUpload");
+			this.logger = logger;
 		}
 
 		/// <summary>
@@ -64,7 +54,7 @@
 				CatalogMetaData metaData = catalogMetaDataFactory.FromArtifact(pathToArtifact);
 				metaData.SearchAndApplyCatalogYaml(fs, pathToArtifact);
 
-				var artifact = new CatalogArtifact(pathToArtifact, logger, metaData);
+				var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
 
 				ArtifactUploadResult result;
 				if (dmCatalogToken != null)
@@ -112,13 +102,9 @@
 		/// </summary>
 		/// <param name="dmCatalogToken">The token used for authentication during registration and upload.</param>
 		/// <param name="pathToArtifact">The path to the artifact being uploaded and registered.</param>
-		/// <param name="uriSourceCode">Optional. The URI to the source code to override the default value.</param>
-		/// <param name="overrideVersion">Optional. The version to override the default version in the metadata.</param>
-		/// <param name="branch">Optional. The branch to override the default branch in the metadata.</param>
-		/// <param name="committerMail">Optional. The committer's email to override the default value in the metadata.</param>
-		/// <param name="releaseUri">Optional. The release URI to override the default value in the metadata.</param>
+		/// <param name="optionalArguments"> A set of optional arguments that provide additional information for the registration process.</param>
 		/// <returns>An integer result indicating success (0) or failure (1).</returns>
-		public async Task<int> ProcessWithRegistrationAsync(string dmCatalogToken, string pathToArtifact, string uriSourceCode, string overrideVersion, string branch, string committerMail, string releaseUri)
+		public async Task<int> ProcessWithRegistrationAsync(string dmCatalogToken, string pathToArtifact, OptionalRegistrationArguments optionalArguments)
 		{
 			string devopsMetricsMessage = "Skyline.DataMiner.CICD.Tools.CatalogUpload|with-registration";
 
@@ -128,9 +114,9 @@
 				CatalogMetaData metaData = catalogMetaDataFactory.FromArtifact(pathToArtifact);
 				metaData.SearchAndApplyCatalogYaml(fs, pathToArtifact);
 				metaData.SearchAndApplyReadMe(fs, pathToArtifact);
-				ApplyOptionalArguments(uriSourceCode, overrideVersion, branch, committerMail, releaseUri, metaData);
+				ApplyOptionalArguments(optionalArguments, metaData);
 
-				var artifact = new CatalogArtifact(pathToArtifact, logger, metaData);
+				var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
 
 				ArtifactUploadResult result;
 				if (dmCatalogToken != null)
@@ -188,7 +174,7 @@
 			try
 			{
 				CatalogMetaData metaData = catalogMetaDataFactory.FromCatalogYaml(fs, catalogDetailsYml, readme, images);
-				CatalogArtifact artifact = new CatalogArtifact(logger, metaData);
+				CatalogArtifact artifact = new CatalogArtifact(service, fs, logger, metaData);
 
 				ArtifactUploadResult result;
 				if (dmCatalogToken != null)
@@ -234,48 +220,50 @@
 		/// <summary>
 		/// Applies optional arguments such as version, branch, and source code URI to the catalog metadata.
 		/// </summary>
-		/// <param name="uriSourceCode">Optional. The URI to the source code.</param>
-		/// <param name="overrideVersion">Optional. The version to override the default version.</param>
-		/// <param name="branch">Optional. The branch to override the default branch.</param>
-		/// <param name="committerMail">Optional. The committer's email to override the default value.</param>
-		/// <param name="releaseUri">Optional. The release URI to override the default value.</param>
 		/// <param name="metaData">The catalog metadata instance to apply the changes to.</param>
 		/// <exception cref="ArgumentNullException">Thrown when the metadata is null.</exception>
-		private void ApplyOptionalArguments(string uriSourceCode, string overrideVersion, string branch, string committerMail, string releaseUri, CatalogMetaData metaData)
+		private void ApplyOptionalArguments(OptionalRegistrationArguments optionalArguments, CatalogMetaData metaData)
 		{
 			if (metaData == null)
 			{
 				throw new ArgumentNullException(nameof(metaData), "Metadata cannot be null.");
 			}
 
-			if (uriSourceCode != null)
+			if (optionalArguments.UriSourceCode != null)
 			{
-				logger.LogDebug($"Overriding SourceCodeUri from '{metaData.SourceCodeUri}' to '{uriSourceCode}'");
-				metaData.SourceCodeUri = uriSourceCode;
+				logger.LogDebug($"Overriding SourceCodeUri from '{metaData.SourceCodeUri}' to '{optionalArguments.UriSourceCode}'");
+				metaData.SourceCodeUri = optionalArguments.UriSourceCode;
 			}
 
-			if (overrideVersion != null)
+			if (optionalArguments.OverrideVersion != null)
 			{
-				logger.LogDebug($"Overriding Version from '{metaData.Version.Value}' to '{overrideVersion}'");
-				metaData.Version.Value = overrideVersion;
+				logger.LogDebug($"Overriding Version from '{metaData.Version.Value}' to '{optionalArguments.OverrideVersion}'");
+				metaData.Version.Value = optionalArguments.OverrideVersion;
 			}
 
-			if (branch != null)
+			if (optionalArguments.Branch != null)
 			{
-				logger.LogDebug($"Overriding Branch from '{metaData.Version.Branch}' to '{branch}'");
-				metaData.Version.Branch = branch;
+				logger.LogDebug($"Overriding Branch from '{metaData.Version.Branch}' to '{optionalArguments.Branch}'");
+				metaData.Version.Branch = optionalArguments.Branch;
 			}
 
-			if (committerMail != null)
+			if (optionalArguments.CommitterMail != null)
 			{
-				logger.LogDebug($"Overriding CommitterMail from '{metaData.Version.CommitterMail}' to '{committerMail}'");
-				metaData.Version.CommitterMail = committerMail;
+				logger.LogDebug($"Overriding CommitterMail from '{metaData.Version.CommitterMail}' to '{optionalArguments.CommitterMail}'");
+				metaData.Version.CommitterMail = optionalArguments.CommitterMail;
 			}
 
-			if (releaseUri != null)
+			if (optionalArguments.ReleaseUri != null)
 			{
-				logger.LogDebug($"Overriding ReleaseUri from '{metaData.Version.ReleaseUri}' to '{releaseUri}'");
-				metaData.Version.ReleaseUri = releaseUri;
+				logger.LogDebug($"Overriding ReleaseUri from '{metaData.Version.ReleaseUri}' to '{optionalArguments.ReleaseUri}'");
+				metaData.Version.ReleaseUri = optionalArguments.ReleaseUri;
+			}
+
+
+			if (optionalArguments.CatalogIdentifier != null)
+			{
+				logger.LogDebug($"Overriding CatalogIdentifier from '{metaData.CatalogIdentifier}' to '{optionalArguments.CatalogIdentifier}'");
+				metaData.CatalogIdentifier = optionalArguments.CatalogIdentifier;
 			}
 		}
 	}
