@@ -185,7 +185,7 @@
 		/// </summary>
 		/// <param name="dmCatalogToken">A provided token for the agent or organization as defined in https://admin.dataminer.services/.</param>
 		/// <returns>If the upload was successful or not.</returns>
-		public async Task<ArtifactUploadResult> VolatatileUploadAsync(string dmCatalogToken)
+		public async Task<ArtifactUploadResult> VolatileUploadAsync(string dmCatalogToken)
 		{
 			if (PathToArtifact == null) throw new InvalidOperationException($"{nameof(PathToArtifact)} cannot be null.");
 
@@ -220,7 +220,7 @@
 			}
 
 			_logger.LogDebug($"Attempting upload with Environment Variable as token for artifact: {PathToArtifact}...");
-			return await VolatatileUploadAsync(KeyFromEnv).ConfigureAwait(false);
+			return await VolatileUploadAsync(KeyFromEnv).ConfigureAwait(false);
 		}
 
 		/// <summary>

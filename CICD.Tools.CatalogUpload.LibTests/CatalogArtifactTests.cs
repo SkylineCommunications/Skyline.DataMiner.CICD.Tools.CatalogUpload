@@ -180,7 +180,7 @@
 
 			// Act
 			CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-			var result = await artifactModel.VolatatileUploadAsync("token");
+			var result = await artifactModel.VolatileUploadAsync("token");
 
 			// Assert
 			result.ArtifactId.Should().Be("10");

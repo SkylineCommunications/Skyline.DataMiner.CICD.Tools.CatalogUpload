@@ -181,7 +181,10 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 				}
 			}
 
-			description = ($"Minimum DataMiner Version: {minimumDmaVersion}\r\n{description}");
+			if (!String.IsNullOrWhiteSpace(minimumDmaVersion))
+			{
+				description = ($"Minimum DataMiner Version: {minimumDmaVersion}\r\n{description ?? ""}");
+			}
 
 			if (!String.IsNullOrWhiteSpace(buildNumber))
 			{
@@ -275,15 +278,11 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 				}
 			}
 
-			// Note. Tried using Skyline.DataMiner.CICD.Parsers but could not find a method to get VersionHistory.
-			// So... doing this again... sigh.
-
 			var protocolDoc = XDocument.Parse(protocolXmlString);
 			var ns = protocolDoc.Root.GetDefaultNamespace();
 			// find the current configured version.
 			var currentVersion = protocolDoc.Root.Element(ns + "Version")?.Value;
 			var versionHistory = protocolDoc.Root.Element(ns + "VersionHistory");
-
 
 			string versionDescription = "No Description";
 			if (currentVersion != null && versionHistory != null)

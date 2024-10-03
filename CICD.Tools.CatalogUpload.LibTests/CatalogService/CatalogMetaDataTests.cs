@@ -43,7 +43,6 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
 			result.IsPreRelease().Should().BeTrue();
 		}
 
-
 		[TestMethod()]
 		public void FromArtifactTest_BuildPreReleaseDmappWithProtocols()
 		{

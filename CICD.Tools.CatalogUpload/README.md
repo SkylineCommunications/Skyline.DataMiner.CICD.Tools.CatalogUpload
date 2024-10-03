@@ -122,5 +122,5 @@ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dma
 You can update or create only the catalog registration details by providing a `.yml` file containing the required metadata (as described [here](https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file)), along with an optional `README.md` and `Images` folder.
 
 ```console
-dataminer-catalog-upload with-only-registration --path-to-catalog-yml "catalog.yml" --path-to-readme "README.md" --path-to-images "resources/images"
+dataminer-catalog-upload update-catalog-details --path-to-catalog-yml "catalog.yml" --path-to-readme "README.md" --path-to-images "resources/images"
 ```

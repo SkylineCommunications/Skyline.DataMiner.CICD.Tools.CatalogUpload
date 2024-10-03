@@ -60,7 +60,7 @@
 				if (dmCatalogToken != null)
 				{
 					logger.LogDebug("Uploading artifact to the volatile catalog using provided key...");
-					result = await artifact.VolatatileUploadAsync(dmCatalogToken).ConfigureAwait(false);
+					result = await artifact.VolatileUploadAsync(dmCatalogToken).ConfigureAwait(false);
 				}
 				else
 				{

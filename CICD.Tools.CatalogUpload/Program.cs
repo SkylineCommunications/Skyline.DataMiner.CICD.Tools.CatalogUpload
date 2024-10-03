@@ -28,7 +28,7 @@
 	/// <summary>
 	/// Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).
 	/// </summary>
-	public static partial class Program
+	public static class Program
 	{
 		/// <summary>
 		/// Code that will be called when running the tool.
@@ -148,7 +148,7 @@
 				catalogIdentifier
 			};
 
-			var withOnlyRegistrationCommand = new Command("with-only-registration", "Uploads only the registration information for a Skyline DataMiner catalog (https://catalog.dataminer.services) item.")
+			var withOnlyRegistrationCommand = new Command("update-catalog-details", "Uploads only the registration information for a Skyline DataMiner catalog (https://catalog.dataminer.services) item.")
 			{
 				catalogDetailsYml,
 				readme,
