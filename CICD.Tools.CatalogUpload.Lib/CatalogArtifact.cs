@@ -10,8 +10,10 @@
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.CICD.FileSystem;
-    using YamlDotNet.Serialization.NamingConventions;
+
     using YamlDotNet.Serialization;
+
+    using YamlDotNet.Serialization.NamingConventions;
 
     /// <summary>
     /// Allows Uploading an artifact to the Catalog using one of the below in order of priority:

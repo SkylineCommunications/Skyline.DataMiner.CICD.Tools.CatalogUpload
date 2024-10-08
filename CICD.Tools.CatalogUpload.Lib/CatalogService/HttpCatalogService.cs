@@ -1,167 +1,167 @@
 ﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib
 {
-	using System;
-	using System.IO;
-	using System.Net;
-	using System.Net.Http;
-	using System.Net.Http.Headers;
-	using System.Security.Authentication;
-	using System.Threading;
-	using System.Threading.Tasks;
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Security.Authentication;
+    using System.Threading;
+    using System.Threading.Tasks;
 
-	using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging;
 
-	using Newtonsoft.Json;
+    using Newtonsoft.Json;
 
-	internal sealed class HttpCatalogService : ICatalogService, IDisposable
-	{
-		private const string RegistrationPath = "api/key-catalog/v1-0/catalog/register";
-		private const string VersionUploadPathEnd = "/register/version";
-		private const string VersionUploadPathStart = "https://api.dataminer.services/api/key-catalog/v1-0/catalog/";
-		private const string VolatileUploadPath = "api/key-artifact-upload/v1-0/private/artifact";
-		private readonly HttpClient _httpClient;
-		private readonly ILogger _logger;
+    internal sealed class HttpCatalogService : ICatalogService, IDisposable
+    {
+        private const string RegistrationPath = "api/key-catalog/v1-0/catalog/register";
+        private const string VersionUploadPathEnd = "/register/version";
+        private const string VersionUploadPathStart = "https://api.dataminer.services/api/key-catalog/v1-0/catalog/";
+        private const string VolatileUploadPath = "api/key-artifact-upload/v1-0/private/artifact";
+        private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
 
-		public HttpCatalogService(HttpClient httpClient, ILogger logger)
-		{
-			_logger = logger;
-			_httpClient = httpClient;
-		}
+        public HttpCatalogService(HttpClient httpClient, ILogger logger)
+        {
+            _logger = logger;
+            _httpClient = httpClient;
+        }
 
-		public void Dispose()
-		{
-			_httpClient.Dispose();
-		}
+        public void Dispose()
+        {
+            _httpClient.Dispose();
+        }
 
-		public async Task<ArtifactUploadResult> RegisterCatalogAsync(byte[] catalogDetailsZip, string key, CancellationToken cancellationToken)
-		{
-			using var formData = new MultipartFormDataContent();
-			formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
+        public async Task<ArtifactUploadResult> RegisterCatalogAsync(byte[] catalogDetailsZip, string key, CancellationToken cancellationToken)
+        {
+            using var formData = new MultipartFormDataContent();
+            formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
 
-			// Add file
-			using MemoryStream ms = new MemoryStream(catalogDetailsZip);
-			ms.Write(catalogDetailsZip, 0, catalogDetailsZip.Length);
-			ms.Position = 0;
-			formData.Add(new StreamContent(ms), "file", "catalogDetails.zip");
+            // Add file
+            using MemoryStream ms = new MemoryStream(catalogDetailsZip);
+            ms.Write(catalogDetailsZip, 0, catalogDetailsZip.Length);
+            ms.Position = 0;
+            formData.Add(new StreamContent(ms), "file", "catalogDetails.zip");
 
-			_logger.LogDebug($"Uploading catalogDetails.zip ({ms.Length} bytes) to {RegistrationPath}");
+            _logger.LogDebug($"Uploading catalogDetails.zip ({ms.Length} bytes) to {RegistrationPath}");
 
-			// Make PUT request
-			var response = await _httpClient.PutAsync(RegistrationPath, formData, cancellationToken).ConfigureAwait(false);
+            // Make PUT request
+            var response = await _httpClient.PutAsync(RegistrationPath, formData, cancellationToken).ConfigureAwait(false);
 
-			// Get the response body
-			var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            // Get the response body
+            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-			_logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
+            _logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
 
-			if (response.IsSuccessStatusCode)
-			{
-				_logger.LogDebug($"The registration api returned a {response.StatusCode} response. Body: {body}");
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogDebug($"The registration api returned a {response.StatusCode} response. Body: {body}");
 
-				return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
-			}
+                return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            }
 
-			_logger.LogError($"The registration api returned a {response.StatusCode} response. Body: {body}");
+            _logger.LogError($"The registration api returned a {response.StatusCode} response. Body: {body}");
 
-			if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
-			{
-				throw new AuthenticationException($"The registration api returned a {response.StatusCode} response. Body: {body}");
-			}
+            if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
+            {
+                throw new AuthenticationException($"The registration api returned a {response.StatusCode} response. Body: {body}");
+            }
 
-			throw new InvalidOperationException($"The registration api returned a {response.StatusCode} response. Body: {body}");
-		}
+            throw new InvalidOperationException($"The registration api returned a {response.StatusCode} response. Body: {body}");
+        }
 
-		public async Task<ArtifactUploadResult> UploadVersionAsync(byte[] package, string fileName, string key, string catalogId, string version, string description, CancellationToken cancellationToken)
-		{
-			if (String.IsNullOrWhiteSpace(version)) throw new ArgumentNullException(nameof(version));
+        public async Task<ArtifactUploadResult> UploadVersionAsync(byte[] package, string fileName, string key, string catalogId, string version, string description, CancellationToken cancellationToken)
+        {
+            if (String.IsNullOrWhiteSpace(version)) throw new ArgumentNullException(nameof(version));
 
-			string versionUploadPath = $"{VersionUploadPathStart}{catalogId}{VersionUploadPathEnd}";
-			using var formData = new MultipartFormDataContent();
-			formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
+            string versionUploadPath = $"{VersionUploadPathStart}{catalogId}{VersionUploadPathEnd}";
+            using var formData = new MultipartFormDataContent();
+            formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
 
-			// Add the package (zip file) to the form data
-			using MemoryStream ms = new MemoryStream(package);
-			ms.Position = 0; // Reset the stream position after writing
+            // Add the package (zip file) to the form data
+            using MemoryStream ms = new MemoryStream(package);
+            ms.Position = 0; // Reset the stream position after writing
 
-			// Set up StreamContent with correct headers for the file
-			var fileContent = new StreamContent(ms);
+            // Set up StreamContent with correct headers for the file
+            var fileContent = new StreamContent(ms);
 
-			fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-			{
-				Name = "\"file\"",
-				FileName = "\"" + fileName + "\""
-			};
-			formData.Add(fileContent);
+            fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"file\"",
+                FileName = "\"" + fileName + "\""
+            };
+            formData.Add(fileContent);
 
-			// Add version information to the form data
-			formData.Add(new StringContent(version), "versionNumber");
-			formData.Add(new StringContent(description), "versionDescription");
+            // Add version information to the form data
+            formData.Add(new StringContent(version), "versionNumber");
+            formData.Add(new StringContent(description), "versionDescription");
 
-			// Log the info for debugging
-			string logInfo = $"name {fileName} --versionNumber {version} --versionDescription {description}";
-			_logger.LogDebug("HTTP Post with info: " + logInfo);
+            // Log the info for debugging
+            string logInfo = $"name {fileName} --versionNumber {version} --versionDescription {description}";
+            _logger.LogDebug("HTTP Post with info: " + logInfo);
 
-			// Make the HTTP POST request
-			var response = await _httpClient.PostAsync(versionUploadPath, formData, cancellationToken).ConfigureAwait(false);
+            // Make the HTTP POST request
+            var response = await _httpClient.PostAsync(versionUploadPath, formData, cancellationToken).ConfigureAwait(false);
 
-			// Read and log the response body
-			var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-			_logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
+            // Read and log the response body
+            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
 
-			if (response.IsSuccessStatusCode)
-			{
-				_logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
-				return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
-			}
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
+                return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            }
 
-			_logger.LogError($"The version upload api returned a {response.StatusCode} response. Body: {body}");
-			if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
-			{
-				throw new AuthenticationException($"The version upload api returned a {response.StatusCode} response. Body: {body}");
-			}
+            _logger.LogError($"The version upload api returned a {response.StatusCode} response. Body: {body}");
+            if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
+            {
+                throw new AuthenticationException($"The version upload api returned a {response.StatusCode} response. Body: {body}");
+            }
 
-			throw new InvalidOperationException($"The version upload api returned a {response.StatusCode} response. Body: {body}");
-		}
+            throw new InvalidOperationException($"The version upload api returned a {response.StatusCode} response. Body: {body}");
+        }
 
-		public async Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
-		{
-			using var formData = new MultipartFormDataContent();
-			formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
-			formData.Add(new StringContent(catalog.Name), "name");
-			formData.Add(new StringContent(catalog.Version.Value), "version");
+        public async Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
+        {
+            using var formData = new MultipartFormDataContent();
+            formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
+            formData.Add(new StringContent(catalog.Name), "name");
+            formData.Add(new StringContent(catalog.Version.Value), "version");
 
-			// ContentType of old API doesn't match new API. Switch it to what we do know here. Doesn't matter.
-			string oldApiContentType = "DmScript";
+            // ContentType of old API doesn't match new API. Switch it to what we do know here. Doesn't matter.
+            string oldApiContentType = "DmScript";
 
-			formData.Add(new StringContent(oldApiContentType), "contentType");
+            formData.Add(new StringContent(oldApiContentType), "contentType");
 
-			using MemoryStream ms = new MemoryStream();
-			ms.Write(package, 0, package.Length);
+            using MemoryStream ms = new MemoryStream();
+            ms.Write(package, 0, package.Length);
 
-			// Reset position so it can be read out again.
-			ms.Position = 0;
-			formData.Add(new StreamContent(ms), "file", catalog.Name);
+            // Reset position so it can be read out again.
+            ms.Position = 0;
+            formData.Add(new StreamContent(ms), "file", catalog.Name);
 
-			string logInfo = $"--name {catalog.Name} --version {catalog.Version.Value} --contentType {catalog.ContentType}  --file {catalog.Name}";
+            string logInfo = $"--name {catalog.Name} --version {catalog.Version.Value} --contentType {catalog.ContentType}  --file {catalog.Name}";
 
-			_logger.LogDebug("HTTP Post with info:" + logInfo);
+            _logger.LogDebug("HTTP Post with info:" + logInfo);
 
-			var response = await _httpClient.PostAsync(VolatileUploadPath, formData, cancellationToken).ConfigureAwait(false);
-			var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            var response = await _httpClient.PostAsync(VolatileUploadPath, formData, cancellationToken).ConfigureAwait(false);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-			if (response.IsSuccessStatusCode)
-			{
-				_logger.LogDebug($"The upload api returned a {response.StatusCode} response. Body: {body}");
-				return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
-			}
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogDebug($"The upload api returned a {response.StatusCode} response. Body: {body}");
+                return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            }
 
-			_logger.LogError($"The upload api returned a {response.StatusCode} response. Body: {body}");
-			if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
-			{
-				throw new AuthenticationException($"The upload api returned a {response.StatusCode} response. Body: {body}");
-			}
+            _logger.LogError($"The upload api returned a {response.StatusCode} response. Body: {body}");
+            if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
+            {
+                throw new AuthenticationException($"The upload api returned a {response.StatusCode} response. Body: {body}");
+            }
 
-			throw new InvalidOperationException($"The upload api returned a {response.StatusCode} response. Body: {body}");
-		}
-	}
+            throw new InvalidOperationException($"The upload api returned a {response.StatusCode} response. Body: {body}");
+        }
+    }
 }
