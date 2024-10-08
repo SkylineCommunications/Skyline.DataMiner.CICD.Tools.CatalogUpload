@@ -42,7 +42,7 @@
 		public bool ArtifactHadBuildNumber { get; set; }
 
 		/// <summary>
-		/// An global, readable, unique identifier for this package. This is the GUID defined in the Catalog.
+		/// A global, readable, unique identifier for this package. This is the GUID defined in the Catalog.
 		/// </summary>
 		public string CatalogIdentifier { get; set; }
 
