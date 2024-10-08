@@ -20,7 +20,7 @@
 		/// Gets or sets the URL to the documentation related to the catalog entry.
 		/// </summary>
 		/// <value>A string representing the documentation URL.</value>
-		public string Documentation_url { get; set; }
+		public string DocumentationUrl { get; set; }
 
 		/// <summary>
 		/// Gets or sets the unique identifier for the catalog entry.
@@ -38,13 +38,13 @@
 		/// Gets or sets the short description of the catalog entry.
 		/// </summary>
 		/// <value>A string representing the short description of the entry.</value>
-		public string Short_description { get; set; }
+		public string ShortDescription { get; set; }
 
 		/// <summary>
 		/// Gets or sets the URL to the source code related to the catalog entry.
 		/// </summary>
 		/// <value>A string representing the source code URL.</value>
-		public string Source_code_url { get; set; }
+		public string SourceCodeUrl { get; set; }
 
 		/// <summary>
 		/// Gets or sets the tags associated with the catalog entry.

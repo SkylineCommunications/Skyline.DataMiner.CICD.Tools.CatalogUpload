@@ -74,7 +74,7 @@
 				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "");
 
 				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-				Func<Task> uploadAction = async () => { await artifactModel.VolatatileUploadAsync(); };
+				Func<Task> uploadAction = async () => { await artifactModel.VolatileUploadAsync(); };
 				await uploadAction.Should().ThrowAsync<InvalidOperationException>().WithMessage("*missing token*");
 			}
 			finally
@@ -128,7 +128,7 @@
 
 				// Act
 				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-				var result = await artifactModel.VolatatileUploadAsync();
+				var result = await artifactModel.VolatileUploadAsync();
 
 				// Assert
 				result.ArtifactId.Should().Be("10");
@@ -234,7 +234,7 @@
 
 				// Act
 				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-				var result = await artifactModel.VolatatileUploadAsync();
+				var result = await artifactModel.VolatileUploadAsync();
 
 				// Assert
 				result.ArtifactId.Should().Be("10");

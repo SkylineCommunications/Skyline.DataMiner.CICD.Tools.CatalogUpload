@@ -10,9 +10,7 @@
 	using System.Xml.Linq;
 
 	using Skyline.DataMiner.CICD.FileSystem;
-	using Skyline.DataMiner.CICD.Parsers.Protocol.Xml;
 	using System.Xml;
-	using Skyline.DataMiner.CICD.Parsers.Common.Xml;
 
 	/// <summary>
 	/// A factory class responsible for creating instances of <see cref="CatalogMetaData"/>.

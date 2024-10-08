@@ -243,8 +243,8 @@
 				if (!String.IsNullOrWhiteSpace(p.Type)) ContentType = p.Type;
 				if (!String.IsNullOrWhiteSpace(p.Title)) Name = p.Title;
 
-				if (!String.IsNullOrWhiteSpace(p.Short_description)) ShortDescription = p.Short_description;
-				if (!String.IsNullOrWhiteSpace(p.Source_code_url)) SourceCodeUri = p.Source_code_url;
+				if (!String.IsNullOrWhiteSpace(p.ShortDescription)) ShortDescription = p.ShortDescription;
+				if (!String.IsNullOrWhiteSpace(p.SourceCodeUrl)) SourceCodeUri = p.SourceCodeUrl;
 				if (p.Owners != null)
 				{
 					p.Owners.ForEach(o => { Owners.Add(new CatalogOwner() { Name = o.Name, Email = o.Email, Url = o.Url }); });
@@ -303,11 +303,11 @@
 			CatalogYaml catalogYaml = new CatalogYaml()
 			{
 				Id = CatalogIdentifier,
-				Documentation_url = DocumentationUrl,
-				Short_description = ShortDescription,
+				DocumentationUrl = DocumentationUrl,
+				ShortDescription = ShortDescription,
 				Title = Name,
 				Type = ContentType,
-				Source_code_url = SourceCodeUri
+				SourceCodeUrl = SourceCodeUri
 			};
 
 			if (Owners != null)

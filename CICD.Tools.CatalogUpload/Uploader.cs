@@ -65,7 +65,7 @@
 				else
 				{
 					logger.LogDebug("Uploading artifact to the volatile catalog using environment key...");
-					result = await artifact.VolatatileUploadAsync().ConfigureAwait(false);
+					result = await artifact.VolatileUploadAsync().ConfigureAwait(false);
 				}
 
 				logger.LogDebug($"Artifact Uploaded with {result.ArtifactId}.");
