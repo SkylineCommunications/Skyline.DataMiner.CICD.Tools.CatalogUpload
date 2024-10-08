@@ -401,7 +401,7 @@
 			return RecursiveFindClosestImages(fs, parent, maxRecurse);
 		}
 
-		private string RecursiveFindClosestReadmeMd(IFileSystem fs, string directory, int maxRecurse)
+		private static string RecursiveFindClosestReadmeMd(IFileSystem fs, string directory, int maxRecurse)
 		{
 			if (maxRecurse-- <= 0)
 			{
