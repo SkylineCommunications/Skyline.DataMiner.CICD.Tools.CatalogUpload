@@ -244,15 +244,9 @@
 
 				if (!String.IsNullOrWhiteSpace(p.Short_description)) ShortDescription = p.Short_description;
 				if (!String.IsNullOrWhiteSpace(p.Source_code_url)) SourceCodeUri = p.Source_code_url;
-				if (p.Owners != null)
-				{
-					p.Owners.ForEach(o => { Owners.Add(new CatalogOwner() { Name = o.Name, Email = o.Email, Url = o.Url }); });
-				}
 
-				if (p.Tags != null)
-				{
-					p.Tags.ForEach(Tags.Add);
-				}
+				p.Owners?.ForEach(o => { Owners.Add(new CatalogOwner { Name = o.Name, Email = o.Email, Url = o.Url }); });
+				p.Tags?.AddRange(Tags);
 			}
 
 			return true;
