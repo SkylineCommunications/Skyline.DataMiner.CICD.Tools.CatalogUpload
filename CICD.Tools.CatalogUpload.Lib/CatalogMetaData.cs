@@ -279,9 +279,8 @@
 			PathToReadme = foundReadme;
 			if (foundReadme == null) return false;
 
-			string foundImages;
 			var directoryForImages = fs.File.GetParentDirectory(PathToReadme);
-			foundImages = RecursiveFindClosestImages(fs, directoryForImages, 5);
+			string foundImages = RecursiveFindClosestImages(fs, directoryForImages, 5);
 
 			PathToImages = foundImages;
 			return true;
