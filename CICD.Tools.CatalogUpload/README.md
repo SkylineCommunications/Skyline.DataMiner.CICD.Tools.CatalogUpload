@@ -86,7 +86,7 @@ https://github.com/SkylineCommunications/Skyline.DataMiner.CICD.Tools.WinEncrypt
 
 To make your package visible on the catalog and enable the creation of combined Installation Packages (currently only available through internal tools at Skyline Communications), you need to provide additional registration metadata.
 
-#### Important Changes Since Version 3.0.1
+#### Important Changes Since Version 3.0.0
 - The **--uri-sourcecode** argument is no longer required. Instead, you must provide the **catalog-identifier**, which is the GUID identifying the catalog item on [catalog.dataminer.services](https://catalog.dataminer.services/). If not provided through the `catalog-identifier` argument, it must be specified in a `catalog.yml` file as described [here](https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file).
 - If a `README.md` file or an `Images` folder is present in the same directory (or a parent directory) as the `.dmapp` or `.dmprotocol` file, they will be registered alongside the package.
 
