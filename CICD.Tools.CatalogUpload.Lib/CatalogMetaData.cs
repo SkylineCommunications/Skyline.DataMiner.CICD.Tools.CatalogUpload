@@ -369,7 +369,7 @@
 			}
 		}
 
-		private string RecursiveFindClosestCatalogYaml(IFileSystem fs, string directory, int maxRecurse)
+		private static string RecursiveFindClosestCatalogYaml(IFileSystem fs, string directory, int maxRecurse)
 		{
 			if (maxRecurse-- <= 0)
 			{
