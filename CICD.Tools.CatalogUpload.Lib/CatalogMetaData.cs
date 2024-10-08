@@ -245,7 +245,6 @@
 				if (!String.IsNullOrWhiteSpace(p.ShortDescription)) ShortDescription = p.ShortDescription;
 				if (!String.IsNullOrWhiteSpace(p.SourceCodeUrl)) SourceCodeUri = p.SourceCodeUrl;
 
-
 				p.Owners?.ForEach(o => { Owners.Add(new CatalogOwner { Name = o.Name, Email = o.Email, Url = o.Url }); });
 				p.Tags?.AddRange(Tags);
 			}
