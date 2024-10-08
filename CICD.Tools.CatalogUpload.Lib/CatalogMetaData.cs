@@ -7,7 +7,6 @@
 	using System.Linq;
 	using System.Text.RegularExpressions;
 	using System.Threading.Tasks;
-	using System.Xml.Linq;
 
 	using Skyline.DataMiner.CICD.FileSystem;
 	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.CatalogService;
