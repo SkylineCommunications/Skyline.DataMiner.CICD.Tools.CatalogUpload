@@ -128,16 +128,16 @@
 		{
 			if (obj is CatalogMetaData other)
 			{
-				return string.Equals(CatalogIdentifier, other.CatalogIdentifier, StringComparison.OrdinalIgnoreCase) &&
-					   string.Equals(ContentType, other.ContentType, StringComparison.OrdinalIgnoreCase) &&
-					   string.Equals(SourceCodeUri, other.SourceCodeUri, StringComparison.OrdinalIgnoreCase) &&
-					   string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
-					   string.Equals(ShortDescription, other.ShortDescription, StringComparison.OrdinalIgnoreCase) &&
-					   string.Equals(DocumentationUrl, other.DocumentationUrl, StringComparison.OrdinalIgnoreCase) &&
+				return String.Equals(CatalogIdentifier, other.CatalogIdentifier, StringComparison.OrdinalIgnoreCase) &&
+					   String.Equals(ContentType, other.ContentType, StringComparison.OrdinalIgnoreCase) &&
+					   String.Equals(SourceCodeUri, other.SourceCodeUri, StringComparison.OrdinalIgnoreCase) &&
+					   String.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+					   String.Equals(ShortDescription, other.ShortDescription, StringComparison.OrdinalIgnoreCase) &&
+					   String.Equals(DocumentationUrl, other.DocumentationUrl, StringComparison.OrdinalIgnoreCase) &&
 					   Owners.SequenceEqual(other.Owners) && // List comparison
 					   Tags.SequenceEqual(other.Tags) && // List comparison
-					   string.Equals(PathToReadme, other.PathToReadme, StringComparison.OrdinalIgnoreCase) &&
-					   string.Equals(PathToImages, other.PathToImages, StringComparison.OrdinalIgnoreCase) &&
+					   String.Equals(PathToReadme, other.PathToReadme, StringComparison.OrdinalIgnoreCase) &&
+					   String.Equals(PathToImages, other.PathToImages, StringComparison.OrdinalIgnoreCase) &&
 					   Equals(Version, other.Version); // Version is an object, so we use Equals
 			}
 			return false;
