@@ -162,11 +162,11 @@
 				DocumentationUrl?.ToLower(),
 				PathToReadme?.ToLower(),
 				PathToImages?.ToLower(),
-				Owners != null ? string.Join(",", Owners).ToLower() : string.Empty
+				Owners != null ? String.Join(",", Owners).ToLower() : String.Empty
 			);
 
 			int hash3 = HashCode.Combine(
-				Tags != null ? string.Join(",", Tags).ToLower() : string.Empty,
+				Tags != null ? String.Join(",", Tags).ToLower() : String.Empty,
 				Version
 			);
 
