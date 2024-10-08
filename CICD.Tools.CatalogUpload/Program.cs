@@ -1,29 +1,16 @@
 ﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload
 {
-	using System;
 	using System.CommandLine;
-	using System.CommandLine.Binding;
-	using System.Diagnostics;
 	using System.Threading.Tasks;
-	using System.Xml.XPath;
-
-	using CICD.Tools.CatalogUpload;
 
 	using global::CICD.Tools.CatalogUpload;
 
 	using Microsoft.Extensions.Logging;
-	using Microsoft.Extensions.Options;
 
 	using Serilog;
-	using Serilog.Core;
 
 	using Skyline.DataMiner.CICD.FileSystem;
 	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
-	using Skyline.DataMiner.CICD.Tools.Reporter;
-
-	using YamlDotNet.Core;
-
-	using static System.Net.Mime.MediaTypeNames;
 
 	/// <summary>
 	/// Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).

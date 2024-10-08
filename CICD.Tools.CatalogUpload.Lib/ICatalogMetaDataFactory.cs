@@ -10,13 +10,13 @@
 	public interface ICatalogMetaDataFactory
 	{
 		/// <summary>
-		/// Creates a partial CataLogMetaData using any information it can from the artifact itself. Check the items for null and complete.
+		/// Creates a partial <see cref="CatalogMetaData"/> using any information it can from the artifact itself. Check the items for null and complete.
 		/// </summary>
 		/// <param name="pathToArtifact">Path to the artifact.</param>
-		/// <param name="pathToReadme"></param>
-		/// <param name="pathToImages"></param>
-		/// <returns>An instance of <see cref="CatalogMetaData"/>.></returns>
-		/// <exception cref="ArgumentNullException">Provided path should not be null</exception>
+		/// <param name="pathToReadme">Optional. The path to the README file. If null, the method will attempt to locate the README.</param>
+		/// <param name="pathToImages">Optional. The path to the images directory. If null, no images path will be set.</param>
+		/// <returns>An instance of <see cref="CatalogMetaData"/>.</returns>
+		/// <exception cref="ArgumentNullException">Provided path should not be null.</exception>
 		/// <exception cref="InvalidOperationException">Expected data was not present in the Artifact.</exception>
 		public CatalogMetaData FromArtifact(string pathToArtifact, string pathToReadme = null, string pathToImages = null);
 		

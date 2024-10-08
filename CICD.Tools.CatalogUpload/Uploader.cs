@@ -256,7 +256,6 @@
 				metaData.Version.ReleaseUri = optionalArguments.ReleaseUri;
 			}
 
-
 			if (optionalArguments.CatalogIdentifier != null)
 			{
 				logger.LogDebug($"Overriding CatalogIdentifier from '{metaData.CatalogIdentifier}' to '{optionalArguments.CatalogIdentifier}'");

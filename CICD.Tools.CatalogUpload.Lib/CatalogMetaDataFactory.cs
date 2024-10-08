@@ -1,12 +1,9 @@
 ﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib
 {
 	using System;
-	using System.Collections.Generic;
-	using System.IO.Compression;
 	using System.IO;
+	using System.IO.Compression;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 	using System.Xml.Linq;
 
 	using Skyline.DataMiner.CICD.FileSystem;
@@ -18,12 +15,12 @@
 	public class CatalogMetaDataFactory : ICatalogMetaDataFactory
 	{
 		/// <summary>
-		/// Creates a partial CataLogMetaData using any information it can from the artifact itself. Check the items for null and complete.
+		/// Creates a partial <see cref="CatalogMetaData"/> using any information it can from the artifact itself. Check the items for null and complete.
 		/// </summary>
 		/// <param name="pathToArtifact">Path to the artifact.</param>
-		/// <param name="pathToReadme"></param>
-		/// <param name="pathToImages"></param>
-		/// <returns>An instance of <see cref="CatalogMetaData"/>.></returns>
+		/// <param name="pathToReadme">Optional. The path to the README file. If null, the method will attempt to locate the README.</param>
+		/// <param name="pathToImages">Optional. The path to the images directory. If null, no images path will be set.</param>
+		/// <returns>An instance of <see cref="CatalogMetaData"/>.</returns>
 		/// <exception cref="ArgumentNullException">Provided path should not be null</exception>
 		/// <exception cref="InvalidOperationException">Expected data was not present in the Artifact.</exception>
 		public CatalogMetaData FromArtifact(string pathToArtifact, string pathToReadme = null, string pathToImages = null)
@@ -37,11 +34,11 @@
 
 			if (pathToArtifact.EndsWith(".dmapp", StringComparison.InvariantCultureIgnoreCase))
 			{
-				meta = CatalogMetaDataFactory.FromDmapp(pathToArtifact);
+				meta = FromDmapp(pathToArtifact);
 			}
 			else if (pathToArtifact.EndsWith(".dmprotocol", StringComparison.InvariantCultureIgnoreCase))
 			{
-				meta = CatalogMetaDataFactory.FromDmprotocol(pathToArtifact);
+				meta = FromDmprotocol(pathToArtifact);
 			}
 			else
 			{
@@ -165,8 +162,8 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 			var buildNumber = appInfo.Element("Build")?.Value;
 			var minimumDmaVersion = appInfo.Element("MinDmaVersion")?.Value;
 
-			// cleanup first line from descriptionFromPackage if it contains version. We dont want that hardcoded version when the version might change later.
-			if (!string.IsNullOrEmpty(description))
+			// Cleanup first line from descriptionFromPackage if it contains version. We don't want that hardcoded version when the version might change later.
+			if (!String.IsNullOrEmpty(description))
 			{
 				// Split the string by newlines to work with the first line
 				string[] lines = description.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
@@ -175,13 +172,13 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 				if (lines[0].Contains("version:", StringComparison.OrdinalIgnoreCase))
 				{
 					// Remove the first line and join the remaining lines back into a single string
-					description = string.Join(Environment.NewLine, lines.Skip(1));
+					description = String.Join(Environment.NewLine, lines.Skip(1));
 				}
 			}
 
 			if (!String.IsNullOrWhiteSpace(minimumDmaVersion))
 			{
-				description = ($"Minimum DataMiner Version: {minimumDmaVersion}\r\n{description ?? ""}");
+				description = $"Minimum DataMiner Version: {minimumDmaVersion}\r\n{description ?? ""}";
 			}
 
 			if (!String.IsNullOrWhiteSpace(buildNumber))
@@ -210,8 +207,6 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 			}
 
 			if (description.Length > 500) description = description.Substring(0, 497) + "...";
-
-
 			meta.Version.VersionDescription = description;
 			meta.ContentType = contentType;
 			return meta;
@@ -299,13 +294,10 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 					var majorXml = systemXml?.Element(ns + "MajorVersions")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == major);
 					var minorXml = majorXml?.Element(ns + "MinorVersions")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == minor);
 
-					if (minorXml != null)
+					var allChanges = minorXml?.Element(ns + "Changes")?.Elements().ToList();
+					if (allChanges != null && allChanges.Any())
 					{
-						var allChanges = minorXml.Element(ns + "Changes")?.Elements();
-						if (allChanges != null && allChanges.Any())
-						{
-							versionDescription = string.Join(Environment.NewLine, allChanges.Select(change => $"{change.Name.LocalName}: {change.Value.Trim()}"));
-						}
+						versionDescription = String.Join(Environment.NewLine, allChanges.Select(change => $"{change.Name.LocalName}: {change.Value.Trim()}"));
 					}
 				}
 			}
