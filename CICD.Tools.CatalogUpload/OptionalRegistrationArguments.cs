@@ -44,8 +44,6 @@
 
 		private readonly Option<string> uriSourceCode;
 		private readonly Option<string> overrideVersion;
-
-
 		private readonly Option<string> branch;
 		private readonly Option<string> committerMail;
 		private readonly Option<string> releaseUri;
@@ -63,7 +61,6 @@
 			this.releaseUri = releaseUri;
 			this.catalogIdentifier = catalogIdentifier;
 		}
-
 
 		/// <summary>
 		/// Retrieves the bound value of <see cref="OptionalRegistrationArguments"/> from the <see cref="BindingContext"/>.
@@ -86,6 +83,5 @@
 				CatalogIdentifier = bindingContext.ParseResult.GetValueForOption(catalogIdentifier),
 			};
 		}
-
 	}
 }
