@@ -314,60 +314,50 @@
 
 			var yaml = serializer.Serialize(catalogYaml);
 
-			// Create a zip file in memory that contains manifest.yml, README.md, and an Images folder as expected by the API
-			using (var memoryStream = new MemoryStream())
-			{
-				using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-				{
-					// Add manifest.yml
-					var manifestEntry = archive.CreateEntry("manifest.yml");
-					using (var entryStream = manifestEntry.Open())
+            // Create a zip file in memory that contains manifest.yml, README.md, and an Images folder as expected by the API
+            using var memoryStream = new MemoryStream();
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            {
+                // Add manifest.yml
+                var manifestEntry = archive.CreateEntry("manifest.yml");
+                using (var entryStream = manifestEntry.Open())
 
-					using (var streamWriter = new StreamWriter(entryStream))
-					{
-						await streamWriter.WriteAsync(yaml).ConfigureAwait(false);
-						await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure everything is written
-					}
+                using (var streamWriter = new StreamWriter(entryStream))
+                {
+                    await streamWriter.WriteAsync(yaml).ConfigureAwait(false);
+                    await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure everything is written
+                }
 
-					// Add README.md
-					if (PathToReadme != null && fs.File.Exists(PathToReadme))
-					{
-						var readmeEntry = archive.CreateEntry("README.md");
-						using (var entryStream = readmeEntry.Open())
-						{
-							var readmeContent = fs.File.ReadAllText(PathToReadme); // Get the file content as a string
-							using (var streamWriter = new StreamWriter(entryStream))
-							{
-								await streamWriter.WriteAsync(readmeContent).ConfigureAwait(false);
-								await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure all content is written
-							}
-						}
-					}
+                // Add README.md
+                if (PathToReadme != null && fs.File.Exists(PathToReadme))
+                {
+                    var readmeEntry = archive.CreateEntry("README.md");
+                    using var entryStream = readmeEntry.Open();
+                    var readmeContent = fs.File.ReadAllText(PathToReadme); // Get the file content as a string
+                    using var streamWriter = new StreamWriter(entryStream);
+                    await streamWriter.WriteAsync(readmeContent).ConfigureAwait(false);
+                    await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure all content is written
+                }
 
-					// Add Images folder
-					if (PathToImages != null && fs.Directory.Exists(PathToImages))
-					{
-						var imageFiles = fs.Directory.GetFiles(PathToImages);
-						foreach (var imageFile in imageFiles)
-						{
-							var imageEntry = archive.CreateEntry($"Images/{fs.Path.GetFileName(imageFile)}");
-							using (var entryStream = imageEntry.Open())
-							{
-								var readmeContent = fs.File.ReadAllText(imageFile); // Get the file content as a string
-								using (var streamWriter = new StreamWriter(entryStream))
-								{
-									await streamWriter.WriteAsync(readmeContent).ConfigureAwait(false);
-									await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure all content is written
-								}
-							}
-						}
-					}
-				}
+                // Add Images folder
+                if (PathToImages != null && fs.Directory.Exists(PathToImages))
+                {
+                    var imageFiles = fs.Directory.GetFiles(PathToImages);
+                    foreach (var imageFile in imageFiles)
+                    {
+                        var imageEntry = archive.CreateEntry($"Images/{fs.Path.GetFileName(imageFile)}");
+                        using var entryStream = imageEntry.Open();
+                        var readmeContent = fs.File.ReadAllText(imageFile); // Get the file content as a string
+                        using var streamWriter = new StreamWriter(entryStream);
+                        await streamWriter.WriteAsync(readmeContent).ConfigureAwait(false);
+                        await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure all content is written
+                    }
+                }
+            }
 
-				// Convert zip file to byte array
-				return memoryStream.ToArray();
-			}
-		}
+            // Convert zip file to byte array
+            return memoryStream.ToArray();
+        }
 
 		private static string RecursiveFindClosestCatalogYaml(IFileSystem fs, string directory, int maxRecurse)
 		{
