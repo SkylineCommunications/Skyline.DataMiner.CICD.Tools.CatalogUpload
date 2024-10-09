@@ -1,4 +1,4 @@
-﻿namespace CICD.Tools.CatalogUpload
+﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload
 {
     using System;
     using System.Threading.Tasks;
@@ -6,7 +6,6 @@
     using Microsoft.Extensions.Logging;
 
     using Skyline.DataMiner.CICD.FileSystem;
-    using Skyline.DataMiner.CICD.Tools.CatalogUpload;
     using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
     using Skyline.DataMiner.CICD.Tools.Reporter;
 
@@ -17,7 +16,7 @@
     {
         private readonly ICatalogMetaDataFactory catalogMetaDataFactory;
         private readonly IFileSystem fs;
-        private readonly Microsoft.Extensions.Logging.ILogger logger;
+        private readonly ILogger logger;
         private readonly ICatalogService service;
 
         /// <summary>
@@ -27,7 +26,7 @@
         /// <param name="logger">The logger instance used for logging informational, warning, and error messages throughout the upload process.</param>
         /// <param name="service">The catalog service used to interact with the catalog, such as uploading artifacts and retrieving metadata.</param>
         /// <param name="catalogMetaDataFactory">Factory responsible for creating instances of catalog metadata, used during artifact registration.</param>
-        public Uploader(IFileSystem fileSystem, Microsoft.Extensions.Logging.ILogger logger, ICatalogService service, ICatalogMetaDataFactory catalogMetaDataFactory)
+        public Uploader(IFileSystem fileSystem, ILogger logger, ICatalogService service, ICatalogMetaDataFactory catalogMetaDataFactory)
         {
             this.service = service;
             fs = fileSystem;
@@ -47,11 +46,11 @@
 
             try
             {
-                // Order of priority first the content of the artifact. Then the provided yml file. Finally any arguments from the tool.
+                // Order of priority first the content of the artifact. Then the provided yml file. Finally, any arguments from the tool.
                 CatalogMetaData metaData = catalogMetaDataFactory.FromArtifact(pathToArtifact);
                 metaData.SearchAndApplyCatalogYaml(fs, pathToArtifact);
 
-                var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
+                using var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
 
                 ArtifactUploadResult result;
                 if (dmCatalogToken != null)
@@ -96,13 +95,13 @@
 
             try
             {
-                // Order of priority first the content of the artifact. Then the provided yml file. Finally any arguments from the tool.
+                // Order of priority first the content of the artifact. Then the provided yml file. Finally, any arguments from the tool.
                 CatalogMetaData metaData = catalogMetaDataFactory.FromArtifact(pathToArtifact);
                 metaData.SearchAndApplyCatalogYaml(fs, pathToArtifact);
                 metaData.SearchAndApplyReadMe(fs, pathToArtifact);
                 ApplyOptionalArguments(optionalArguments, metaData);
 
-                var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
+                using var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
 
                 ArtifactUploadResult result;
                 if (dmCatalogToken != null)
@@ -149,7 +148,7 @@
             try
             {
                 CatalogMetaData metaData = catalogMetaDataFactory.FromCatalogYaml(fs, catalogDetailsYml, readme, images);
-                CatalogArtifact artifact = new CatalogArtifact(service, fs, logger, metaData);
+                using CatalogArtifact artifact = new CatalogArtifact(service, fs, logger, metaData);
 
                 ArtifactUploadResult result;
                 if (dmCatalogToken != null)
@@ -183,7 +182,7 @@
 
         private static async Task TryReportAsync(string devopsMetricsMessage)
         {
-            if (!string.IsNullOrWhiteSpace(devopsMetricsMessage))
+            if (!String.IsNullOrWhiteSpace(devopsMetricsMessage))
             {
                 try
                 {

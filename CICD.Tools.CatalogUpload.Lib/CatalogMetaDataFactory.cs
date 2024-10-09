@@ -7,7 +7,6 @@
     using System.Xml.Linq;
 
     using Skyline.DataMiner.CICD.FileSystem;
-    using System.Xml;
 
     /// <summary>
     /// A factory class responsible for creating instances of <see cref="CatalogMetaData"/>.
@@ -92,6 +91,7 @@
             {
                 meta.PathToImages = pathToImages;
             }
+
             return meta;
         }
 
@@ -99,8 +99,8 @@
         {
             // Open as a ZIP file.
             /*AppInfo.xml
-			 *
-			 * <?xml version="1.0" encoding="utf-8"?>
+             *
+             * <?xml version="1.0" encoding="utf-8"?>
 <AppInfo>
   <DisplayName>COX Communications CISCO CBR-8 CCAP Platform Collector</DisplayName>
   <LastModifiedAt>2023-11-24T14:05:47</LastModifiedAt>
@@ -109,9 +109,9 @@
   <AllowMultipleInstalledVersions>false</AllowMultipleInstalledVersions>
   <Version>0.0.0-CU1</Version>
 </AppInfo>
-			 *
+             *
 
-			Description.txt
+            Description.txt
 
 Bridge Technologies VB Probe Series package version: 0.0.0-CU2
 ---------------------------------
@@ -120,7 +120,7 @@ Package creation time: 2023-11-24 13:38:17
 File Versions:
 Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 
-			 */
+             */
 
             string appInfoRaw;
             string contentType;
@@ -131,28 +131,22 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
                 ZipArchiveEntry foundFile = zipFile.GetEntry("AppInfo.xml");
                 if (foundFile == null) throw new InvalidOperationException("Could not find AppInfo.xml in the .dmapp.");
 
-                using (var stream = foundFile.Open())
+                using (var foundFileStream = foundFile.Open())
                 {
-                    using (var memoryStream = new StreamReader(stream))
-                    {
-                        appInfoRaw = memoryStream.ReadToEnd();
-                    }
+                    using var foundFileMemoryStream = new StreamReader(foundFileStream);
+                    appInfoRaw = foundFileMemoryStream.ReadToEnd();
                 }
 
                 ZipArchiveEntry foundDescriptionFile = zipFile.GetEntry("Description.txt");
                 if (foundDescriptionFile != null)
                 {
-                    using (var stream = foundDescriptionFile.Open())
-                    {
-                        using (var memoryStream = new StreamReader(stream))
-                        {
-                            description = memoryStream.ReadToEnd();
-                        }
-                    }
+                    using var stream = foundDescriptionFile.Open();
+                    using var memoryStream = new StreamReader(stream);
+                    description = memoryStream.ReadToEnd();
                 }
 
-                ContentType contentFromPackagContent = new ContentType(zipFile);
-                contentType = contentFromPackagContent.Value;
+                ContentType contentFromPackageContent = new ContentType(zipFile);
+                contentType = contentFromPackageContent.Value;
             }
 
             CatalogMetaData meta = new CatalogMetaData();
@@ -162,7 +156,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
             }
 
             var appInfo = XDocument.Parse(appInfoRaw).Root;
-            meta.Name = appInfo.Element("DisplayName")?.Value;
+            meta.Name = appInfo!.Element("DisplayName")?.Value;
 
             var buildNumber = appInfo.Element("Build")?.Value;
             var minimumDmaVersion = appInfo.Element("MinDmaVersion")?.Value;
@@ -222,11 +216,11 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
         {
             // Description.txt
             /*
-				Protocol Name: Microsoft Platform
-				Protocol Version: 6.0.0.4_B2
-			 * */
+                Protocol Name: Microsoft Platform
+                Protocol Version: 6.0.0.4_B2
+             * */
 
-            string descriptionFileDMProtocolText;
+            string descriptionFileDmProtocolText;
             string protocolXmlString;
 
             using (var zipFile = ZipFile.OpenRead(pathToDmprotocol))
@@ -234,29 +228,23 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
                 var foundFile = zipFile.Entries.FirstOrDefault(x => x.Name.Equals("Description.txt", StringComparison.InvariantCulture));
                 if (foundFile == null) throw new InvalidOperationException("Could not find Description.txt in the .dmprotocol.");
 
-                using (var stream = foundFile.Open())
+                using (var foundFileStream = foundFile.Open())
                 {
-                    using (var memoryStream = new StreamReader(stream))
-                    {
-                        descriptionFileDMProtocolText = memoryStream.ReadToEnd();
-                    }
+                    using var foundFileMemoryStream = new StreamReader(foundFileStream);
+                    descriptionFileDmProtocolText = foundFileMemoryStream.ReadToEnd();
                 }
 
                 var foundProtocol = zipFile.Entries.FirstOrDefault(x => x.Name.EndsWith("Protocol.xml", StringComparison.InvariantCulture));
                 if (foundProtocol == null) throw new InvalidOperationException("Could not find Protocol.xml in the .dmprotocol.");
 
-                using (var stream = foundProtocol.Open())
-                {
-                    using (var memoryStream = new StreamReader(stream))
-                    {
-                        protocolXmlString = memoryStream.ReadToEnd();
-                    }
-                }
+                using var stream = foundProtocol.Open();
+                using var memoryStream = new StreamReader(stream);
+                protocolXmlString = memoryStream.ReadToEnd();
             }
 
             CatalogMetaData meta = new CatalogMetaData();
 
-            var lines = descriptionFileDMProtocolText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var lines = descriptionFileDmProtocolText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             foreach (var line in lines)
             {
@@ -283,7 +271,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
             }
 
             var protocolDoc = XDocument.Parse(protocolXmlString);
-            var ns = protocolDoc.Root.GetDefaultNamespace();
+            var ns = protocolDoc.Root!.GetDefaultNamespace();
             // find the current configured version.
             var currentVersion = protocolDoc.Root.Element(ns + "Version")?.Value;
             var versionHistory = protocolDoc.Root.Element(ns + "VersionHistory");

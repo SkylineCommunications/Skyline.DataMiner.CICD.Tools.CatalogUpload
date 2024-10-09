@@ -1,254 +1,261 @@
-﻿namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
+﻿namespace CICD.Tools.CatalogUpload.LibTests
 {
-	using System;
-	using System.Threading.Tasks;
+    using System;
+    using System.Threading.Tasks;
 
-	using FluentAssertions;
+    using FluentAssertions;
 
-	using Microsoft.Extensions.DependencyInjection;
-	using Microsoft.Extensions.Logging;
-	using Microsoft.Extensions.Logging.Mock;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Mock;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-	using Moq;
+    using Moq;
 
-	using Skyline.DataMiner.CICD.FileSystem;
-	using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
+    using Skyline.DataMiner.CICD.FileSystem;
+    using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
 
-	[TestClass()]
-	public class CatalogArtifactTests
-	{
+    [TestClass]
+    public class CatalogArtifactTests
+    {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		private Mock<ILogger> fakeLogger;
-		private ILogger logger;
+        private Mock<ILogger> fakeLogger;
+        private ILogger logger;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-		[TestInitialize()]
-		public void Initialize()
-		{
-			fakeLogger = new Mock<ILogger>();
-			IServiceCollection services = new ServiceCollection();
+        [TestInitialize]
+        public void Initialize()
+        {
+            fakeLogger = new Mock<ILogger>();
+            IServiceCollection services = new ServiceCollection();
 
-			services.AddLogging(builder =>
-			{
-				builder.SetMinimumLevel(LogLevel.Trace);
-				builder.AddConsole();
-				builder.AddMock(fakeLogger);
-			});
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(LogLevel.Trace);
+                builder.AddConsole();
+                builder.AddMock(fakeLogger);
+            });
 
-			IServiceProvider serviceProvider = services.BuildServiceProvider();
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-			ILoggerFactory loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-			logger = loggerFactory.CreateLogger("TestLogger");
-		}
+            ILoggerFactory loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+            logger = loggerFactory.CreateLogger("TestLogger");
+        }
 
-		[TestMethod()]
-		public async Task UploadAsyncTest_NoToken()
-		{
-			string pathToArtifact = "";
-			Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
-			Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
-			CatalogVersionMetaData versionMeta = new CatalogVersionMetaData()
-			{
-				Branch = "1.0.0.X",
-				CommitterMail = "thunder@skyline.be",
-				ReleaseUri = "pathToNotes",
-				Value = "1.0.0.1-alpha"
-			};
+        [TestMethod]
+        public async Task UploadAsyncTest_NoToken()
+        {
+            string pathToArtifact = "";
+            Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
+            Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
+            CatalogVersionMetaData versionMeta = new CatalogVersionMetaData
+            {
+                Branch = "1.0.0.X",
+                CommitterMail = "thunder@skyline.be",
+                ReleaseUri = "pathToNotes",
+                Value = "1.0.0.1-alpha"
+            };
 
-			CatalogMetaData metaData = new CatalogMetaData()
-			{
-			
-				ContentType = "DMScript",
-				SourceCodeUri = "uniqueIdentifier",
-				Name = "Name",	
-				Version = versionMeta
-			};
+            CatalogMetaData metaData = new CatalogMetaData
+            {
 
-			var originalKey_encrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
-			var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = versionMeta
+            };
 
-			try
-			{
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "", EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "");
+            var originalKeyEncrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
+            var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
 
-				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-				Func<Task> uploadAction = async () => { await artifactModel.VolatileUploadAsync(); };
-				await uploadAction.Should().ThrowAsync<InvalidOperationException>().WithMessage("*missing token*");
-			}
-			finally
-			{
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKey_encrypt, EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
-			}
-		}
+            try
+            {
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "", EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "");
 
-		[TestMethod()]
-		public async Task UploadAsyncTest_ProvidedEncryptedTokenEnvironment()
-		{
-			// Arrange
-			string pathToArtifact = "";
-			Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
-			Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
+                CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+                Func<Task> uploadAction = async () => await artifactModel.VolatileUploadAsync();
 
-			CatalogVersionMetaData versionMeta = new CatalogVersionMetaData()
-			{
-				Branch = "1.0.0.X",
-				CommitterMail = "thunder@skyline.be",
-				ReleaseUri = "pathToNotes",
-				Value = "1.0.0.1-alpha"
-			};
+                await uploadAction.Should().ThrowAsync<InvalidOperationException>().WithMessage("*missing token*");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKeyEncrypt, EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
+            }
+        }
 
-			CatalogMetaData metaData = new CatalogMetaData()
-			{
-				ContentType = "DMScript",
-				SourceCodeUri = "uniqueIdentifier",
-				Name = "Name",
-				Version = versionMeta
-			};
+        [TestMethod]
+        public async Task UploadAsyncTest_ProvidedEncryptedTokenEnvironment()
+        {
+            // Arrange
+            string pathToArtifact = "";
+            Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
+            Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
 
-			Mock<IFileIO> fakeFile = new Mock<IFileIO>();
-			fakeFile.Setup(p => p.ReadAllBytes(It.IsAny<String>())).Returns(new byte[0]);
-			fakeFileSystem.Setup(p => p.File).Returns(fakeFile.Object);
+            CatalogVersionMetaData versionMeta = new CatalogVersionMetaData
+            {
+                Branch = "1.0.0.X",
+                CommitterMail = "thunder@skyline.be",
+                ReleaseUri = "pathToNotes",
+                Value = "1.0.0.1-alpha"
+            };
 
-			ArtifactUploadResult model = new ArtifactUploadResult();
-			model.ArtifactId = "10";
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = versionMeta
+            };
 
-			fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "encryptedFake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
+            Mock<IFileIO> fakeFile = new Mock<IFileIO>();
+            fakeFile.Setup(p => p.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeFileSystem.Setup(p => p.File).Returns(fakeFile.Object);
 
-			var originalKey_encrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
-			var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
+            ArtifactUploadResult model = new ArtifactUploadResult
+            {
+                ArtifactId = "10"
+            };
 
-			try
-			{
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "");
+            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "encryptedFake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
-				WinEncryptedKeys.Lib.Keys.SetKey("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "encryptedFake");
+            var originalKeyEncrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
+            var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
 
-				// Act
-				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-				var result = await artifactModel.VolatileUploadAsync();
+            try
+            {
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "");
 
-				// Assert
-				result.ArtifactId.Should().Be("10");
+                Skyline.DataMiner.CICD.Tools.WinEncryptedKeys.Lib.Keys.SetKey("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "encryptedFake");
 
-				fakeLogger.VerifyLog().InformationWasCalled().MessageEquals(@"{""artifactId"":""10""}");
+                // Act
+                CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+                var result = await artifactModel.VolatileUploadAsync();
 
-				fakeService.VerifyAll();
-				fakeFileSystem.VerifyAll();
-			}
-			finally
-			{
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKey_encrypt, EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
-			}
-		}
+                // Assert
+                result.ArtifactId.Should().Be("10");
 
-		[TestMethod()]
-		public async Task UploadAsyncTest_ProvidedTokenArgument()
-		{
-			// Arrange
-			string pathToArtifact = "";
-			Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
-			Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
+                fakeLogger.VerifyLog().InformationWasCalled().MessageEquals(@"{""artifactId"":""10""}");
 
-			CatalogVersionMetaData versionMeta = new CatalogVersionMetaData()
-			{
-				Branch = "1.0.0.X",
-				CommitterMail = "thunder@skyline.be",
-				ReleaseUri = "pathToNotes",
-				Value = "1.0.0.1-alpha"
-			};
+                fakeService.VerifyAll();
+                fakeFileSystem.VerifyAll();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKeyEncrypt, EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
+            }
+        }
 
-			CatalogMetaData metaData = new CatalogMetaData()
-			{
-				ContentType = "DMScript",
-				SourceCodeUri = "uniqueIdentifier",
-				Name = "Name",
-				Version = versionMeta
-			};
+        [TestMethod]
+        public async Task UploadAsyncTest_ProvidedTokenArgument()
+        {
+            // Arrange
+            string pathToArtifact = "";
+            Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
+            Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
 
-			Mock<IFileIO> fakeFile = new Mock<IFileIO>();
-			fakeFile.Setup(p => p.ReadAllBytes(It.IsAny<String>())).Returns(new byte[0]);
-			fakeFileSystem.Setup(p => p.File).Returns(fakeFile.Object);
+            CatalogVersionMetaData versionMeta = new CatalogVersionMetaData
+            {
+                Branch = "1.0.0.X",
+                CommitterMail = "thunder@skyline.be",
+                ReleaseUri = "pathToNotes",
+                Value = "1.0.0.1-alpha"
+            };
 
-			ArtifactUploadResult model = new ArtifactUploadResult();
-			model.ArtifactId = "10";
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = versionMeta
+            };
 
-			fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "token", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
+            Mock<IFileIO> fakeFile = new Mock<IFileIO>();
+            fakeFile.Setup(p => p.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeFileSystem.Setup(p => p.File).Returns(fakeFile.Object);
 
-			// Act
-			CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-			var result = await artifactModel.VolatileUploadAsync("token");
+            ArtifactUploadResult model = new ArtifactUploadResult
+            {
+                ArtifactId = "10"
+            };
 
-			// Assert
-			result.ArtifactId.Should().Be("10");
+            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "token", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
-			fakeLogger.VerifyLog().InformationWasCalled().MessageEquals(@"{""artifactId"":""10""}");
+            // Act
+            CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+            var result = await artifactModel.VolatileUploadAsync("token");
 
-			fakeService.VerifyAll();
-			fakeFileSystem.VerifyAll();
-		}
+            // Assert
+            result.ArtifactId.Should().Be("10");
 
-		[TestMethod()]
-		public async Task UploadAsyncTest_ProvidedTokenEnvironment()
-		{
-			// Arrange
-			string pathToArtifact = "";
-			Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
-			Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
+            fakeLogger.VerifyLog().InformationWasCalled().MessageEquals(@"{""artifactId"":""10""}");
 
-			CatalogVersionMetaData versionMeta = new CatalogVersionMetaData()
-			{
-				Branch = "1.0.0.X",
-				CommitterMail = "thunder@skyline.be",
-				ReleaseUri = "pathToNotes",
-				Value = "1.0.0.1-alpha"
-			};
+            fakeService.VerifyAll();
+            fakeFileSystem.VerifyAll();
+        }
 
-			CatalogMetaData metaData = new CatalogMetaData()
-			{
-				ContentType = "DMScript",
-				SourceCodeUri = "uniqueIdentifier",
-				Name = "Name",
-				Version = versionMeta
-			};
+        [TestMethod]
+        public async Task UploadAsyncTest_ProvidedTokenEnvironment()
+        {
+            // Arrange
+            string pathToArtifact = "";
+            Mock<ICatalogService> fakeService = new Mock<ICatalogService>();
+            Mock<IFileSystem> fakeFileSystem = new Mock<IFileSystem>();
 
-			Mock<IFileIO> fakeFile = new Mock<IFileIO>();
-			fakeFile.Setup(p => p.ReadAllBytes(It.IsAny<String>())).Returns(new byte[0]);
-			fakeFileSystem.Setup(p => p.File).Returns(fakeFile.Object);
+            CatalogVersionMetaData versionMeta = new CatalogVersionMetaData
+            {
+                Branch = "1.0.0.X",
+                CommitterMail = "thunder@skyline.be",
+                ReleaseUri = "pathToNotes",
+                Value = "1.0.0.1-alpha"
+            };
 
-			ArtifactUploadResult model = new ArtifactUploadResult();
-			model.ArtifactId = "10";
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = versionMeta
+            };
 
-			fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "fake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
+            Mock<IFileIO> fakeFile = new Mock<IFileIO>();
+            fakeFile.Setup(p => p.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeFileSystem.Setup(p => p.File).Returns(fakeFile.Object);
 
-			var originalKey_encrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
-			var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
+            ArtifactUploadResult model = new ArtifactUploadResult
+            {
+                ArtifactId = "10"
+            };
 
-			try
-			{
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "", EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "fake");
+            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "fake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
-				// Act
-				CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
-				var result = await artifactModel.VolatileUploadAsync();
+            var originalKeyEncrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
+            var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
 
-				// Assert
-				result.ArtifactId.Should().Be("10");
+            try
+            {
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", "", EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", "fake");
 
-				fakeLogger.VerifyLog().InformationWasCalled().MessageEquals(@"{""artifactId"":""10""}");
+                // Act
+                CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+                var result = await artifactModel.VolatileUploadAsync();
 
-				fakeService.VerifyAll();
-				fakeFileSystem.VerifyAll();
-			}
-			finally
-			{
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKey_encrypt, EnvironmentVariableTarget.Machine);
-				Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
-			}
-		}
-	}
+                // Assert
+                result.ArtifactId.Should().Be("10");
+
+                fakeLogger.VerifyLog().InformationWasCalled().MessageEquals(@"{""artifactId"":""10""}");
+
+                fakeService.VerifyAll();
+                fakeFileSystem.VerifyAll();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", originalKeyEncrypt, EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
+            }
+        }
+    }
 }

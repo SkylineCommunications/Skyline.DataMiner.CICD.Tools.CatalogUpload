@@ -21,7 +21,7 @@
     ///  <para>- key stored as an Environment Variable called "DATAMINER_CATALOG_TOKEN". (Unix/Windows)</para>
     ///  <para>- key configured using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys called "DATAMINER_CATALOG_TOKEN_ENCRYPTED" (Windows only)</para>
     /// </summary>
-    public class CatalogArtifact
+    public class CatalogArtifact : IDisposable
     {
         private readonly ILogger _logger;
         private readonly ICatalogService catalogService;
@@ -252,7 +252,7 @@
                     var encryptedKey = WinEncryptedKeys.Lib.Keys.RetrieveKey("DATAMINER_CATALOG_TOKEN_ENCRYPTED");
                     if (encryptedKey != null)
                     {
-                        string keyFromWinEncryptedKeys = new System.Net.NetworkCredential(string.Empty, encryptedKey).Password;
+                        string keyFromWinEncryptedKeys = new System.Net.NetworkCredential(String.Empty, encryptedKey).Password;
 
                         if (!String.IsNullOrWhiteSpace(keyFromWinEncryptedKeys))
                         {
@@ -282,6 +282,12 @@
 
                 keyFromEnv = keyFromEnvironment;
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            cts?.Dispose();
         }
     }
 }

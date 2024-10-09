@@ -1,160 +1,161 @@
-﻿using System.IO.Compression;
-
-using FluentAssertions;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Moq;
-
-using Skyline.DataMiner.CICD.FileSystem;
-using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.CatalogService;
-
-using YamlDotNet.Serialization;
-
-namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
+﻿namespace CICD.Tools.CatalogUpload.LibTests.CatalogService
 {
-	[TestClass()]
-	public class CatalogMetaDataTests
-	{
-		[TestMethod()]
-		public void FromArtifactTest_FromDMProtocol()
-		{
-			// Arrange
-			string pathToArtifact = "TestData/Arris_E6000_2_0_0_17_B3.dmprotocol";
+    using System.IO.Compression;
 
-			// Act		
-			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+    using FluentAssertions;
 
-			// Assert
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-			CatalogMetaData expected = new CatalogMetaData()
-			{
-				ArtifactHadBuildNumber = true,
-				ContentType = "connector",
-				Name = "Arris E6000",
-				Version = new CatalogVersionMetaData()
-				{
-					Value = "2.0.0.17_B3",
-					VersionDescription = "Fix: Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature: Added Video Counts table.\r\nNewFeature: Added Global Video Input Streams table.\r\nNewFeature: Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature: Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrou..."
-				}
-			};
+    using Moq;
 
-			result.Should().Be(expected);
-			result.IsPreRelease().Should().BeTrue();
-		}
+    using Skyline.DataMiner.CICD.FileSystem;
+    using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
+    using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.CatalogService;
 
-		[TestMethod()]
-		public void FromArtifactTest_BuildPreReleaseDmappWithProtocols()
-		{
-			// Arrange
-			string pathToArtifact = "TestData/withProtocols.dmapp";
+    using YamlDotNet.Serialization;
 
-			// Act		
-			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+    [TestClass]
+    public class CatalogMetaDataTests
+    {
+        [TestMethod]
+        public void FromArtifactTest_FromDMProtocol()
+        {
+            // Arrange
+            string pathToArtifact = "TestData/Arris_E6000_2_0_0_17_B3.dmprotocol";
 
-			// Assert
+            // Act		
+            CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
-			CatalogMetaData expected = new CatalogMetaData()
-			{
-				ContentType = "solution",
-				Name = "SLNetSubscriptionsBenchmarking",
-				Version = new CatalogVersionMetaData()
-				{
-					Value = "1.0.1-B15",
-					VersionDescription = "Pre-Release (Unofficial) version.\r\nMinimum DataMiner Version: 10.0.10.0-9414\r\n---------------------------------\r\nPackage creation time: 2023-11-15 13:04:54\r\n---------------------------------\r\nFile Versions:\r\nProtocol\\Metrics Subscription Event Generator:1.0.0.1_B77\r\nProtocol\\Metrics Subscription Monitor A:1.0.0.1_B74\r\nProtocol\\Metrics Subscription Monitor B:1.0.0.1_B62\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for protocol:Me...",
-					//VersionDescription = "Pre-Release (Unofficial) version.\r\nMinimum DataMiner Version: 10.0.10.0-9414\r\n---------------------------------\r\nPackage creation time: 2023-11-15 13:04:54\r\n---------------------------------\r\nFile Versions:\r\nProtocol\\Metrics Subscription Event Generator:1.0.0.1_B77\r\nProtocol\\Metrics Subscription Monitor A:1.0.0.1_B74\r\nProtocol\\Metrics Subscription Monitor B:1.0.0.1_B62\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\system.threading.tasks.dataflow\\7.0.0\\lib\\net462\\System.Threading.Tasks.Dataflow.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.common\\1.0.0-dev.monitorpartialtablesupport.6\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Common.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.protocol\\1.0.0-dev.monitorpartialtablesupport.6\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Protocol.dll for protocol:Metrics Subscription Event Generator\r\n",
-				}
-			};
+            // Assert
 
-			result.Should().Be(expected);
-			result.IsPreRelease().Should().BeTrue();
-		}
+            CatalogMetaData expected = new CatalogMetaData
+            {
+                ArtifactHadBuildNumber = true,
+                ContentType = "connector",
+                Name = "Arris E6000",
+                Version = new CatalogVersionMetaData
+                {
+                    Value = "2.0.0.17_B3",
+                    VersionDescription = "Fix: Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature: Added Video Counts table.\r\nNewFeature: Added Global Video Input Streams table.\r\nNewFeature: Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature: Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrou..."
+                }
+            };
 
-		[TestMethod()]
-		public void FromArtifactTest_ReleaseAutomation()
-		{
-			// Arrange
-			string pathToArtifact = "TestData/withAutomation.dmapp";
+            result.Should().Be(expected);
+            result.IsPreRelease().Should().BeTrue();
+        }
 
-			// Act
-			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+        [TestMethod]
+        public void FromArtifactTest_BuildPreReleaseDmappWithProtocols()
+        {
+            // Arrange
+            string pathToArtifact = "TestData/withProtocols.dmapp";
 
-			// Assert
+            // Act		
+            CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
-			CatalogMetaData expected = new CatalogMetaData()
-			{
-				ContentType = "automationscript",
-				Name = "Demo InterAppCalls",
-				Version = new CatalogVersionMetaData()
-				{
-					Value = "1.0.0-CU1",
-					VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-07-24 17:00:19\r\n---------------------------------\r\nFile Versions:\r\nScript\\MWCore-InterAppDemo-Streams:1.0.0-CU1\r\nScript\\MWCore-InterAppDemo-InputsOutputs:1.0.0-CU1\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.3\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.data...",
-					//VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-07-24 17:00:19\r\n---------------------------------\r\nFile Versions:\r\nScript\\MWCore-InterAppDemo-Streams:1.0.0-CU1\r\nScript\\MWCore-InterAppDemo-InputsOutputs:1.0.0-CU1\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.3\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.common\\1.0.0.2\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Common.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.interappcalls.common\\1.0.0.2\\lib\\net462\\Skyline.DataMiner.Core.InterAppCalls.Common.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.utils.connectorapi.techex.mwcore\\1.0.1\\lib\\net462\\Skyline.DataMiner.Utils.ConnectorAPI.Techex.MWCore.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\n",
-				}
-			};
+            // Assert
 
-			result.Should().Be(expected);
-			result.IsPreRelease().Should().BeFalse();
-		}
+            CatalogMetaData expected = new CatalogMetaData
+            {
+                ContentType = "solution",
+                Name = "SLNetSubscriptionsBenchmarking",
+                Version = new CatalogVersionMetaData
+                {
+                    Value = "1.0.1-B15",
+                    VersionDescription = "Pre-Release (Unofficial) version.\r\nMinimum DataMiner Version: 10.0.10.0-9414\r\n---------------------------------\r\nPackage creation time: 2023-11-15 13:04:54\r\n---------------------------------\r\nFile Versions:\r\nProtocol\\Metrics Subscription Event Generator:1.0.0.1_B77\r\nProtocol\\Metrics Subscription Monitor A:1.0.0.1_B74\r\nProtocol\\Metrics Subscription Monitor B:1.0.0.1_B62\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for protocol:Me...",
+                    //VersionDescription = "Pre-Release (Unofficial) version.\r\nMinimum DataMiner Version: 10.0.10.0-9414\r\n---------------------------------\r\nPackage creation time: 2023-11-15 13:04:54\r\n---------------------------------\r\nFile Versions:\r\nProtocol\\Metrics Subscription Event Generator:1.0.0.1_B77\r\nProtocol\\Metrics Subscription Monitor A:1.0.0.1_B74\r\nProtocol\\Metrics Subscription Monitor B:1.0.0.1_B62\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\system.threading.tasks.dataflow\\7.0.0\\lib\\net462\\System.Threading.Tasks.Dataflow.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.common\\1.0.0-dev.monitorpartialtablesupport.6\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Common.dll for protocol:Metrics Subscription Event Generator\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.protocol\\1.0.0-dev.monitorpartialtablesupport.6\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Protocol.dll for protocol:Metrics Subscription Event Generator\r\n",
+                }
+            };
 
-		[TestMethod()]
-		public void FromArtifactTest_ReleaseDashboard()
-		{
-			// Arrange
-			string pathToArtifact = "TestData/withDashboard.dmapp";
+            result.Should().Be(expected);
+            result.IsPreRelease().Should().BeTrue();
+        }
 
-			// Act
-			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+        [TestMethod]
+        public void FromArtifactTest_ReleaseAutomation()
+        {
+            // Arrange
+            string pathToArtifact = "TestData/withAutomation.dmapp";
 
-			// Assert
+            // Act
+            CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
-			CatalogMetaData expected = new CatalogMetaData()
-			{
-				ContentType = "dashboard",
-				Name = "Tandberg RX1290",
-				Version = new CatalogVersionMetaData()
-				{
-					Value = "1.0.0-CU1",
-					VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-09-28 15:37:14\r\n---------------------------------\r\nFile Versions:\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg KPI Overview.dmadb.json\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg KPI.dmadb.json\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg Status Overview.dmadb.json\r\n",
-				},
-			};
+            // Assert
 
-			result.Should().Be(expected);
-			result.IsPreRelease().Should().BeFalse();
-		}
+            CatalogMetaData expected = new CatalogMetaData
+            {
+                ContentType = "automationscript",
+                Name = "Demo InterAppCalls",
+                Version = new CatalogVersionMetaData
+                {
+                    Value = "1.0.0-CU1",
+                    VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-07-24 17:00:19\r\n---------------------------------\r\nFile Versions:\r\nScript\\MWCore-InterAppDemo-Streams:1.0.0-CU1\r\nScript\\MWCore-InterAppDemo-InputsOutputs:1.0.0-CU1\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.3\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.data...",
+                    //VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-07-24 17:00:19\r\n---------------------------------\r\nFile Versions:\r\nScript\\MWCore-InterAppDemo-Streams:1.0.0-CU1\r\nScript\\MWCore-InterAppDemo-InputsOutputs:1.0.0-CU1\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.3\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.dataminersystem.common\\1.0.0.2\\lib\\net462\\Skyline.DataMiner.Core.DataMinerSystem.Common.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.core.interappcalls.common\\1.0.0.2\\lib\\net462\\Skyline.DataMiner.Core.InterAppCalls.Common.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\skyline.dataminer.utils.connectorapi.techex.mwcore\\1.0.1\\lib\\net462\\Skyline.DataMiner.Utils.ConnectorAPI.Techex.MWCore.dll for automationscript:MWCore-InterAppDemo-Streams\r\nAssembly\\C:\\Skyline DataMiner\\ProtocolScripts\\DllImport\\newtonsoft.json\\13.0.2\\lib\\net45\\Newtonsoft.Json.dll for automationscript:MWCore-InterAppDemo-Streams\r\n",
+                }
+            };
 
-		[TestMethod()]
-		public void FromArtifactTest_ReleaseProtocolVisio()
-		{
-			// Arrange
-			string pathToArtifact = "TestData/withVisio.dmapp";
+            result.Should().Be(expected);
+            result.IsPreRelease().Should().BeFalse();
+        }
 
-			// Act
-			CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+        [TestMethod]
+        public void FromArtifactTest_ReleaseDashboard()
+        {
+            // Arrange
+            string pathToArtifact = "TestData/withDashboard.dmapp";
 
-			// Assert
+            // Act
+            CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
 
-			CatalogMetaData expected = new CatalogMetaData()
-			{
-				ContentType = "visio",
-				Name = "Microsoft Platform",
-				Version = new CatalogVersionMetaData()
-				{
-					Value = "1.0.0-CU4",
-					VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-11-28 10:30:46\r\n---------------------------------\r\nFile Versions:\r\nVisio\\skyline_Microsoft Platform:1.0.0-CU4\r\n",
-				},
-			};
+            // Assert
 
-			result.Should().Be(expected);
-			result.IsPreRelease().Should().BeFalse();
-		}
+            CatalogMetaData expected = new CatalogMetaData
+            {
+                ContentType = "dashboard",
+                Name = "Tandberg RX1290",
+                Version = new CatalogVersionMetaData
+                {
+                    Value = "1.0.0-CU1",
+                    VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-09-28 15:37:14\r\n---------------------------------\r\nFile Versions:\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg KPI Overview.dmadb.json\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg KPI.dmadb.json\r\nDashboard\\AppInstallContent\\Dashboards\\Tandberg Status Overview.dmadb.json\r\n",
+                },
+            };
 
-		[TestMethod()]
-		public void FromCatalogYaml_ValidYamlFile_ShouldParseCorrectly()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			string yamlContent = @"
+            result.Should().Be(expected);
+            result.IsPreRelease().Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void FromArtifactTest_ReleaseProtocolVisio()
+        {
+            // Arrange
+            string pathToArtifact = "TestData/withVisio.dmapp";
+
+            // Act
+            CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+
+            // Assert
+
+            CatalogMetaData expected = new CatalogMetaData
+            {
+                ContentType = "visio",
+                Name = "Microsoft Platform",
+                Version = new CatalogVersionMetaData
+                {
+                    Value = "1.0.0-CU4",
+                    VersionDescription = "Minimum DataMiner Version: 10.0.9.0-9312\r\n---------------------------------\r\nPackage creation time: 2023-11-28 10:30:46\r\n---------------------------------\r\nFile Versions:\r\nVisio\\skyline_Microsoft Platform:1.0.0-CU4\r\n",
+                },
+            };
+
+            result.Should().Be(expected);
+            result.IsPreRelease().Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void FromCatalogYaml_ValidYamlFile_ShouldParseCorrectly()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            string yamlContent = @"
                 id: catalog-id-1234
                 type: solution
                 title: MyCatalogPackage
@@ -167,44 +168,44 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
                 tags: [tag1, tag2]
             ";
 
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
-			mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
-			mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
-			// Act
-			var result = new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
+            mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
+            mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
+            // Act
+            var result = new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
 
-			// Assert
-			result.CatalogIdentifier.Should().Be("catalog-id-1234");
-			result.ContentType.Should().Be("solution");
-			result.Name.Should().Be("MyCatalogPackage");
-			result.ShortDescription.Should().Be("A package description");
-			result.SourceCodeUri.Should().Be("https://example.com/source-code");
-			result.Owners.Should().ContainSingle(owner => owner.Name == "Owner1" && owner.Email == "owner1@example.com");
-			result.Tags.Should().BeEquivalentTo(new[] { "tag1", "tag2" });
-		}
+            // Assert
+            result.CatalogIdentifier.Should().Be("catalog-id-1234");
+            result.ContentType.Should().Be("solution");
+            result.Name.Should().Be("MyCatalogPackage");
+            result.ShortDescription.Should().Be("A package description");
+            result.SourceCodeUri.Should().Be("https://example.com/source-code");
+            result.Owners.Should().ContainSingle(owner => owner.Name == "Owner1" && owner.Email == "owner1@example.com");
+            result.Tags.Should().BeEquivalentTo(new[] { "tag1", "tag2" });
+        }
 
-		[TestMethod()]
-		public void FromCatalogYaml_MissingYamlFile_ShouldThrowException()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
+        [TestMethod]
+        public void FromCatalogYaml_MissingYamlFile_ShouldThrowException()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
 
-			// Act
-			Action act = () => new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
+            // Act
+            Action act = () => new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
 
-			// Assert
-			act.Should().Throw<InvalidOperationException>().WithMessage("Unable to locate a catalog.yml or manifest.yml file within the provided directory/file or up to 5 parent directories.");
-		}
+            // Assert
+            act.Should().Throw<InvalidOperationException>().WithMessage("Unable to locate a catalog.yml or manifest.yml file within the provided directory/file or up to 5 parent directories.");
+        }
 
-		[TestMethod()]
-		public void SearchAndApplyCatalogYaml_ValidFile_ShouldApplyYamlData()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			string yamlContent = @"
+        [TestMethod]
+        public void SearchAndApplyCatalogYaml_ValidFile_ShouldApplyYamlData()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            string yamlContent = @"
                 id: catalog-id-5678
                 type: automation
                 title: AutomationScript
@@ -214,409 +215,395 @@ namespace Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.Tests
                 tags: [auto, deploy]
             ";
 
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
-			mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
-			mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
+            mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
+            mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
 
-			var metaData = new CatalogMetaData();
+            var metaData = new CatalogMetaData();
 
-			// Act
-			var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+            // Act
+            var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
 
-			// Assert
-			success.Should().BeTrue();
-			metaData.CatalogIdentifier.Should().Be("catalog-id-5678");
-			metaData.ContentType.Should().Be("automation");
-			metaData.Name.Should().Be("AutomationScript");
-			metaData.Owners.Should().ContainSingle(owner => owner.Name == "Owner2" && owner.Email == "owner2@example.com");
-			metaData.Tags.Should().BeEquivalentTo(new[] { "auto", "deploy" });
-		}
+            // Assert
+            success.Should().BeTrue();
+            metaData.CatalogIdentifier.Should().Be("catalog-id-5678");
+            metaData.ContentType.Should().Be("automation");
+            metaData.Name.Should().Be("AutomationScript");
+            metaData.Owners.Should().ContainSingle(owner => owner.Name == "Owner2" && owner.Email == "owner2@example.com");
+            metaData.Tags.Should().BeEquivalentTo(new[] { "auto", "deploy" });
+        }
 
-		[TestMethod()]
-		public void SearchAndApplyCatalogYaml_ValidFile_ShouldOverwriteOrPreserveExistingData()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			string yamlContent = @"
+        [TestMethod]
+        public void SearchAndApplyCatalogYaml_ValidFile_ShouldOverwriteOrPreserveExistingData()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            string yamlContent = @"
         id: catalog-id-5678
         type: automation
         title: AutomationScript
         tags: [auto, deploy]
     ";
 
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
-			mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
-			mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
+            mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
+            mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
 
-			// Pre-populate CatalogMetaData with some values
-			var metaData = new CatalogMetaData
-			{
-				CatalogIdentifier = "pre-existing-id",
-				ContentType = "solution",
-				Name = "PreExistingScript",
-				ShortDescription = "Pre-existing description",
-				Owners = new List<CatalogOwner>
-		{
-			new CatalogOwner { Name = "Owner1", Email = "owner1@example.com" }
-		},
-				Tags = new List<string> { "pre-existing-tag" }
-			};
+            // Pre-populate CatalogMetaData with some values
+            var metaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "pre-existing-id",
+                ContentType = "solution",
+                Name = "PreExistingScript",
+                ShortDescription = "Pre-existing description",
+                Owners = new List<CatalogOwner>
+                {
+                    new CatalogOwner { Name = "Owner1", Email = "owner1@example.com" }
+                },
+                Tags = new List<string> { "pre-existing-tag" }
+            };
 
-			// Act
-			var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+            // Act
+            var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
 
-			// Assert
-			success.Should().BeTrue();
+            // Assert
+            success.Should().BeTrue();
 
-			// Ensure the YAML overrides existing data
-			metaData.CatalogIdentifier.Should().Be("catalog-id-5678"); // Overwritten by YAML
-			metaData.ContentType.Should().Be("automation"); // Overwritten by YAML
-			metaData.Name.Should().Be("AutomationScript"); // Overwritten by YAML
+            // Ensure the YAML overrides existing data
+            metaData.CatalogIdentifier.Should().Be("catalog-id-5678"); // Overwritten by YAML
+            metaData.ContentType.Should().Be("automation"); // Overwritten by YAML
+            metaData.Name.Should().Be("AutomationScript"); // Overwritten by YAML
 
-			// Ensure pre-existing data is preserved when not overridden by YAML
-			metaData.ShortDescription.Should().Be("Pre-existing description"); // Not overwritten, so it should remain
-			metaData.Owners.Should().ContainSingle(owner => owner.Name == "Owner1" && owner.Email == "owner1@example.com"); // No owners in YAML, so it should remain
-			metaData.Tags.Should().BeEquivalentTo(new[] { "pre-existing-tag", "auto", "deploy" }); // Extended by YAML
-		}
+            // Ensure pre-existing data is preserved when not overridden by YAML
+            metaData.ShortDescription.Should().Be("Pre-existing description"); // Not overwritten, so it should remain
+            metaData.Owners.Should().ContainSingle(owner => owner.Name == "Owner1" && owner.Email == "owner1@example.com"); // No owners in YAML, so it should remain
+            metaData.Tags.Should().BeEquivalentTo(new[] { "pre-existing-tag", "auto", "deploy" }); // Extended by YAML
+        }
 
 
-		[TestMethod()]
-		public void SearchAndApplyCatalogYaml_NoYamlFile_ShouldReturnFalse()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
+        [TestMethod]
+        public void SearchAndApplyCatalogYaml_NoYamlFile_ShouldReturnFalse()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
 
-			var metaData = new CatalogMetaData();
+            var metaData = new CatalogMetaData();
 
-			// Act
-			var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+            // Act
+            var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
 
-			// Assert
-			success.Should().BeFalse();
-		}
+            // Assert
+            success.Should().BeFalse();
+        }
 
-		[TestMethod()]
-		public void RecursiveFindClosestCatalogYaml_FoundInParentDirectory_ShouldReturnFilePath()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
+        [TestMethod]
+        public void RecursiveFindClosestCatalogYaml_FoundInParentDirectory_ShouldReturnFilePath()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
 
-			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
 
-			mockFileSystem.Setup(fs => fs.File.ReadAllText("catalog.yml")).Returns("");
-			mockFileSystem.Setup(fs => fs.File.GetParentDirectory("test/path")).Returns("parentDir");
-			mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles("parentDir")).Returns(new[] { "catalog.yml" });
-			mockFileSystem.Setup(fs => fs.Path.GetFileName("catalog.yml")).Returns("catalog.yml");
-			var metaData = new CatalogMetaData();
+            mockFileSystem.Setup(fs => fs.File.ReadAllText("catalog.yml")).Returns("");
+            mockFileSystem.Setup(fs => fs.File.GetParentDirectory("test/path")).Returns("parentDir");
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles("parentDir")).Returns(new[] { "catalog.yml" });
+            mockFileSystem.Setup(fs => fs.Path.GetFileName("catalog.yml")).Returns("catalog.yml");
+            var metaData = new CatalogMetaData();
 
-			// Act
-			var foundFile = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+            // Act
+            var foundFile = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
 
-			// Assert
-			foundFile.Should().BeTrue();
-		}
+            // Assert
+            foundFile.Should().BeTrue();
+        }
 
-		[TestMethod()]
-		public async Task ToCatalogZipAsync_ShouldCreateValidZipFile()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			var mockSerializer = new Mock<ISerializer>();
+        [TestMethod]
+        public async Task ToCatalogZipAsync_ShouldCreateValidZipFile()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockSerializer = new Mock<ISerializer>();
 
-			// Mock YAML serialization
-			mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
-				.Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
+            // Mock YAML serialization
+            mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
+                .Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
 
-			// Mock file system for README.md and Images folder
-			mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>()))
-				.Returns("Readme content"); // Mock README content
+            // Mock file system for README.md and Images folder
+            mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>()))
+                .Returns("Readme content"); // Mock README content
 
-			mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>()))
-				.Returns(new[] { "image1.png", "image2.png" }); // Mock image files
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.Is<string>(path => path == "image1.png")))
-				.Returns("Image1 content"); // Mock Image1 content
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.Is<string>(path => path == "image2.png")))
-				.Returns("Image2 content"); // Mock Image2 content
+            mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>()))
+                .Returns(new[] { "image1.png", "image2.png" }); // Mock image files
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.Is<string>(path => path == "image1.png")))
+                .Returns("Image1 content"); // Mock Image1 content
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.Is<string>(path => path == "image2.png")))
+                .Returns("Image2 content"); // Mock Image2 content
 
-			mockFileSystem.Setup(fs => fs.Path.GetFileName("image1.png")).Returns("image1.png");
-			mockFileSystem.Setup(fs => fs.Path.GetFileName("image2.png")).Returns("image2.png");
-			mockFileSystem.Setup(fs => fs.Path.GetFileName("README.md")).Returns("README.md");
+            mockFileSystem.Setup(fs => fs.Path.GetFileName("image1.png")).Returns("image1.png");
+            mockFileSystem.Setup(fs => fs.Path.GetFileName("image2.png")).Returns("image2.png");
+            mockFileSystem.Setup(fs => fs.Path.GetFileName("README.md")).Returns("README.md");
 
-			var catalogMetaData = new CatalogMetaData
-			{
-				CatalogIdentifier = "catalog-id-1234",
-				Name = "MyCatalogPackage",
-				PathToReadme = "README.md",
-				PathToImages = "Images"
-			};
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage",
+                PathToReadme = "README.md",
+                PathToImages = "Images"
+            };
 
-			// Act
-			byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
 
-			// Assert
-			using (var zipStream = new MemoryStream(result))
-			{
-				using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Read))
-				{
-					// Check manifest.yml exists
-					var manifestEntry = zip.GetEntry("manifest.yml");
-					manifestEntry.Should().NotBeNull();
-					if (manifestEntry == null) return;
-					using (var reader = new StreamReader(manifestEntry.Open()))
-					{
-						var content = reader.ReadToEnd();
-						content.Should().Contain("id: catalog-id-1234");
-						content.Should().Contain("title: MyCatalogPackage");
-					}
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
 
-					// Check README.md exists
-					var readmeEntry = zip.GetEntry("README.md");
-					readmeEntry.Should().NotBeNull();
-					if (readmeEntry == null) return;
-					using (var reader = new StreamReader(readmeEntry.Open()))
-					{
-						var content = reader.ReadToEnd();
-						content.Should().Be("Readme content");
-					}
+            // Check manifest.yml exists
+            var manifestEntry = zip.GetEntry("manifest.yml");
+            manifestEntry.Should().NotBeNull();
+            if (manifestEntry == null) return;
+            using (var reader = new StreamReader(manifestEntry.Open()))
+            {
+                var content = await reader.ReadToEndAsync();
+                content.Should().Contain("id: catalog-id-1234");
+                content.Should().Contain("title: MyCatalogPackage");
+            }
 
-					// Check Images folder and files exist
-					var image1Entry = zip.GetEntry("Images/image1.png");
-					image1Entry.Should().NotBeNull();
-					if (image1Entry == null) return;
-					using (var reader = new StreamReader(image1Entry.Open()))
-					{
-						var content = reader.ReadToEnd();
-						content.Should().Be("Image1 content");
-					}
+            // Check README.md exists
+            var readmeEntry = zip.GetEntry("README.md");
+            readmeEntry.Should().NotBeNull();
+            if (readmeEntry == null) return;
+            using (var reader = new StreamReader(readmeEntry.Open()))
+            {
+                var content = await reader.ReadToEndAsync();
+                content.Should().Be("Readme content");
+            }
 
-					var image2Entry = zip.GetEntry("Images/image2.png");
-					image2Entry.Should().NotBeNull();
-					if (image2Entry == null) return;
-					using (var reader = new StreamReader(image2Entry.Open()))
-					{
-						var content = reader.ReadToEnd();
-						content.Should().Be("Image2 content");
-					}
-				}
-			}
-		}
+            // Check Images folder and files exist
+            var image1Entry = zip.GetEntry("Images/image1.png");
+            image1Entry.Should().NotBeNull();
+            if (image1Entry == null) return;
+            using (var reader = new StreamReader(image1Entry.Open()))
+            {
+                var content = await reader.ReadToEndAsync();
+                content.Should().Be("Image1 content");
+            }
 
-		[TestMethod()]
-		public async Task ToCatalogZipAsync_NoReadmeFile_ShouldNotIncludeReadme()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			var mockSerializer = new Mock<ISerializer>();
+            var image2Entry = zip.GetEntry("Images/image2.png");
+            image2Entry.Should().NotBeNull();
+            if (image2Entry == null) return;
+            using (var reader = new StreamReader(image2Entry.Open()))
+            {
+                var content = await reader.ReadToEndAsync();
+                content.Should().Be("Image2 content");
+            }
+        }
 
-			// Mock YAML serialization
-			mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
-				.Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
+        [TestMethod]
+        public async Task ToCatalogZipAsync_NoReadmeFile_ShouldNotIncludeReadme()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockSerializer = new Mock<ISerializer>();
 
-			// Mock file system without README.md
-			mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(false); // No README file
+            // Mock YAML serialization
+            mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
+                .Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
 
-			mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>()))
-				.Returns(new[] { "image1.png" }); // Mock image files
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.Is<string>(path => path == "image1.png")))
-				.Returns("Image1 content"); // Mock Image1 content
+            // Mock file system without README.md
+            mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(false); // No README file
 
-			mockFileSystem.Setup(fs => fs.Path.GetFileName("image1.png")).Returns("image1.png");
+            mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>()))
+                .Returns(new[] { "image1.png" }); // Mock image files
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.Is<string>(path => path == "image1.png")))
+                .Returns("Image1 content"); // Mock Image1 content
 
-			var catalogMetaData = new CatalogMetaData
-			{
-				CatalogIdentifier = "catalog-id-1234",
-				Name = "MyCatalogPackage",
-				PathToImages = "Images"
-			};
+            mockFileSystem.Setup(fs => fs.Path.GetFileName("image1.png")).Returns("image1.png");
 
-			// Act
-			byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage",
+                PathToImages = "Images"
+            };
 
-			// Assert
-			using (var zipStream = new MemoryStream(result))
-			{
-				using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Read))
-				{
-					// Check manifest.yml exists
-					var manifestEntry = zip.GetEntry("manifest.yml");
-					manifestEntry.Should().NotBeNull();
-					if (manifestEntry == null) return;
-					using (var reader = new StreamReader(manifestEntry.Open()))
-					{
-						var content = reader.ReadToEnd();
-						content.Should().Contain("id: catalog-id-1234");
-						content.Should().Contain("title: MyCatalogPackage");
-					}
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
 
-					// Check README.md does not exist
-					var readmeEntry = zip.GetEntry("README.md");
-					readmeEntry.Should().BeNull();
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
 
-					// Check Images folder and files exist
-					var image1Entry = zip.GetEntry("Images/image1.png");
-					image1Entry.Should().NotBeNull();
-					if (image1Entry == null) return;
-					using (var reader = new StreamReader(image1Entry.Open()))
-					{
-						var content = reader.ReadToEnd();
-						content.Should().Be("Image1 content");
-					}
-				}
-			}
-		}
+            // Check manifest.yml exists
+            var manifestEntry = zip.GetEntry("manifest.yml");
+            manifestEntry.Should().NotBeNull();
+            if (manifestEntry == null) return;
+            using (var reader = new StreamReader(manifestEntry.Open()))
+            {
+                var content = await reader.ReadToEndAsync();
+                content.Should().Contain("id: catalog-id-1234");
+                content.Should().Contain("title: MyCatalogPackage");
+            }
 
-		[TestMethod()]
-		public async Task ToCatalogZipAsync_ImagesFolderEmpty_ShouldNotIncludeImages()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			var mockSerializer = new Mock<ISerializer>();
+            // Check README.md does not exist
+            var readmeEntry = zip.GetEntry("README.md");
+            readmeEntry.Should().BeNull();
 
-			// Mock YAML serialization
-			mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
-				.Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
+            // Check Images folder and files exist
+            var image1Entry = zip.GetEntry("Images/image1.png");
+            image1Entry.Should().NotBeNull();
+            if (image1Entry == null) return;
+            using (var reader = new StreamReader(image1Entry.Open()))
+            {
+                var content = await reader.ReadToEndAsync();
+                content.Should().Be("Image1 content");
+            }
+        }
 
-			// Mock file system without images
-			mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(true); // README exists
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns("Readme content"); // Mock README content
+        [TestMethod]
+        public async Task ToCatalogZipAsync_ImagesFolderEmpty_ShouldNotIncludeImages()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockSerializer = new Mock<ISerializer>();
 
-			mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>())).Returns(new string[] { }); // No image files
+            // Mock YAML serialization
+            mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
+                .Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
 
-			mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns((string s) => s);
+            // Mock file system without images
+            mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(true); // README exists
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns("Readme content"); // Mock README content
 
-			var catalogMetaData = new CatalogMetaData
-			{
-				CatalogIdentifier = "catalog-id-1234",
-				Name = "MyCatalogPackage",
-				PathToReadme = "README.md",
-				PathToImages = "Images"
-			};
+            mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>())).Returns(new string[] { }); // No image files
 
-			// Act
-			byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns((string s) => s);
 
-			// Assert
-			using (var zipStream = new MemoryStream(result))
-			{
-				using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Read))
-				{
-					// Check manifest.yml exists
-					var manifestEntry = zip.GetEntry("manifest.yml");
-					manifestEntry.Should().NotBeNull();
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage",
+                PathToReadme = "README.md",
+                PathToImages = "Images"
+            };
 
-					// Check README.md exists
-					var readmeEntry = zip.GetEntry("README.md");
-					readmeEntry.Should().NotBeNull();
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
 
-					// Check Images folder does not exist
-					var imageEntry = zip.GetEntry("Images/image1.png");
-					imageEntry.Should().BeNull();
-				}
-			}
-		}
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
 
-		[TestMethod()]
-		public async Task ToCatalogZipAsync_NoReadmeOrImages_ShouldOnlyContainManifest()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			var mockSerializer = new Mock<ISerializer>();
+            // Check manifest.yml exists
+            var manifestEntry = zip.GetEntry("manifest.yml");
+            manifestEntry.Should().NotBeNull();
 
-			// Mock YAML serialization
-			mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
-				.Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
+            // Check README.md exists
+            var readmeEntry = zip.GetEntry("README.md");
+            readmeEntry.Should().NotBeNull();
 
-			// Mock file system without README and images
-			mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(false); // No README
-			mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(false); // No images folder
+            // Check Images folder does not exist
+            var imageEntry = zip.GetEntry("Images/image1.png");
+            imageEntry.Should().BeNull();
+        }
 
-			var catalogMetaData = new CatalogMetaData
-			{
-				CatalogIdentifier = "catalog-id-1234",
-				Name = "MyCatalogPackage"
-			};
+        [TestMethod]
+        public async Task ToCatalogZipAsync_NoReadmeOrImages_ShouldOnlyContainManifest()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockSerializer = new Mock<ISerializer>();
 
-			// Act
-			byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            // Mock YAML serialization
+            mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
+                .Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
 
-			// Assert
-			using (var zipStream = new MemoryStream(result))
-			{
-				using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Read))
-				{
-					// Check manifest.yml exists
-					var manifestEntry = zip.GetEntry("manifest.yml");
-					manifestEntry.Should().NotBeNull();
+            // Mock file system without README and images
+            mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(false); // No README
+            mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(false); // No images folder
 
-					// Check README.md does not exist
-					var readmeEntry = zip.GetEntry("README.md");
-					readmeEntry.Should().BeNull();
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage"
+            };
 
-					// Check Images folder does not exist
-					var imageEntry = zip.GetEntry("Images/image1.png");
-					imageEntry.Should().BeNull();
-				}
-			}
-		}
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
 
-		[TestMethod()]
-		public async Task ToCatalogZipAsync_LargeNumberOfImageFiles_ShouldIncludeAllImages()
-		{
-			// Arrange
-			var mockFileSystem = new Mock<IFileSystem>();
-			var mockSerializer = new Mock<ISerializer>();
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
 
-			// Mock YAML serialization
-			mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
-				.Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
+            // Check manifest.yml exists
+            var manifestEntry = zip.GetEntry("manifest.yml");
+            manifestEntry.Should().NotBeNull();
 
-			// Mock file system for README.md and a large number of image files
-			mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(true);
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns("Readme content");
+            // Check README.md does not exist
+            var readmeEntry = zip.GetEntry("README.md");
+            readmeEntry.Should().BeNull();
 
-			mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
-			var largeImageList = new List<string>();
-			for (int i = 0; i < 1000; i++)
-			{
-				largeImageList.Add($"image{i}.png");
-			}
-			mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>())).Returns(largeImageList.ToArray());
-			mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns("Image content");
+            // Check Images folder does not exist
+            var imageEntry = zip.GetEntry("Images/image1.png");
+            imageEntry.Should().BeNull();
+        }
 
-			mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns((string s) => s);
+        [TestMethod]
+        public async Task ToCatalogZipAsync_LargeNumberOfImageFiles_ShouldIncludeAllImages()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockSerializer = new Mock<ISerializer>();
 
-			var catalogMetaData = new CatalogMetaData
-			{
-				CatalogIdentifier = "catalog-id-1234",
-				Name = "MyCatalogPackage",
-				PathToReadme = "README.md",
-				PathToImages = "Images"
-			};
+            // Mock YAML serialization
+            mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
+                .Returns("id: catalog-id-1234\ntitle: MyCatalogPackage");
 
-			// Act
-			byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            // Mock file system for README.md and a large number of image files
+            mockFileSystem.Setup(fs => fs.File.Exists(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns("Readme content");
 
-			// Assert
-			using (var zipStream = new MemoryStream(result))
-			{
-				using (var zip = new ZipArchive(zipStream, ZipArchiveMode.Read))
-				{
-					// Check that all 1000 images are included
-					for (int i = 0; i < 1000; i++)
-					{
-						var imageEntry = zip.GetEntry($"Images/image{i}.png");
-						imageEntry.Should().NotBeNull();
-					}
-				}
-			}
-		}
-	}
+            mockFileSystem.Setup(fs => fs.Directory.Exists(It.IsAny<string>())).Returns(true);
+            var largeImageList = new List<string>();
+            for (int i = 0; i < 1000; i++)
+            {
+                largeImageList.Add($"image{i}.png");
+            }
+
+            mockFileSystem.Setup(fs => fs.Directory.GetFiles(It.IsAny<string>())).Returns(largeImageList.ToArray());
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns("Image content");
+
+            mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns((string s) => s);
+
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage",
+                PathToReadme = "README.md",
+                PathToImages = "Images"
+            };
+
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+
+            // Check that all 1000 images are included
+            for (int i = 0; i < 1000; i++)
+            {
+                var imageEntry = zip.GetEntry($"Images/image{i}.png");
+                imageEntry.Should().NotBeNull();
+            }
+        }
+    }
 }

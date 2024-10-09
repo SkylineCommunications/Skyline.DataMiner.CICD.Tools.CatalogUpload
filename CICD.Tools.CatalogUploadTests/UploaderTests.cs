@@ -1,17 +1,17 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CICD.Tools.CatalogUpload;
-using Skyline.DataMiner.CICD.FileSystem;
-using Moq;
-using Microsoft.Extensions.Logging;
-using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
-using FluentAssertions;
-using System.Threading.Tasks;
-using Skyline.DataMiner.CICD.Tools.CatalogUpload;
-using System.Diagnostics;
-
-namespace CICD.Tools.CatalogUpload.Tests
+﻿namespace CICD.Tools.CatalogUploadTests
 {
-	[TestClass()]
+    using FluentAssertions;
+
+    using Microsoft.Extensions.Logging;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    using Moq;
+
+    using Skyline.DataMiner.CICD.FileSystem;
+    using Skyline.DataMiner.CICD.Tools.CatalogUpload;
+    using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
+
+    [TestClass]
 	public class UploaderTests
 	{
 		[TestMethod]

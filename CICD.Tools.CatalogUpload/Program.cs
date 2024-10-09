@@ -3,8 +3,6 @@
     using System.CommandLine;
     using System.Threading.Tasks;
 
-    using global::CICD.Tools.CatalogUpload;
-
     using Microsoft.Extensions.Logging;
 
     using Serilog;

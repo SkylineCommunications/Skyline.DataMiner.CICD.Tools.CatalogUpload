@@ -302,15 +302,8 @@
                 SourceCodeUrl = SourceCodeUri
             };
 
-            if (Owners != null)
-            {
-                Owners.ForEach(o => catalogYaml.Owners.Add(new CatalogYamlOwner() { Name = o.Name, Email = o.Email, Url = o.Url }));
-            }
-
-            if (Tags != null)
-            {
-                Tags.ForEach(catalogYaml.Tags.Add);
-            }
+            Owners?.ForEach(o => catalogYaml.Owners.Add(new CatalogYamlOwner { Name = o.Name, Email = o.Email, Url = o.Url }));
+            Tags?.ForEach(catalogYaml.Tags.Add);
 
             var yaml = serializer.Serialize(catalogYaml);
 
