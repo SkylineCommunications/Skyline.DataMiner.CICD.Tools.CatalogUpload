@@ -191,7 +191,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
-            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(Array.Empty<string>());
 
             // Act
             Action act = () => new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
@@ -289,7 +289,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
-            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(Array.Empty<string>());
 
             var metaData = new CatalogMetaData();
 
@@ -306,7 +306,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
 
-            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new string[] { });
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(Array.Empty<string>());
 
             mockFileSystem.Setup(fs => fs.File.ReadAllText("catalog.yml")).Returns("");
             mockFileSystem.Setup(fs => fs.File.GetParentDirectory("test/path")).Returns("parentDir");
