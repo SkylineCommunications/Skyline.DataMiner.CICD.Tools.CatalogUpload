@@ -5,11 +5,6 @@
 Uploads and/or makes visible, artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services).
 
 > **Note**
-> Currently this tool only works for DataMiner application packages (.dmapp) files.
-> 
-> Protocol packages (.dmprotocol) are not supported yet.
-
-> **Note**
 > Usage of this tool is tracked through non-personal metrics provided through a single https call on each use.
 >
 > These metrics may include, but are not limited to, the frequency of use and the primary purposes for which the Software is employed (e.g., automation, protocol analysis, visualization, etc.). By using the Software, you agree to allow Skyline to collect and analyze such metrics for the purpose of improving and enhancing the Software.
@@ -40,6 +35,15 @@ Then run the command
 ```console
 dataminer-catalog-upload help
 ```
+
+## Creating a dataminer.services Key
+
+A `dataminer.services` key can be scoped either to a specific DMS or to an organization. Both types of keys can be used to upload and register items.
+
+**Note:** For volatile uploads, you can only upload and deploy using the same DMS-scoped key.
+
+For more details on how to create a `dataminer.services` key, refer to the documentation [here](https://docs.dataminer.services/user-guide/Cloud_Platform/CloudAdminApp/Managing_DCP_keys.html).
+
 ## Common Commands
 
 ### Volatile Uploads
@@ -78,24 +82,45 @@ WinEncryptedKeys --name "DATAMINER_CATALOG_TOKEN_ENCRYPTED" --value "MyTokenHere
 You can review and make suggestions to the sourcecode of this encryption tool here: 
 https://github.com/SkylineCommunications/Skyline.DataMiner.CICD.Tools.WinEncryptedKeys
 
- ### Registered Uploads
+### Registered Uploads
 
-If you want to make your package visible on the catalog and provide the ability to create combined Installation Packages (Currently only available through internal tools at Skyline Communications) you'll need to provide additional registration meta-data.
+To make your package visible on the catalog and enable the creation of combined Installation Packages (currently only available through internal tools at Skyline Communications), you need to provide additional registration metadata.
 
-The most basic command will be default anonymous and try to use the 'main' branch and the version defined in the artifact (either protocol version or dmapp version)
+#### Important Changes Since Version 3.0.0
+- The **--uri-sourcecode** argument is no longer required. Instead, you must provide the **catalog-identifier**, which is the GUID identifying the catalog item on [catalog.dataminer.services](https://catalog.dataminer.services/). If not provided through the `catalog-identifier` argument, it must be specified in a `catalog.yml` file as described [here](https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file).
+- If a `README.md` file or an `Images` folder is present in the same directory (or a parent directory) as the `.dmapp` or `.dmprotocol` file, they will be registered alongside the package.
+
+#### Basic Command
+The most basic command is anonymous by default and will try to use the `main` branch and the version defined in the artifact (either protocol version or DMAPP version).
 
 ```console
- dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --uri-sourcecode "https://github.com/SkylineCommunications/MyTestRepo"
+dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --catalog-identifier "123-aaa-123-123-abc"
 ```
 
-Though optional, it is however highly recommended (due to current restrictions to the internal dmapp version syntax) to provide your own version tag.
+#### Version Tag Recommendation
+Though optional, it is highly recommended to provide your own **version tag** due to current restrictions in the internal DMAPP version syntax.
 
 ```console
- dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --uri-sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1"
+dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --catalog-identifier "123-aaa-123-123-abc" --version "1.0.1-alpha1"
 ```
 
-In addition you can provide additional optional information:
+#### Optional Additional Information
+You can also provide additional optional metadata:
 
 ```console
- dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --uri-sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1" --branch "dev/MyFeature" --author-mail "thunder@skyline.be" --release-notes "https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3"
+dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp" --catalog-identifier "123-aaa-123-123-abc" --uri-sourcecode "https://github.com/SkylineCommunications/MyTestRepo" --version "1.0.1-alpha1" --branch "dev/MyFeature" --author-mail "thunder@skyline.be" --release-notes "https://github.com/SkylineCommunications/MyTestRepo/releases/tag/1.0.3"
+```
+
+Alternatively, you can rely on a **catalog.yml file** located next to the `.dmapp` or `.dmprotocol` file, as described [here](https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file).
+
+```console
+dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp"
+```
+
+### Update Catalog Details
+
+You can update or create only the catalog registration details by providing a `.yml` file containing the required metadata (as described [here](https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file)), along with an optional `README.md` and `Images` folder.
+
+```console
+dataminer-catalog-upload update-catalog-details --path-to-catalog-yml "catalog.yml" --path-to-readme "README.md" --path-to-images "resources/images"
 ```
