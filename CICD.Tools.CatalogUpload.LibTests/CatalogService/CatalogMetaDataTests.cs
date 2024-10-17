@@ -222,8 +222,8 @@
 
             var metaData = new CatalogMetaData();
 
-            // Act
-            var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+			// Act
+			var success = metaData.SearchAndApplyCatalogYamlAndReadMe(mockFileSystem.Object, "test/path");
 
             // Assert
             success.Should().BeTrue();
@@ -265,8 +265,8 @@
                 Tags = new List<string> { "pre-existing-tag" }
             };
 
-            // Act
-            var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+			// Act
+			var success = metaData.SearchAndApplyCatalogYamlAndReadMe(mockFileSystem.Object, "test/path");
 
             // Assert
             success.Should().BeTrue();
@@ -293,8 +293,8 @@
 
             var metaData = new CatalogMetaData();
 
-            // Act
-            var success = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+			// Act
+			var success = metaData.SearchAndApplyCatalogYamlAndReadMe(mockFileSystem.Object, "test/path");
 
             // Assert
             success.Should().BeFalse();
@@ -314,8 +314,8 @@
             mockFileSystem.Setup(fs => fs.Path.GetFileName("catalog.yml")).Returns("catalog.yml");
             var metaData = new CatalogMetaData();
 
-            // Act
-            var foundFile = metaData.SearchAndApplyCatalogYaml(mockFileSystem.Object, "test/path");
+			// Act
+			var foundFile = metaData.SearchAndApplyCatalogYamlAndReadMe(mockFileSystem.Object, "test/path");
 
             // Assert
             foundFile.Should().BeTrue();

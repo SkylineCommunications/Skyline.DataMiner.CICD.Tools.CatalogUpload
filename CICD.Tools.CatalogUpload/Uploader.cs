@@ -48,7 +48,7 @@
             {
                 // Order of priority first the content of the artifact. Then the provided yml file. Finally, any arguments from the tool.
                 CatalogMetaData metaData = catalogMetaDataFactory.FromArtifact(pathToArtifact);
-                metaData.SearchAndApplyCatalogYaml(fs, pathToArtifact);
+                metaData.SearchAndApplyCatalogYamlAndReadMe(fs, pathToArtifact);
 
                 using var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
 
@@ -97,8 +97,7 @@
             {
                 // Order of priority first the content of the artifact. Then the provided yml file. Finally, any arguments from the tool.
                 CatalogMetaData metaData = catalogMetaDataFactory.FromArtifact(pathToArtifact);
-                metaData.SearchAndApplyCatalogYaml(fs, pathToArtifact);
-                metaData.SearchAndApplyReadMe(fs, pathToArtifact);
+                metaData.SearchAndApplyCatalogYamlAndReadMe(fs, pathToArtifact);
                 ApplyOptionalArguments(optionalArguments, metaData);
 
                 using var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
@@ -211,37 +210,37 @@
             if (optionalArguments.UriSourceCode != null)
             {
                 logger.LogDebug($"Overriding SourceCodeUri from '{metaData.SourceCodeUri}' to '{optionalArguments.UriSourceCode}'");
-                metaData.SourceCodeUri = optionalArguments.UriSourceCode;
+                metaData.SourceCodeUri = optionalArguments.UriSourceCode.Trim();
             }
 
             if (optionalArguments.OverrideVersion != null)
             {
                 logger.LogDebug($"Overriding Version from '{metaData.Version.Value}' to '{optionalArguments.OverrideVersion}'");
-                metaData.Version.Value = optionalArguments.OverrideVersion;
+                metaData.Version.Value = optionalArguments.OverrideVersion.Trim();
             }
 
             if (optionalArguments.Branch != null)
             {
                 logger.LogDebug($"Overriding Branch from '{metaData.Version.Branch}' to '{optionalArguments.Branch}'");
-                metaData.Version.Branch = optionalArguments.Branch;
+                metaData.Version.Branch = optionalArguments.Branch.Trim();
             }
 
             if (optionalArguments.CommitterMail != null)
             {
                 logger.LogDebug($"Overriding CommitterMail from '{metaData.Version.CommitterMail}' to '{optionalArguments.CommitterMail}'");
-                metaData.Version.CommitterMail = optionalArguments.CommitterMail;
+                metaData.Version.CommitterMail = optionalArguments.CommitterMail.Trim();
             }
 
             if (optionalArguments.ReleaseUri != null)
             {
                 logger.LogDebug($"Overriding ReleaseUri from '{metaData.Version.ReleaseUri}' to '{optionalArguments.ReleaseUri}'");
-                metaData.Version.ReleaseUri = optionalArguments.ReleaseUri;
+                metaData.Version.ReleaseUri = optionalArguments.ReleaseUri.Trim();
             }
 
             if (optionalArguments.CatalogIdentifier != null)
             {
                 logger.LogDebug($"Overriding CatalogIdentifier from '{metaData.CatalogIdentifier}' to '{optionalArguments.CatalogIdentifier}'");
-                metaData.CatalogIdentifier = optionalArguments.CatalogIdentifier;
+                metaData.CatalogIdentifier = optionalArguments.CatalogIdentifier.Trim();
             }
         }
     }

@@ -75,16 +75,12 @@
         public CatalogMetaData FromCatalogYaml(IFileSystem fs, string startPath, string pathToReadme = null, string pathToImages = null)
         {
             var meta = new CatalogMetaData();
-            if (!meta.SearchAndApplyCatalogYaml(fs, startPath))
+            if (!meta.SearchAndApplyCatalogYamlAndReadMe(fs, startPath))
                 throw new InvalidOperationException("Unable to locate a catalog.yml or manifest.yml file within the provided directory/file or up to 5 parent directories.");
 
-            if (pathToReadme == null)
+            if (pathToReadme != null)
             {
-                meta.SearchAndApplyReadMe(fs, startPath);
-            }
-            else
-            {
-                meta.PathToReadme = pathToReadme;
+                meta.PathToReadme = pathToReadme; ;
             }
 
             if (pathToImages != null)

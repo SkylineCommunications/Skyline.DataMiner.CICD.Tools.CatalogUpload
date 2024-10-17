@@ -207,7 +207,7 @@
         /// <param name="fs">The file system interface to use for file operations.</param>
         /// <param name="startPath">The starting directory or file path for the search.</param>
         /// <returns>True if a catalog YAML file is found and applied, otherwise false.</returns>
-        public bool SearchAndApplyCatalogYaml(IFileSystem fs, string startPath)
+        public bool SearchAndApplyCatalogYamlAndReadMe(IFileSystem fs, string startPath)
         {
             string foundYaml;
             if (fs.Directory.IsDirectory(startPath))
@@ -222,6 +222,22 @@
             {
                 var directory = fs.File.GetParentDirectory(startPath);
                 foundYaml = RecursiveFindClosestCatalogYaml(fs, directory, 5);
+            }
+
+            if (foundYaml == null)
+            {
+                // Last fallback. Check starting from working directory and down.
+                var currentDirectory = Directory.GetCurrentDirectory();
+                var searchPattern = "*.yml";
+
+                foundYaml = fs.Directory
+                    .EnumerateFiles(currentDirectory, searchPattern, SearchOption.AllDirectories)
+                    .FirstOrDefault(p =>
+                        fs.Path.GetFileNameWithoutExtension(p)
+                            .Equals("catalog", StringComparison.InvariantCultureIgnoreCase) ||
+                        fs.Path.GetFileNameWithoutExtension(p)
+                            .Equals("manifest", StringComparison.InvariantCultureIgnoreCase)
+                    );
             }
 
             if (foundYaml == null) return false;
@@ -248,6 +264,8 @@
                 p.Owners?.ForEach(o => { Owners.Add(new CatalogOwner { Name = o.Name, Email = o.Email, Url = o.Url }); });
                 p.Tags?.ForEach(Tags.Add);
             }
+
+            SearchAndApplyReadMe(fs, foundYaml);
 
             return true;
         }
@@ -353,7 +371,7 @@
         }
 
         private static string RecursiveFindClosestCatalogYaml(IFileSystem fs, string directory, int maxRecurse)
-        {
+        {         
             if (maxRecurse-- <= 0)
             {
                 return null;
