@@ -358,10 +358,9 @@
                     {
                         var imageEntry = archive.CreateEntry($"Images/{fs.Path.GetFileName(imageFile)}");
                         using var entryStream = imageEntry.Open();
-                        var readmeContent = fs.File.ReadAllText(imageFile); // Get the file content as a string
-                        using var streamWriter = new StreamWriter(entryStream);
-                        await streamWriter.WriteAsync(readmeContent).ConfigureAwait(false);
-                        await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure all content is written
+                        var imageBytes = fs.File.ReadAllBytes(imageFile); // Get the file content as binary data
+                        await entryStream.WriteAsync(imageBytes, 0, imageBytes.Length).ConfigureAwait(false); // Write binary data
+                        await entryStream.FlushAsync().ConfigureAwait(false); // Ensure all content is written
                     }
                 }
             }
@@ -371,7 +370,7 @@
         }
 
         private static string RecursiveFindClosestCatalogYaml(IFileSystem fs, string directory, int maxRecurse)
-        {         
+        {
             if (maxRecurse-- <= 0)
             {
                 return null;

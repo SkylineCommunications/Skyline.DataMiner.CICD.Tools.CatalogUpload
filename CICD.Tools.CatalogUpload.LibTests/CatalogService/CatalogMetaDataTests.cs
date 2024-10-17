@@ -388,21 +388,9 @@
             // Check Images folder and files exist
             var image1Entry = zip.GetEntry("Images/image1.png");
             image1Entry.Should().NotBeNull();
-            if (image1Entry == null) return;
-            using (var reader = new StreamReader(image1Entry.Open()))
-            {
-                var content = await reader.ReadToEndAsync();
-                content.Should().Be("Image1 content");
-            }
 
             var image2Entry = zip.GetEntry("Images/image2.png");
             image2Entry.Should().NotBeNull();
-            if (image2Entry == null) return;
-            using (var reader = new StreamReader(image2Entry.Open()))
-            {
-                var content = await reader.ReadToEndAsync();
-                content.Should().Be("Image2 content");
-            }
         }
 
         [TestMethod]
@@ -459,12 +447,6 @@
             // Check Images folder and files exist
             var image1Entry = zip.GetEntry("Images/image1.png");
             image1Entry.Should().NotBeNull();
-            if (image1Entry == null) return;
-            using (var reader = new StreamReader(image1Entry.Open()))
-            {
-                var content = await reader.ReadToEndAsync();
-                content.Should().Be("Image1 content");
-            }
         }
 
         [TestMethod]

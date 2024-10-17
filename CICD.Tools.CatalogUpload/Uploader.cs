@@ -70,7 +70,7 @@
             catch (Exception e)
             {
                 devopsMetricsMessage += "|" + "Status:Fail-" + e.Message;
-                logger.LogError(e, "An error occurred during processing");
+                logger.LogError(e, $"An error occurred during processing: {e}");
                 return 1;
             }
             finally
@@ -120,7 +120,7 @@
             catch (Exception e)
             {
                 devopsMetricsMessage += "|" + "Status:Fail-" + e.Message;
-                logger.LogError(e, "An error occurred during processing");
+                logger.LogError(e, $"An error occurred during processing: {e}");
                 return 1;
             }
             finally
@@ -167,7 +167,7 @@
             catch (Exception e)
             {
                 devopsMetricsMessage += "|" + "Status:Fail-" + e.Message;
-                logger.LogError(e, "An error occurred during registration");
+                logger.LogError(e, $"An error occurred during registration {e}");
                 return 1;
             }
             finally
@@ -209,38 +209,43 @@
 
             if (optionalArguments.UriSourceCode != null)
             {
-                logger.LogDebug($"Overriding SourceCodeUri from '{metaData.SourceCodeUri}' to '{optionalArguments.UriSourceCode}'");
+                logger.LogDebug($"Overriding SourceCodeUri from '{metaData.SourceCodeUri}' to '{optionalArguments.UriSourceCode.Trim()}'");
                 metaData.SourceCodeUri = optionalArguments.UriSourceCode.Trim();
             }
 
             if (optionalArguments.OverrideVersion != null)
             {
-                logger.LogDebug($"Overriding Version from '{metaData.Version.Value}' to '{optionalArguments.OverrideVersion}'");
-                metaData.Version.Value = optionalArguments.OverrideVersion.Trim();
+                string newValue = optionalArguments.OverrideVersion.Trim();
+                logger.LogDebug($"Overriding Version from '{metaData.Version.Value}' to '{newValue}'");
+                metaData.Version.Value = newValue;
             }
 
             if (optionalArguments.Branch != null)
             {
-                logger.LogDebug($"Overriding Branch from '{metaData.Version.Branch}' to '{optionalArguments.Branch}'");
-                metaData.Version.Branch = optionalArguments.Branch.Trim();
+                string newValue = optionalArguments.Branch.Trim();
+                logger.LogDebug($"Overriding Branch from '{metaData.Version.Branch}' to '{newValue}'");
+                metaData.Version.Branch = newValue;
             }
 
             if (optionalArguments.CommitterMail != null)
             {
-                logger.LogDebug($"Overriding CommitterMail from '{metaData.Version.CommitterMail}' to '{optionalArguments.CommitterMail}'");
-                metaData.Version.CommitterMail = optionalArguments.CommitterMail.Trim();
+                string newValue = optionalArguments.CommitterMail.Trim();
+                logger.LogDebug($"Overriding CommitterMail from '{metaData.Version.CommitterMail}' to '{newValue}'");
+                metaData.Version.CommitterMail = newValue;
             }
 
             if (optionalArguments.ReleaseUri != null)
             {
-                logger.LogDebug($"Overriding ReleaseUri from '{metaData.Version.ReleaseUri}' to '{optionalArguments.ReleaseUri}'");
-                metaData.Version.ReleaseUri = optionalArguments.ReleaseUri.Trim();
+                string newValue = optionalArguments.ReleaseUri.Trim();
+                logger.LogDebug($"Overriding ReleaseUri from '{metaData.Version.ReleaseUri}' to '{newValue}'");
+                metaData.Version.ReleaseUri = newValue;
             }
 
             if (optionalArguments.CatalogIdentifier != null)
             {
-                logger.LogDebug($"Overriding CatalogIdentifier from '{metaData.CatalogIdentifier}' to '{optionalArguments.CatalogIdentifier}'");
-                metaData.CatalogIdentifier = optionalArguments.CatalogIdentifier.Trim();
+                string newValue = optionalArguments.CatalogIdentifier.Trim();
+                logger.LogDebug($"Overriding CatalogIdentifier from '{metaData.CatalogIdentifier}' to '{newValue}'");
+                metaData.CatalogIdentifier = newValue;
             }
         }
     }
