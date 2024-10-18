@@ -15,9 +15,9 @@
 
     internal sealed class HttpCatalogService : ICatalogService, IDisposable
     {
-        private const string RegistrationPath = "api/key-catalog/v1-0/catalog/register";
+        private const string RegistrationPath = "api/key-catalog/v2-0/catalogs/register";
         private const string VersionUploadPathEnd = "/register/version";
-        private const string VersionUploadPathStart = "https://api.dataminer.services/api/key-catalog/v1-0/catalog/";
+        private const string VersionUploadPathStart = "api/key-catalog/v2-0/catalogs/";
         private const string VolatileUploadPath = "api/key-artifact-upload/v1-0/private/artifact";
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
