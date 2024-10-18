@@ -149,10 +149,10 @@
             byte[] packageData = fs.File.ReadAllBytes(PathToArtifact);
 
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
-
-            var uploadResult = await catalogService.UploadVersionAsync(packageData, fs.Path.GetFileName(PathToArtifact), dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, cts.Token).ConfigureAwait(false);
             // Register the new version on the catalog.
             await RegisterAsync(dmCatalogToken).ConfigureAwait(false);
+
+            var uploadResult = await catalogService.UploadVersionAsync(packageData, fs.Path.GetFileName(PathToArtifact), dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, cts.Token).ConfigureAwait(false);
 
             return uploadResult;
         }
