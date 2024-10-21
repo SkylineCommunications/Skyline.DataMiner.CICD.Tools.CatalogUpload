@@ -30,6 +30,9 @@
     <None Update="TestData\Arris_E6000_2_0_0_17_B3.dmprotocol">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestData\BOOST-Test-SDK-Connector 1.0.0.1-alpha1.dmprotocol">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\withAutomation.dmapp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

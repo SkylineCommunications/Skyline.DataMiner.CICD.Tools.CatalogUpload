@@ -18,7 +18,7 @@
     public class CatalogMetaDataTests
     {
         [TestMethod]
-        public void FromArtifactTest_FromDMProtocol()
+        public void FromArtifactTest_FromDMProtocol_BuildVersion()
         {
             // Arrange
             string pathToArtifact = "TestData/Arris_E6000_2_0_0_17_B3.dmprotocol";
@@ -37,6 +37,33 @@
                 {
                     Value = "2.0.0.17_B3",
                     VersionDescription = "Fix: Fixed snmp instance ID appearing in the Total PATs TX column of the QAM Streams Status table.\r\nNewFeature: Added Video Counts table.\r\nNewFeature: Added Global Video Input Streams table.\r\nNewFeature: Added Passthrough Type, Network ID, Original Network ID, NIT PID ID, Network Name, PAT Generation for Broadcast, Force PAT NIT Entry to QAM Streams Filtered table.\r\nNewFeature: Added Video Streams Table Instance, Time Activated, Time Deactivated, Packet Count, Channel Container, PID Passthrou..."
+                }
+            };
+
+            result.Should().Be(expected);
+            result.IsPreRelease().Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void FromArtifactTest_FromDMProtocol_Prerelease()
+        {
+            // Arrange
+            string pathToArtifact = "TestData/BOOST-Test-SDK-Connector 1.0.0.1-alpha1.dmprotocol";
+
+            // Act		
+            CatalogMetaData result = new CatalogMetaDataFactory().FromArtifact(pathToArtifact);
+
+            // Assert
+
+            CatalogMetaData expected = new CatalogMetaData
+            {
+                ArtifactHadBuildNumber = false,
+                ContentType = "connector",
+                Name = "Skyline BOOST Test Connector",
+                Version = new CatalogVersionMetaData
+                {
+                    Value = "1.0.0.1-alpha1",
+                    VersionDescription = "NewFeature: Initial version"
                 }
             };
 

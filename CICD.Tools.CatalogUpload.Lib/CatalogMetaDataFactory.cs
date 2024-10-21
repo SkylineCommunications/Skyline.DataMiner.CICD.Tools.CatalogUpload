@@ -282,7 +282,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
                     var branch = splitVersion[0];
                     var system = splitVersion[1];
                     var major = splitVersion[2];
-                    var minor = splitVersion[3].Split("_")[0];
+                    var minor = splitVersion[3].Split(new char[] { '_', '-' })[0];
 
                     var branchXml = versionHistory.Element(ns + "Branches")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == branch);
                     var systemXml = branchXml?.Element(ns + "SystemVersions")?.Elements().FirstOrDefault(p => p.Attribute("id")?.Value == system);
