@@ -113,6 +113,8 @@ dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dma
 
 Alternatively, you can rely on a **catalog.yml file** located next to the `.dmapp` or `.dmprotocol` file, as described [here](https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file).
 
+(Both the name **catalog.yml** and **manifest.yml** are supported)
+
 ```console
 dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp"
 ```
