@@ -15,6 +15,22 @@
 
     internal sealed class HttpCatalogService : ICatalogService, IDisposable
     {
+        /// <summary>
+        /// Artifact information returned from uploading an artifact to the catalog using the non-volatile upload.
+        /// </summary>
+        private sealed class CatalogUploadResult
+        {
+            [JsonProperty("catalogId")]
+            public string? CatalogId { get; set; }
+
+            [JsonProperty("catalogVersionNumber")]
+            public string? CatalogVersionNumber { get; set; }
+
+            [JsonProperty("azureStorageId")]
+            public string? AzureStorageId { get; set; }
+        }
+
+
         private const string RegistrationPath = "api/key-catalog/v2-0/catalogs/register";
         private const string VersionUploadPathEnd = "/register/version";
         private const string VersionUploadPathStart = "api/key-catalog/v2-0/catalogs/";
@@ -58,7 +74,8 @@
             {
                 _logger.LogDebug($"The registration api returned a {response.StatusCode} response. Body: {body}");
 
-                return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+                var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+                return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
             }
 
             _logger.LogError($"The registration api returned a {response.StatusCode} response. Body: {body}");
@@ -111,7 +128,8 @@
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
-                return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+                var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+                return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
             }
 
             _logger.LogError($"The version upload api returned a {response.StatusCode} response. Body: {body}");
