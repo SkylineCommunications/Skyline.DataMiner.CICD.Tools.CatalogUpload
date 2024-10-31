@@ -153,7 +153,7 @@
             await RegisterAsync(dmCatalogToken).ConfigureAwait(false);
 
             var uploadResult = await catalogService.UploadVersionAsync(packageData, fs.Path.GetFileName(PathToArtifact), dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, cts.Token).ConfigureAwait(false);
-
+            _logger.LogInformation(JsonConvert.SerializeObject(uploadResult));
             return uploadResult;
         }
 

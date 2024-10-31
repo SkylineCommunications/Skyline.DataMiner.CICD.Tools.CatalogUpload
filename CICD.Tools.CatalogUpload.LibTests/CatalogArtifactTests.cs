@@ -12,6 +12,8 @@
 
     using Moq;
 
+    using Newtonsoft.Json;
+
     using Skyline.DataMiner.CICD.FileSystem;
     using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib;
 
@@ -257,5 +259,90 @@
                 Environment.SetEnvironmentVariable("DATAMINER_CATALOG_TOKEN", originalKey);
             }
         }
+
+        [TestMethod]
+        public async Task VolatileUploadAsync_ShouldLogInformation_WhenCalled()
+        {
+            // Arrange
+            string pathToArtifact = "testPath";
+            var fakeService = new Mock<ICatalogService>();
+            var fakeFileSystem = new Mock<IFileSystem>();
+            var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
+            fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeService
+                .Setup(service => service.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CatalogMetaData>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+
+            fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
+
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "123",
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = new CatalogVersionMetaData { Value = "1.0.0.1-alpha" }
+            };
+            CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+
+            // Act
+            var result = await artifactModel.VolatileUploadAsync("dummyToken");
+
+            // Assert
+            result.Should().Be(uploadResult);
+            fakeLogger.Verify(
+              logger => logger.Log(
+                  LogLevel.Information,
+                  It.IsAny<EventId>(),
+                  It.Is<It.IsAnyType>((v, t) => v.ToString().Contains(JsonConvert.SerializeObject(uploadResult))),
+                  It.IsAny<Exception>(),
+                  (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+              Times.Once);
+        }
+
+        [TestMethod]
+        public async Task UploadAndRegisterAsync_ShouldLogInformation_WhenCalled()
+        {
+            // Arrange
+            string pathToArtifact = "testPath";
+            var fakeService = new Mock<ICatalogService>();
+            var fakeFileSystem = new Mock<IFileSystem>();
+            var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
+            fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeService
+                .Setup(service => service.RegisterCatalogAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+            fakeService
+                .Setup(service => service.UploadVersionAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+
+            fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
+
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "123",
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = new CatalogVersionMetaData { Value = "1.0.0.1-alpha" }
+            };
+            CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+
+            // Act
+            var result = await artifactModel.UploadAndRegisterAsync("dummyToken");
+
+            // Assert
+            result.Should().Be(uploadResult);
+            fakeLogger.Verify(
+                logger => logger.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains(JsonConvert.SerializeObject(uploadResult))),
+                    It.IsAny<Exception>(),
+                    (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+                Times.Once);
+
+        }
+
     }
 }
