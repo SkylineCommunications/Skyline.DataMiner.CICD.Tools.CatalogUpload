@@ -128,8 +128,13 @@
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
-                var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
-                return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
+
+                // Problem, Deployer cannot handle the new flow of catalog upload. So we will use the 'old' upload again. Return that Identifier.
+                CatalogMetaData meta = new CatalogMetaData() { Name = fileName, Version = new CatalogVersionMetaData() { Value = version } };
+                return await VolatileArtifactUploadAsync(package, key, meta, cancellationToken);
+
+                //var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+                //return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
             }
 
             _logger.LogError($"The version upload api returned a {response.StatusCode} response. Body: {body}");
