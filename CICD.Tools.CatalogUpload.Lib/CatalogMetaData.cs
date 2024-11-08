@@ -206,41 +206,46 @@
         /// </summary>
         /// <param name="fs">The file system interface to use for file operations.</param>
         /// <param name="startPath">The starting directory or file path for the search.</param>
+        /// <param name="pathToCatalogYml">Optional path to catalog YAML file.</param>
         /// <returns>True if a catalog YAML file is found and applied, otherwise false.</returns>
-        public bool SearchAndApplyCatalogYamlAndReadMe(IFileSystem fs, string startPath)
+        public bool SearchAndApplyCatalogYamlAndReadMe(IFileSystem fs, string startPath, string pathToCatalogYml = null)
         {
-            string foundYaml;
-            if (fs.Directory.IsDirectory(startPath))
-            {
-                foundYaml = RecursiveFindClosestCatalogYaml(fs, startPath, 5);
-            }
-            else if (startPath.EndsWith(".yml"))
-            {
-                foundYaml = startPath;
-            }
-            else
-            {
-                var directory = fs.File.GetParentDirectory(startPath);
-                foundYaml = RecursiveFindClosestCatalogYaml(fs, directory, 5);
-            }
+            string foundYaml = pathToCatalogYml;
 
             if (foundYaml == null)
             {
-                // Last fallback. Check starting from working directory and down.
-                var currentDirectory = Directory.GetCurrentDirectory();
-                var searchPattern = "*.yml";
+                if (fs.Directory.IsDirectory(startPath))
+                {
+                    foundYaml = RecursiveFindClosestCatalogYaml(fs, startPath, 5);
+                }
+                else if (startPath.EndsWith(".yml"))
+                {
+                    foundYaml = startPath;
+                }
+                else
+                {
+                    var directory = fs.File.GetParentDirectory(startPath);
+                    foundYaml = RecursiveFindClosestCatalogYaml(fs, directory, 5);
+                }
 
-                foundYaml = fs.Directory
-                    .EnumerateFiles(currentDirectory, searchPattern, SearchOption.AllDirectories)
-                    .FirstOrDefault(p =>
-                        fs.Path.GetFileNameWithoutExtension(p)
-                            .Equals("catalog", StringComparison.InvariantCultureIgnoreCase) ||
-                        fs.Path.GetFileNameWithoutExtension(p)
-                            .Equals("manifest", StringComparison.InvariantCultureIgnoreCase)
-                    );
+                if (foundYaml == null)
+                {
+                    // Last fallback. Check starting from working directory and down.
+                    var currentDirectory = Directory.GetCurrentDirectory();
+                    var searchPattern = "*.yml";
+
+                    foundYaml = fs.Directory
+                                  .EnumerateFiles(currentDirectory, searchPattern, SearchOption.AllDirectories)
+                                  .FirstOrDefault(p =>
+                                      fs.Path.GetFileNameWithoutExtension(p)
+                                        .Equals("catalog", StringComparison.InvariantCultureIgnoreCase) ||
+                                      fs.Path.GetFileNameWithoutExtension(p)
+                                        .Equals("manifest", StringComparison.InvariantCultureIgnoreCase)
+                                  );
+                }
+
+                if (foundYaml == null) return false;
             }
-
-            if (foundYaml == null) return false;
 
             // use a yaml parser to grab the yaml file.
             var deserializer = new DeserializerBuilder()
@@ -272,35 +277,43 @@
 
         /// <summary>
         /// Searches for and applies metadata from the closest README.md file in the specified directory.
-        /// Also searches for the closest "images" folder.
+        /// Also searches for the closest "images" folder starting from the readme file.
         /// </summary>
         /// <param name="fs">The file system interface to use for file operations.</param>
         /// <param name="startPath">The starting directory or file path for the search.</param>
         /// <returns>True if a README.md file is found and applied, otherwise false.</returns>
         public bool SearchAndApplyReadMe(IFileSystem fs, string startPath)
         {
-            string foundReadme;
-            if (fs.Directory.IsDirectory(startPath))
+            if (PathToReadme == null)
             {
-                foundReadme = RecursiveFindClosestReadmeMd(fs, startPath, 5);
-            }
-            else if (startPath.EndsWith(".md"))
-            {
-                foundReadme = startPath;
-            }
-            else
-            {
-                var directoryForReadme = fs.File.GetParentDirectory(startPath);
-                foundReadme = RecursiveFindClosestReadmeMd(fs, directoryForReadme, 5);
+                string foundReadme;
+                if (fs.Directory.IsDirectory(startPath))
+                {
+                    foundReadme = RecursiveFindClosestReadmeMd(fs, startPath, 5);
+                }
+                else if (startPath.EndsWith(".md"))
+                {
+                    foundReadme = startPath;
+                }
+                else
+                {
+                    var directoryForReadme = fs.File.GetParentDirectory(startPath);
+                    foundReadme = RecursiveFindClosestReadmeMd(fs, directoryForReadme, 5);
+                }
+
+                PathToReadme = foundReadme;
+
+                if (foundReadme == null) return false;
             }
 
-            PathToReadme = foundReadme;
-            if (foundReadme == null) return false;
+            if (PathToImages == null)
+            {
+                var directoryForImages = fs.File.GetParentDirectory(PathToReadme);
+                string foundImages = RecursiveFindClosestImages(fs, directoryForImages, 5);
 
-            var directoryForImages = fs.File.GetParentDirectory(PathToReadme);
-            string foundImages = RecursiveFindClosestImages(fs, directoryForImages, 5);
+                PathToImages = foundImages;
+            }
 
-            PathToImages = foundImages;
             return true;
         }
 

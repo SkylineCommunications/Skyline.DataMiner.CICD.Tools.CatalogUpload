@@ -44,11 +44,7 @@
                 throw new InvalidOperationException($"Invalid path to artifact. Expected a path that ends with .dmapp or .dmprotocol but received {pathToArtifact}");
             }
 
-            if (pathToReadme == null)
-            {
-                meta.SearchAndApplyReadMe(FileSystem.Instance, pathToArtifact);
-            }
-            else
+            if (pathToReadme != null)
             {
                 meta.PathToReadme = pathToReadme;
             }
@@ -56,6 +52,12 @@
             if (pathToImages != null)
             {
                 meta.PathToImages = pathToImages;
+            }
+
+            if (pathToReadme == null || pathToImages == null)
+            {
+                // If either readme or images was not specified, search for it starting from the artifact location.
+                meta.SearchAndApplyReadMe(FileSystem.Instance, pathToArtifact);
             }
 
             return meta;
@@ -75,12 +77,10 @@
         public CatalogMetaData FromCatalogYaml(IFileSystem fs, string startPath, string pathToReadme = null, string pathToImages = null)
         {
             var meta = new CatalogMetaData();
-            if (!meta.SearchAndApplyCatalogYamlAndReadMe(fs, startPath))
-                throw new InvalidOperationException("Unable to locate a catalog.yml or manifest.yml file within the provided directory/file or up to 5 parent directories.");
 
             if (pathToReadme != null)
             {
-                meta.PathToReadme = pathToReadme; ;
+                meta.PathToReadme = pathToReadme;
             }
 
             if (pathToImages != null)
@@ -88,6 +88,10 @@
                 meta.PathToImages = pathToImages;
             }
 
+            // Search catalog and if readme/images is not specified, also search for them.
+            if (!meta.SearchAndApplyCatalogYamlAndReadMe(fs, startPath))
+                throw new InvalidOperationException("Unable to locate a catalog.yml or manifest.yml file within the provided directory/file or up to 5 parent directories.");
+            
             return meta;
         }
 

@@ -104,14 +104,21 @@
             name: "--path-to-readme",
             description: "Path to a readme file written in markdown.")
             {
-                IsRequired = true,
+                IsRequired = false,
             };
 
             var images = new Option<string>(
             name: "--path-to-images",
             description: "Path to a folder with images used in the readme file.")
             {
-                IsRequired = true,
+                IsRequired = false,
+            };
+
+            var optionalCatalogDetailsYml = new Option<string>(
+                name: "--path-to-catalog-yml",
+                description: "Path to a yml file containing catalog details as described here https://docs.dataminer.services/user-guide/Cloud_Platform/Catalog/Register_Catalog_Item.html#manifest-file")
+            {
+                IsRequired = false,
             };
 
             // dataminer-catalog-upload
@@ -128,7 +135,10 @@
                 branch,
                 committerMail,
                 releaseUri,
-                catalogIdentifier
+                catalogIdentifier,
+                optionalCatalogDetailsYml,
+                readme,
+                images
             };
 
             var withOnlyRegistrationCommand = new Command("update-catalog-details", "Uploads only the registration information for a Skyline DataMiner catalog (https://catalog.dataminer.services) item.")
@@ -139,7 +149,7 @@
             };
 
             rootCommand.SetHandler(ProcessVolatile, pathToArtifactRequired, dmCatalogToken, isDebug);
-            withRegistrationCommand.SetHandler(ProcessWithRegistrationAsync, dmCatalogToken, isDebug, pathToArtifactOptional, new OptionalRegistrationArgumentsBinder(uriSourceCode, overrideVersion, branch, committerMail, releaseUri, catalogIdentifier));
+            withRegistrationCommand.SetHandler(ProcessWithRegistrationAsync, dmCatalogToken, isDebug, pathToArtifactOptional, new OptionalRegistrationArgumentsBinder(uriSourceCode, overrideVersion, branch, committerMail, releaseUri, catalogIdentifier, optionalCatalogDetailsYml, readme, images));
             withOnlyRegistrationCommand.SetHandler(ProcessYmlRegistrationAsync, dmCatalogToken, isDebug, catalogDetailsYml, readme, images);
 
             rootCommand.Add(withOnlyRegistrationCommand);

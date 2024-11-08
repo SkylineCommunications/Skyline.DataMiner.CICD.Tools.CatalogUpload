@@ -37,6 +37,21 @@
         /// Gets or sets the URI to the source code related to the artifact.
         /// </summary>
         public string UriSourceCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path for the catalog.yml or manifest.yml file.
+        /// </summary>
+        public string PathToCatalogYml { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path for the readme file.
+        /// </summary>
+        public string PathToReadme { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path for the images directory.
+        /// </summary>
+        public string PathToImages { get; set; }
     }
 
     internal class OptionalRegistrationArgumentsBinder : BinderBase<OptionalRegistrationArguments>
@@ -47,11 +62,14 @@
         private readonly Option<string> overrideVersion;
         private readonly Option<string> releaseUri;
         private readonly Option<string> uriSourceCode;
+        private readonly Option<string> pathToCatalogYml;
+        private readonly Option<string> pathToReadme;
+        private readonly Option<string> pathToImages;
 
         /// <summary>
         /// Binds command line options to <see cref="OptionalRegistrationArguments"/>.
         /// </summary>
-        public OptionalRegistrationArgumentsBinder(Option<string> uriSourceCode, Option<string> overrideVersion, Option<string> branch, Option<string> committerMail, Option<string> releaseUri, Option<string> catalogIdentifier)
+        public OptionalRegistrationArgumentsBinder(Option<string> uriSourceCode, Option<string> overrideVersion, Option<string> branch, Option<string> committerMail, Option<string> releaseUri, Option<string> catalogIdentifier, Option<string> pathToCatalogYml, Option<string> pathToReadme, Option<string> pathToImages)
         {
             this.uriSourceCode = uriSourceCode;
             this.overrideVersion = overrideVersion;
@@ -59,6 +77,9 @@
             this.committerMail = committerMail;
             this.releaseUri = releaseUri;
             this.catalogIdentifier = catalogIdentifier;
+            this.pathToCatalogYml = pathToCatalogYml;
+            this.pathToReadme = pathToReadme;
+            this.pathToImages = pathToImages;
         }
 
         /// <summary>
@@ -80,6 +101,9 @@
                 CommitterMail = bindingContext.ParseResult.GetValueForOption(committerMail),
                 ReleaseUri = bindingContext.ParseResult.GetValueForOption(releaseUri),
                 CatalogIdentifier = bindingContext.ParseResult.GetValueForOption(catalogIdentifier),
+                PathToCatalogYml = bindingContext.ParseResult.GetValueForOption(pathToCatalogYml),
+                PathToReadme = bindingContext.ParseResult.GetValueForOption(pathToReadme),
+                PathToImages = bindingContext.ParseResult.GetValueForOption(pathToImages)
             };
         }
     }
