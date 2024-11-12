@@ -13,6 +13,7 @@
 
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
+    using DirectoryInfo = Skyline.DataMiner.CICD.FileSystem.DirectoryInfoWrapper.DirectoryInfo;
 
     /// <summary>
     /// Represents all metadata for a package.
@@ -412,8 +413,8 @@
 
             foreach (var subdir in fs.Directory.EnumerateDirectories(directory))
             {
-                string fileName = fs.Path.GetDirectoryName(subdir);
-                if (fileName != null && fileName.Equals("images", StringComparison.InvariantCultureIgnoreCase))
+                string dirName = new DirectoryInfo(subdir).Name;
+                if (dirName != null && dirName.Equals("images", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return subdir;
                 }
