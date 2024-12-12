@@ -49,7 +49,7 @@
             catalogService = service;
             PathToArtifact = pathToArtifact;
             serializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
             TryFindEnvironmentKey();
         }
