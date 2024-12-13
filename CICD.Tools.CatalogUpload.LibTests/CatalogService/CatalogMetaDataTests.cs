@@ -31,7 +31,7 @@
             CatalogMetaData expected = new CatalogMetaData
             {
                 ArtifactHadBuildNumber = true,
-                ContentType = "connector",
+                ContentType = "Connector",
                 Name = "Arris E6000",
                 Version = new CatalogVersionMetaData
                 {
@@ -58,7 +58,7 @@
             CatalogMetaData expected = new CatalogMetaData
             {
                 ArtifactHadBuildNumber = false,
-                ContentType = "connector",
+                ContentType = "Connector",
                 Name = "Skyline BOOST Test Connector",
                 Version = new CatalogVersionMetaData
                 {
