@@ -7,29 +7,18 @@
     /// <summary>
     /// As known by the Catalog Registration
     /// </summary>
-    internal enum ArtifactContentType
+    internal static class ArtifactContentType
     {
-        automationscript,
-        lifecycleserviceorchestration,
-        profileloadscript,
-        userdefinedapi,
-        adhocdatasource,
-        chatopsextension,
-        connector,
-        slamodel,
-        enhancedservicemodel,
-        visio,
-        solution,
-        testingsolution,
-        samplesolution,
-        standardsolution,
-        dashboard,
-        lowcodeapp,
-        datatransformer,
-        dataquery,
-        functiondefinition,
-        scriptedconnector,
-        bestpracticesanalyzer,
+        public static string Automation { get; } = "Automation";
+        public static string Connector { get; } = "Connector";
+        public static string Custom_Solution { get; } = "Custom Solution";
+        public static string ChatOps_Extension { get; } = "ChatOps Extension";
+        public static string Dashboard { get; } = "Dashboard";
+        public static string Ad_Hoc_Data_Source { get; } = "Ad Hoc Data Source";
+        public static string Data_Transformer { get; } = "Data Transformer";
+        public static string Scripted_Connector { get; } = "Scripted Connector";
+        public static string User_Defined_API { get; } = "User-Defined API";
+        public static string Visual_Overview { get; } = "Visual Overview";
     }
 
     [System.Flags]
@@ -71,40 +60,40 @@
             {
                 case PackageTypes.HasAutomation:
                 case PackageTypes.HasAutomation | PackageTypes.HasCompanionFiles:
-                    Value = ArtifactContentType.automationscript.ToString();
+                    Value = ArtifactContentType.Automation;
                     break;
 
                 case PackageTypes.HasDashboards:
                 case PackageTypes.HasDashboards | PackageTypes.HasCompanionFiles:
-                    Value = ArtifactContentType.dashboard.ToString();
+                    Value = ArtifactContentType.Dashboard;
                     break;
 
                 case PackageTypes.HasOtherAppPackages:
-                    Value = ArtifactContentType.solution.ToString();
+                    Value = ArtifactContentType.Custom_Solution;
                     break;
 
                 case PackageTypes.HasCompanionFiles:
-                    Value = ArtifactContentType.solution.ToString();
+                    Value = ArtifactContentType.Custom_Solution;
                     break;
 
                 case PackageTypes.HasFunctions:
                 case PackageTypes.HasFunctions | PackageTypes.HasCompanionFiles:
-                    Value = ArtifactContentType.functiondefinition.ToString();
+                    Value = ArtifactContentType.Automation;
                     break;
 
                 case PackageTypes.HasVisios:
                 case PackageTypes.HasVisios | PackageTypes.HasCompanionFiles:
-                    Value = ArtifactContentType.visio.ToString();
+                    Value = ArtifactContentType.Visual_Overview;
                     break;
 
                 case PackageTypes.HasProtocols:
                 case PackageTypes.HasProtocols | PackageTypes.HasCompanionFiles:
-                    Value = ArtifactContentType.solution.ToString();
+                    Value = ArtifactContentType.Custom_Solution;
                     break;
 
                 default:
                     // Everything else is going to be a combination of more than one item so we can consider that to be a "package"
-                    Value = ArtifactContentType.solution.ToString();
+                    Value = ArtifactContentType.Custom_Solution;
                     break;
             }
         }

@@ -31,7 +31,7 @@
             CatalogMetaData expected = new CatalogMetaData
             {
                 ArtifactHadBuildNumber = true,
-                ContentType = "connector",
+                ContentType = "Connector",
                 Name = "Arris E6000",
                 Version = new CatalogVersionMetaData
                 {
@@ -58,7 +58,7 @@
             CatalogMetaData expected = new CatalogMetaData
             {
                 ArtifactHadBuildNumber = false,
-                ContentType = "connector",
+                ContentType = "Connector",
                 Name = "Skyline BOOST Test Connector",
                 Version = new CatalogVersionMetaData
                 {
@@ -84,7 +84,7 @@
 
             CatalogMetaData expected = new CatalogMetaData
             {
-                ContentType = "solution",
+                ContentType = "Custom Solution",
                 Name = "SLNetSubscriptionsBenchmarking",
                 Version = new CatalogVersionMetaData
                 {
@@ -111,7 +111,7 @@
 
             CatalogMetaData expected = new CatalogMetaData
             {
-                ContentType = "automationscript",
+                ContentType = "Automation",
                 Name = "Demo InterAppCalls",
                 Version = new CatalogVersionMetaData
                 {
@@ -164,7 +164,7 @@
 
             CatalogMetaData expected = new CatalogMetaData
             {
-                ContentType = "visio",
+                ContentType = "Visual Overview",
                 Name = "Microsoft Platform",
                 Version = new CatalogVersionMetaData
                 {

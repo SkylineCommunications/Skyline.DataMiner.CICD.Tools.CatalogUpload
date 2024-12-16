@@ -306,7 +306,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
             meta.Version.VersionDescription = versionDescription;
 
             if (meta.Version.Value.Contains("_")) meta.ArtifactHadBuildNumber = true;
-            meta.ContentType = "connector";
+            meta.ContentType = ArtifactContentType.Connector;
             return meta;
         }
     }
