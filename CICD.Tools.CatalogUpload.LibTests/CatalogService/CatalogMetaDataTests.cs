@@ -3,7 +3,7 @@
     using System.IO.Compression;
 
     using FluentAssertions;
-
+    using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Moq;
@@ -354,6 +354,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             var mockSerializer = new Mock<ISerializer>();
+            var mockLogger = new Mock<ILogger>();
 
             // Mock YAML serialization
             mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
@@ -385,7 +386,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -426,6 +427,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             var mockSerializer = new Mock<ISerializer>();
+            var mockLogger = new Mock<ILogger>();
 
             // Mock YAML serialization
             mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
@@ -450,7 +452,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -482,6 +484,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             var mockSerializer = new Mock<ISerializer>();
+            var mockLogger = new Mock<ILogger>();
 
             // Mock YAML serialization
             mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
@@ -505,7 +508,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -530,6 +533,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             var mockSerializer = new Mock<ISerializer>();
+            var mockLogger = new Mock<ILogger>();
 
             // Mock YAML serialization
             mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
@@ -546,7 +550,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -571,6 +575,7 @@
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             var mockSerializer = new Mock<ISerializer>();
+            var mockLogger = new Mock<ILogger>();
 
             // Mock YAML serialization
             mockSerializer.Setup(s => s.Serialize(It.IsAny<CatalogYaml>()))
@@ -601,7 +606,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
 
             // Assert
             using var zipStream = new MemoryStream(result);

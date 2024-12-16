@@ -8,11 +8,14 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
+    using Microsoft.Extensions.Logging;
+
     using Skyline.DataMiner.CICD.FileSystem;
     using Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib.CatalogService;
 
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
+
     using DirectoryInfo = Skyline.DataMiner.CICD.FileSystem.DirectoryInfoWrapper.DirectoryInfo;
 
     /// <summary>
@@ -322,9 +325,9 @@
         /// Asynchronously creates a zip file containing catalog metadata, README.md, and images folder if available.
         /// </summary>
         /// <returns>A byte array representing the zip file.</returns>
-        public async Task<byte[]> ToCatalogZipAsync(IFileSystem fs, ISerializer serializer)
+        public async Task<byte[]> ToCatalogZipAsync(IFileSystem fs, ISerializer serializer, ILogger logger)
         {
-            CatalogYaml catalogYaml = new CatalogYaml()
+            CatalogYaml catalogYaml = new CatalogYaml
             {
                 Id = CatalogIdentifier,
                 DocumentationUrl = DocumentationUrl,
@@ -338,6 +341,8 @@
             Tags?.ForEach(catalogYaml.Tags.Add);
 
             var yaml = serializer.Serialize(catalogYaml);
+
+            logger.LogDebug($"manifest.yml for zip:{Environment.NewLine}{yaml}");
 
             // Create a zip file in memory that contains manifest.yml, README.md, and an Images folder as expected by the API
             using var memoryStream = new MemoryStream();

@@ -112,7 +112,7 @@
         {
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
 
-            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer).ConfigureAwait(false);
+            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger).ConfigureAwait(false);
             return await catalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, cts.Token).ConfigureAwait(false);
         }
 
@@ -131,7 +131,7 @@
             }
 
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
-            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer).ConfigureAwait(false);
+            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger).ConfigureAwait(false);
             return await catalogService.RegisterCatalogAsync(zipArray, keyFromEnv, cts.Token).ConfigureAwait(false);
         }
 
