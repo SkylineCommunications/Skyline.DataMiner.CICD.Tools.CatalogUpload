@@ -22,6 +22,8 @@
       Entry Point: new CatalogArtifact("pathToArtifact", "logger", "metaData").UploadAsync();
     </Description>
     <RootNamespace>Skyline.DataMiner.CICD.Tools.CatalogUpload.Lib</RootNamespace>
+    <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.CICD.Tools.CatalogUpload</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

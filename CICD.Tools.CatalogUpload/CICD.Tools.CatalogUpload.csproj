@@ -21,6 +21,8 @@
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>
     <Description>Uploads artifacts to the Skyline DataMiner catalog (https://catalog.dataminer.services)</Description>
+    <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.CICD.Tools.CatalogUpload</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
