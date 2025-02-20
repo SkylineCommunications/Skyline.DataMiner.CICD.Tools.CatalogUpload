@@ -195,7 +195,18 @@
             _logger.LogDebug($"Uploading {PathToArtifact}...");
 
             byte[] packageData = fs.File.ReadAllBytes(PathToArtifact);
-            var result = await catalogService.VolatileArtifactUploadAsync(packageData, dmCatalogToken, metaData, cts.Token).ConfigureAwait(false);
+
+            VolatileContentType volatileType;
+            if (PathToArtifact.EndsWith(".dmprotocol", StringComparison.InvariantCultureIgnoreCase))
+            {
+                volatileType = VolatileContentType.Connector;
+            }
+            else
+            {
+                volatileType = VolatileContentType.DmScript;
+            }
+
+            var result = await catalogService.VolatileArtifactUploadAsync(packageData, volatileType, dmCatalogToken, metaData, cts.Token).ConfigureAwait(false);
             _logger.LogDebug($"Finished Uploading {PathToArtifact}");
 
             _logger.LogInformation(JsonConvert.SerializeObject(result));
