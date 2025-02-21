@@ -48,7 +48,6 @@
             {
                 // Order of priority first the content of the artifact. Then the provided yml file. Finally, any arguments from the tool.
                 CatalogMetaData metaData = catalogMetaDataFactory.FromArtifact(pathToArtifact);
-                metaData.SearchAndApplyCatalogYamlAndReadMe(fs, pathToArtifact);
 
                 using var artifact = new CatalogArtifact(pathToArtifact, service, fs, logger, metaData);
 

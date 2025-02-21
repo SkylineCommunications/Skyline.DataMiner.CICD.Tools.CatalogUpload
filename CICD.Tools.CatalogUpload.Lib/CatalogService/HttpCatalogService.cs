@@ -130,8 +130,19 @@
                 _logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
 
                 // Problem, Deployer cannot handle the new flow of catalog upload. So we will use the 'old' upload again. Return that Identifier.
+
+                VolatileContentType volatileType;
+                if (fileName.EndsWith(".dmprotocol",StringComparison.InvariantCultureIgnoreCase))
+                {
+                    volatileType = VolatileContentType.Connector;
+                }
+                else
+                {
+                    volatileType = VolatileContentType.DmScript;
+                }
+
                 CatalogMetaData meta = new CatalogMetaData() { Name = fileName, Version = new CatalogVersionMetaData() { Value = version } };
-                return await VolatileArtifactUploadAsync(package, key, meta, cancellationToken);
+                return await VolatileArtifactUploadAsync(package, volatileType, key, meta, cancellationToken);
 
                 //var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
                 //return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
@@ -146,15 +157,14 @@
             throw new InvalidOperationException($"The version upload api returned a {response.StatusCode} response. Body: {body}");
         }
 
-        public async Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
+        public async Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, VolatileContentType type, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
         {
             using var formData = new MultipartFormDataContent();
             formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
             formData.Add(new StringContent(catalog.Name), "name");
             formData.Add(new StringContent(catalog.Version.Value), "version");
 
-            // ContentType of old API doesn't match new API. Switch it to what we do know here. Doesn't matter.
-            string oldApiContentType = "DmScript";
+            string oldApiContentType = type.ToString();
 
             formData.Add(new StringContent(oldApiContentType), "contentType");
 
@@ -185,6 +195,11 @@
             }
 
             throw new InvalidOperationException($"The upload api returned a {response.StatusCode} response. Body: {body}");
+        }
+
+        public async Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
+        {
+           return await VolatileArtifactUploadAsync(package,VolatileContentType.DmScript,key, catalog, cancellationToken);
         }
     }
 }

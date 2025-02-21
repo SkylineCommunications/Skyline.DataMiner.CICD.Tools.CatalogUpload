@@ -120,7 +120,7 @@
                 ArtifactId = "10"
             };
 
-            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "encryptedFake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
+            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), VolatileContentType.DmScript, "encryptedFake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
             var originalKeyEncrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
             var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
@@ -183,7 +183,7 @@
                 ArtifactId = "10"
             };
 
-            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "token", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
+            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), VolatileContentType.DmScript, "token", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
             // Act
             CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
@@ -231,7 +231,7 @@
                 ArtifactId = "10"
             };
 
-            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), "fake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
+            fakeService.Setup(p => p.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), VolatileContentType.DmScript, "fake", metaData, It.IsAny<CancellationToken>())).ReturnsAsync(model);
 
             var originalKeyEncrypt = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN_ENCRYPTED", EnvironmentVariableTarget.Machine) ?? "";
             var originalKey = Environment.GetEnvironmentVariable("DATAMINER_CATALOG_TOKEN") ?? "";
@@ -270,7 +270,7 @@
             var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
             fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
             fakeService
-                .Setup(service => service.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CatalogMetaData>(), It.IsAny<CancellationToken>()))
+                .Setup(service => service.VolatileArtifactUploadAsync(It.IsAny<byte[]>(), VolatileContentType.DmScript, It.IsAny<string>(), It.IsAny<CatalogMetaData>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(uploadResult);
 
             fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
