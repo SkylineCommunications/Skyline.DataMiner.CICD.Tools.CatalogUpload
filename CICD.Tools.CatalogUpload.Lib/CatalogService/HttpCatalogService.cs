@@ -141,8 +141,16 @@
                     volatileType = VolatileContentType.DmScript;
                 }
 
-                CatalogMetaData meta = new CatalogMetaData() { Name = fileName, Version = new CatalogVersionMetaData() { Value = version } };
-                return await VolatileArtifactUploadAsync(package, volatileType, key, meta, cancellationToken);
+                try
+                {
+                    CatalogMetaData meta = new CatalogMetaData() { Name = fileName, Version = new CatalogVersionMetaData() { Value = version } };
+                    return await VolatileArtifactUploadAsync(package, volatileType, key, meta, cancellationToken);
+                }
+                catch
+                {
+                    // Do Nothing, this is a workaround anyway.
+                    return new ArtifactUploadResult() { ArtifactId = "" };
+                }
 
                 //var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
                 //return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
