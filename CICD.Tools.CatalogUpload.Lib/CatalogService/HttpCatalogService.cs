@@ -196,7 +196,6 @@
                 return JsonConvert.DeserializeObject<ArtifactUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
             }
 
-            _logger.LogError($"The upload api returned a {response.StatusCode} response. Body: {body}");
             if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
                 throw new AuthenticationException($"The upload api returned a {response.StatusCode} response. Body: {body}");
