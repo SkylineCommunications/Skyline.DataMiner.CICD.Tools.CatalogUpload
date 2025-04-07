@@ -113,7 +113,8 @@
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
 
             var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger).ConfigureAwait(false);
-            return await catalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, cts.Token).ConfigureAwait(false);
+            var result = await catalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, cts.Token).ConfigureAwait(false);
+            return result;
         }
 
         /// <summary>
@@ -153,6 +154,26 @@
             await RegisterAsync(dmCatalogToken).ConfigureAwait(false);
 
             var uploadResult = await catalogService.UploadVersionAsync(packageData, fs.Path.GetFileName(PathToArtifact), dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, cts.Token).ConfigureAwait(false);
+
+            string isForSkyline = Environment.GetEnvironmentVariable("IsForSkyline");
+            if (isForSkyline != null && isForSkyline.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+            {
+                LegacyCatalogMappingSupportRequest payload = new LegacyCatalogMappingSupportRequest()
+                {
+                    ArtifactId = metaData.CatalogIdentifier,
+                    ContentType = metaData.ContentType,
+                    Identifier = metaData.SourceCodeUri,
+                    Name = metaData.Name,
+                    Version = metaData.Version.Value,
+                    Branch = metaData.Version.Branch,
+                    Developer = metaData.Version.CommitterMail,
+                    IsPrerelease = metaData.IsPreRelease() ? "true" : "false",
+                    ReleasePath = uploadResult.ArtifactId
+                };
+
+                await catalogService.UploadLegacyCatalogMappingSupport(dmCatalogToken, cts.Token, payload);
+            }
+
             _logger.LogInformation(JsonConvert.SerializeObject(uploadResult));
             return uploadResult;
         }

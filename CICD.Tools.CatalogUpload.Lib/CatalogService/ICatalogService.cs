@@ -18,6 +18,16 @@
         Task<ArtifactUploadResult> RegisterCatalogAsync(byte[] catalogDetailsZip, string key, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Uploads legacy catalog mapping support data.
+        /// This method is intended for the Skyline Communications Organization to facilitate the migration from internal flows to GitHub.
+        /// </summary>
+        /// <param name="key">The API subscription key used for authentication.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <param name="payload">The legacy catalog mapping support request payload.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task UploadLegacyCatalogMappingSupport(string key, CancellationToken cancellationToken, LegacyCatalogMappingSupportRequest payload);
+
+        /// <summary>
         /// Uploads a specific version of the artifact to the catalog.
         /// </summary>
         /// <param name="package">A byte array containing the package content.</param>
