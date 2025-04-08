@@ -5,18 +5,14 @@
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
-    using System.Net.Mime;
     using System.Security.Authentication;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
 
     using Microsoft.Extensions.Logging;
 
     using Newtonsoft.Json;
-
-    using YamlDotNet.Core.Tokens;
 
     internal sealed class HttpCatalogService : ICatalogService, IDisposable
     {
@@ -101,16 +97,15 @@
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <param name="payload">The legacy catalog mapping support request payload.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task UploadLegacyCatalogMappingSupport(string key, CancellationToken cancellationToken, LegacyCatalogMappingSupportRequest payload)
+        public async Task UploadLegacyCatalogMappingSupport(string key, LegacyCatalogMappingSupportRequest payload, CancellationToken cancellationToken)
         {
             var jsonPayload = JsonConvert.SerializeObject(payload);
             using var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            using var request = new HttpRequestMessage(HttpMethod.Post, LegacyMappingSupportPath)
-            {
-                Content = content
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Post, LegacyMappingSupportPath);
 
+            request.Content = content;
             request.Headers.Add("Ocp-Apim-Subscription-Key", key);
+
             var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
@@ -118,7 +113,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogDebug($"Legacy Registration: OK");
+                _logger.LogDebug("Legacy Registration: OK");
             }
             else
             {
@@ -126,7 +121,6 @@
                 _logger.LogError($"Legacy Registration: Request to {LegacyMappingSupportPath} failed with status code: {response.StatusCode}");
             }
         }
-
 
         public async Task<ArtifactUploadResult> UploadVersionAsync(byte[] package, string fileName, string key, string catalogId, string version, string description, CancellationToken cancellationToken)
         {
@@ -169,7 +163,7 @@
             {
                 _logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
 
-                // The below will be removed with the breaking change upcoming on 28/05/2025
+                // The below will be removed with the breaking change upcoming on 01/05/2025
                 // Problem, Deployer cannot handle the new flow of catalog upload. So we will use the 'old' upload again. Return that Identifier.
                 VolatileContentType volatileType;
                 if (fileName.EndsWith(".dmprotocol", StringComparison.InvariantCultureIgnoreCase))

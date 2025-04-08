@@ -344,7 +344,6 @@
 
         }
 
-
         [TestMethod]
         public async Task UploadAndRegisterAsync_ShouldRunLegacyForSkyline()
         {
@@ -361,7 +360,6 @@
                 .Setup(service => service.UploadVersionAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(uploadResult);
 
-
             fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
 
             CatalogMetaData metaData = new CatalogMetaData
@@ -375,20 +373,18 @@
             CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
 
             // Act
-
             Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, "true");
-            ArtifactUploadResult result;
             try
             {
-                result = await artifactModel.UploadAndRegisterAsync("dummyToken");
+                await artifactModel.UploadAndRegisterAsync("dummyToken");
             }
             finally
             {
                 Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, null);
             }
 
-            fakeService.Verify(service => service.UploadLegacyCatalogMappingSupport("dummyToken", It.IsAny<CancellationToken>(), It.IsAny<LegacyCatalogMappingSupportRequest>()));
-
+            // Assert
+            fakeService.Verify(service => service.UploadLegacyCatalogMappingSupport("dummyToken", It.IsAny<LegacyCatalogMappingSupportRequest>(), It.IsAny<CancellationToken>()));
         }
 
         [TestMethod]
@@ -407,7 +403,6 @@
                 .Setup(service => service.UploadVersionAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(uploadResult);
 
-
             fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
 
             CatalogMetaData metaData = new CatalogMetaData
@@ -421,22 +416,20 @@
             CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
 
             // Act
-
             Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, "false");
-            ArtifactUploadResult result;
             try
             {
-                result = await artifactModel.UploadAndRegisterAsync("dummyToken");
+                await artifactModel.UploadAndRegisterAsync("dummyToken");
             }
             finally
             {
                 Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, null);
             }
 
+            // Assert
             fakeService.VerifyAll();
             fakeService.VerifyNoOtherCalls();
         }
-
 
         [TestMethod]
         public async Task UploadAndRegisterAsync_ShouldNotRunLegacyForNoSkyline()
@@ -454,7 +447,6 @@
                 .Setup(service => service.UploadVersionAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(uploadResult);
 
-
             fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
 
             CatalogMetaData metaData = new CatalogMetaData
@@ -468,8 +460,9 @@
             CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
 
             // Act
-            var result = await artifactModel.UploadAndRegisterAsync("dummyToken");
+            await artifactModel.UploadAndRegisterAsync("dummyToken");
 
+            // Assert
             fakeService.VerifyAll();
             fakeService.VerifyNoOtherCalls();
         }

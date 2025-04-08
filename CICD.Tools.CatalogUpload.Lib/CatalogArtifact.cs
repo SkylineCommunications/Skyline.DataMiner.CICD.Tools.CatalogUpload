@@ -164,19 +164,15 @@
 
             if (isForSkyline == null && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                isForSkyline = Environment.GetEnvironmentVariable(SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.User);
-                if (isForSkyline == null)
-                {
-                    isForSkyline = Environment.GetEnvironmentVariable(SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.Machine);
-                }
+                isForSkyline = Environment.GetEnvironmentVariable(SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.User) ??
+                               Environment.GetEnvironmentVariable(SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.Machine);
             }
 
             if (isForSkyline != null && isForSkyline.Equals("true", StringComparison.InvariantCultureIgnoreCase))
             {
-
                 string legacyContentType = metaData.ContentType == "Connector" ? "Connector" : "DmScript";
 
-                LegacyCatalogMappingSupportRequest payload = new LegacyCatalogMappingSupportRequest()
+                LegacyCatalogMappingSupportRequest payload = new LegacyCatalogMappingSupportRequest
                 {
                     ArtifactId = metaData.CatalogIdentifier ?? "",
                     ContentType = legacyContentType,
@@ -189,7 +185,7 @@
                     ReleasePath = uploadResult.ArtifactId ?? ""
                 };
 
-                await catalogService.UploadLegacyCatalogMappingSupport(dmCatalogToken, cts.Token, payload);
+                await catalogService.UploadLegacyCatalogMappingSupport(dmCatalogToken, payload, cts.Token);
             }
 
             _logger.LogInformation(JsonConvert.SerializeObject(uploadResult));
