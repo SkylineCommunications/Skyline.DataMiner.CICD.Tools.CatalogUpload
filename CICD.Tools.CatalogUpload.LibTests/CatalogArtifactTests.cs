@@ -376,7 +376,7 @@
 
             // Act
 
-            Environment.SetEnvironmentVariable("IsForSkyline", "true");
+            Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, "true");
             ArtifactUploadResult result;
             try
             {
@@ -384,7 +384,7 @@
             }
             finally
             {
-                Environment.SetEnvironmentVariable("IsForSkyline", null);
+                Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, null);
             }
 
             fakeService.Verify(service => service.UploadLegacyCatalogMappingSupport("dummyToken", It.IsAny<CancellationToken>(), It.IsAny<LegacyCatalogMappingSupportRequest>()));
@@ -422,7 +422,7 @@
 
             // Act
 
-            Environment.SetEnvironmentVariable("IsForSkyline", "false");
+            Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, "false");
             ArtifactUploadResult result;
             try
             {
@@ -430,7 +430,7 @@
             }
             finally
             {
-                Environment.SetEnvironmentVariable("IsForSkyline", null);
+                Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, null);
             }
 
             fakeService.VerifyAll();

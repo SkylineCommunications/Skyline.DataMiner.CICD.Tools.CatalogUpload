@@ -23,6 +23,11 @@
     /// </summary>
     public class CatalogArtifact : IDisposable
     {
+        /// <summary>
+        /// Name for the environment variable that enables some additional skyline specific registration calls.
+        /// </summary>
+        public const string SkylineSpecificEnvironmentVariableName = "CICDIsForSkyline";
+
         private readonly ILogger _logger;
         private readonly ICatalogService catalogService;
         private readonly CancellationTokenSource cts;
@@ -155,20 +160,33 @@
 
             var uploadResult = await catalogService.UploadVersionAsync(packageData, fs.Path.GetFileName(PathToArtifact), dmCatalogToken, metaData.CatalogIdentifier, metaData.Version.Value, metaData.Version.VersionDescription, cts.Token).ConfigureAwait(false);
 
-            string isForSkyline = Environment.GetEnvironmentVariable("IsForSkyline");
+            string isForSkyline = Environment.GetEnvironmentVariable(SkylineSpecificEnvironmentVariableName);
+
+            if (isForSkyline == null && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                isForSkyline = Environment.GetEnvironmentVariable(SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.User);
+                if (isForSkyline == null)
+                {
+                    isForSkyline = Environment.GetEnvironmentVariable(SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.Machine);
+                }
+            }
+
             if (isForSkyline != null && isForSkyline.Equals("true", StringComparison.InvariantCultureIgnoreCase))
             {
+
+                string legacyContentType = metaData.ContentType == "Connector" ? "Connector" : "DmScript";
+
                 LegacyCatalogMappingSupportRequest payload = new LegacyCatalogMappingSupportRequest()
                 {
-                    ArtifactId = metaData.CatalogIdentifier,
-                    ContentType = metaData.ContentType,
-                    Identifier = metaData.SourceCodeUri,
-                    Name = metaData.Name,
-                    Version = metaData.Version.Value,
-                    Branch = metaData.Version.Branch,
-                    Developer = metaData.Version.CommitterMail,
+                    ArtifactId = metaData.CatalogIdentifier ?? "",
+                    ContentType = legacyContentType,
+                    Identifier = metaData.SourceCodeUri ?? "",
+                    Name = metaData.Name ?? "",
+                    Version = metaData.Version.Value ?? "",
+                    Branch = metaData.Version.Branch ?? "",
+                    Developer = metaData.Version.CommitterMail ?? "",
                     IsPrerelease = metaData.IsPreRelease() ? "true" : "false",
-                    ReleasePath = uploadResult.ArtifactId
+                    ReleasePath = uploadResult.ArtifactId ?? ""
                 };
 
                 await catalogService.UploadLegacyCatalogMappingSupport(dmCatalogToken, cts.Token, payload);
