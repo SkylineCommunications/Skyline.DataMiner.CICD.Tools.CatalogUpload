@@ -6,6 +6,7 @@
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Security.Authentication;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -30,7 +31,7 @@
             public string? AzureStorageId { get; set; }
         }
 
-
+        private const string LegacyMappingSupportPath = "api/key-catalog-registration/v1-0/register";
         private const string RegistrationPath = "api/key-catalog/v2-0/catalogs/register";
         private const string VersionUploadPathEnd = "/register/version";
         private const string VersionUploadPathStart = "api/key-catalog/v2-0/catalogs/";
@@ -88,6 +89,39 @@
             throw new InvalidOperationException($"The registration api returned a {response.StatusCode} response. Body: {body}");
         }
 
+        /// <summary>
+        /// Uploads legacy catalog mapping support data.
+        /// This method is intended for the Skyline Communications Organization to facilitate the migration from internal flows to GitHub.
+        /// </summary>
+        /// <param name="key">The API subscription key used for authentication.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <param name="payload">The legacy catalog mapping support request payload.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task UploadLegacyCatalogMappingSupport(string key, LegacyCatalogMappingSupportRequest payload, CancellationToken cancellationToken)
+        {
+            var jsonPayload = JsonConvert.SerializeObject(payload);
+            using var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            using var request = new HttpRequestMessage(HttpMethod.Post, LegacyMappingSupportPath);
+
+            request.Content = content;
+            request.Headers.Add("Ocp-Apim-Subscription-Key", key);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogDebug($"Response: {response.StatusCode}, Body: {responseBody}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogDebug("Legacy Registration: OK");
+            }
+            else
+            {
+                // Optionally log or handle error scenarios.
+                _logger.LogError($"Legacy Registration: Request to {LegacyMappingSupportPath} failed with status code: {response.StatusCode}");
+            }
+        }
+
         public async Task<ArtifactUploadResult> UploadVersionAsync(byte[] package, string fileName, string key, string catalogId, string version, string description, CancellationToken cancellationToken)
         {
             if (String.IsNullOrWhiteSpace(version)) throw new ArgumentNullException(nameof(version));
@@ -129,10 +163,10 @@
             {
                 _logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
 
+                // The below will be removed with the breaking change upcoming on 01/05/2025
                 // Problem, Deployer cannot handle the new flow of catalog upload. So we will use the 'old' upload again. Return that Identifier.
-
                 VolatileContentType volatileType;
-                if (fileName.EndsWith(".dmprotocol",StringComparison.InvariantCultureIgnoreCase))
+                if (fileName.EndsWith(".dmprotocol", StringComparison.InvariantCultureIgnoreCase))
                 {
                     volatileType = VolatileContentType.Connector;
                 }
@@ -206,7 +240,7 @@
 
         public async Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
         {
-           return await VolatileArtifactUploadAsync(package,VolatileContentType.DmScript,key, catalog, cancellationToken);
+            return await VolatileArtifactUploadAsync(package, VolatileContentType.DmScript, key, catalog, cancellationToken);
         }
     }
 }

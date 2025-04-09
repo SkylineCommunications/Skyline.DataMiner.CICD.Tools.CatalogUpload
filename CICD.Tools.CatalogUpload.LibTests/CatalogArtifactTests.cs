@@ -344,5 +344,127 @@
 
         }
 
+        [TestMethod]
+        public async Task UploadAndRegisterAsync_ShouldRunLegacyForSkyline()
+        {
+            // Arrange
+            string pathToArtifact = "testPath";
+            var fakeService = new Mock<ICatalogService>();
+            var fakeFileSystem = new Mock<IFileSystem>();
+            var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
+            fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeService
+                .Setup(service => service.RegisterCatalogAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+            fakeService
+                .Setup(service => service.UploadVersionAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+
+            fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
+
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "123",
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = new CatalogVersionMetaData { Value = "1.0.0.1-alpha" }
+            };
+            CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+
+            // Act
+            Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, "true");
+            try
+            {
+                await artifactModel.UploadAndRegisterAsync("dummyToken");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, null);
+            }
+
+            // Assert
+            fakeService.Verify(service => service.UploadLegacyCatalogMappingSupport("dummyToken", It.IsAny<LegacyCatalogMappingSupportRequest>(), It.IsAny<CancellationToken>()));
+        }
+
+        [TestMethod]
+        public async Task UploadAndRegisterAsync_ShouldNotRunLegacyForSkylineFalse()
+        {
+            // Arrange
+            string pathToArtifact = "testPath";
+            var fakeService = new Mock<ICatalogService>();
+            var fakeFileSystem = new Mock<IFileSystem>();
+            var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
+            fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeService
+                .Setup(service => service.RegisterCatalogAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+            fakeService
+                .Setup(service => service.UploadVersionAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+
+            fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
+
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "123",
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = new CatalogVersionMetaData { Value = "1.0.0.1-alpha" }
+            };
+            CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+
+            // Act
+            Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, "false");
+            try
+            {
+                await artifactModel.UploadAndRegisterAsync("dummyToken");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, null);
+            }
+
+            // Assert
+            fakeService.VerifyAll();
+            fakeService.VerifyNoOtherCalls();
+        }
+
+        [TestMethod]
+        public async Task UploadAndRegisterAsync_ShouldNotRunLegacyForNoSkyline()
+        {
+            // Arrange
+            string pathToArtifact = "testPath";
+            var fakeService = new Mock<ICatalogService>();
+            var fakeFileSystem = new Mock<IFileSystem>();
+            var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
+            fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeService
+                .Setup(service => service.RegisterCatalogAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+            fakeService
+                .Setup(service => service.UploadVersionAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(uploadResult);
+
+            fakeFileSystem.Setup(fs => fs.Path.GetFileName(pathToArtifact)).Returns(pathToArtifact);
+
+            CatalogMetaData metaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "123",
+                ContentType = "DMScript",
+                SourceCodeUri = "uniqueIdentifier",
+                Name = "Name",
+                Version = new CatalogVersionMetaData { Value = "1.0.0.1-alpha" }
+            };
+            CatalogArtifact artifactModel = new CatalogArtifact(pathToArtifact, fakeService.Object, fakeFileSystem.Object, logger, metaData);
+
+            // Act
+            await artifactModel.UploadAndRegisterAsync("dummyToken");
+
+            // Assert
+            fakeService.VerifyAll();
+            fakeService.VerifyNoOtherCalls();
+        }
     }
 }
