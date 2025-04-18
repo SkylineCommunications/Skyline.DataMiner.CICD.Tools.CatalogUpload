@@ -174,7 +174,7 @@
 
                 LegacyCatalogMappingSupportRequest payload = new LegacyCatalogMappingSupportRequest
                 {
-                    ArtifactId = metaData.CatalogIdentifier ?? "",
+                    ArtifactId = uploadResult.ArtifactId ?? "",
                     ContentType = legacyContentType,
                     Identifier = metaData.SourceCodeUri ?? "",
                     Name = metaData.Name ?? "",
@@ -182,7 +182,7 @@
                     Branch = metaData.Version.Branch ?? "",
                     Developer = metaData.Version.CommitterMail ?? "",
                     IsPrerelease = metaData.IsPreRelease() ? "true" : "false",
-                    ReleasePath = uploadResult.ArtifactId ?? ""
+                    ReleasePath = metaData.CatalogIdentifier ?? ""
                 };
 
                 await catalogService.UploadLegacyCatalogMappingSupport(dmCatalogToken, payload, cts.Token);
