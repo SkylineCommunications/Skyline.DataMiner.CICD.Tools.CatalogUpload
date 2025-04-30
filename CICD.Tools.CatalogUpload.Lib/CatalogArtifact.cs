@@ -15,6 +15,8 @@
 
     using YamlDotNet.Serialization.NamingConventions;
 
+    using static System.Net.WebRequestMethods;
+
     /// <summary>
     /// Allows Uploading an artifact to the Catalog using one of the below in order of priority:
     ///  <para>- provided key in upload argument (Unix/Windows)</para>
@@ -188,7 +190,9 @@
                 await catalogService.UploadLegacyCatalogMappingSupport(dmCatalogToken, payload, cts.Token);
             }
 
-            _logger.LogInformation(JsonConvert.SerializeObject(uploadResult));
+            // No longer intended for parsing but for actual information and easy access to the upload location.
+            _logger.LogInformation($"Upload successful to 'https://catalog.dataminer.services/details/{metaData.CatalogIdentifier}' with version '{metaData.Version.Value}' on Blob Storage '{uploadResult.ArtifactId}'."
+);
             return uploadResult;
         }
 
