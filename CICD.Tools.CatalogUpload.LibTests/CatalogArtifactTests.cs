@@ -1,6 +1,7 @@
 ﻿namespace CICD.Tools.CatalogUpload.LibTests
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using FluentAssertions;
@@ -337,7 +338,7 @@
                 logger => logger.Log(
                     LogLevel.Information,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains(JsonConvert.SerializeObject(uploadResult))),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains(metaData.CatalogIdentifier) && v.ToString().Contains(metaData.Version.Value)),
                     It.IsAny<Exception>(),
                     (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
                 Times.Once);

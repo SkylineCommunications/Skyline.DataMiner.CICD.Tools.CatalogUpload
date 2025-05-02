@@ -162,32 +162,8 @@
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogDebug($"The version upload api returned a {response.StatusCode} response. Body: {body}");
-
-                // The below will be removed with the breaking change upcoming on 01/05/2025
-                // Problem, Deployer cannot handle the new flow of catalog upload. So we will use the 'old' upload again. Return that Identifier.
-                VolatileContentType volatileType;
-                if (fileName.EndsWith(".dmprotocol", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    volatileType = VolatileContentType.Connector;
-                }
-                else
-                {
-                    volatileType = VolatileContentType.DmScript;
-                }
-
-                try
-                {
-                    CatalogMetaData meta = new CatalogMetaData() { Name = fileName, Version = new CatalogVersionMetaData() { Value = version } };
-                    return await VolatileArtifactUploadAsync(package, volatileType, key, meta, cancellationToken);
-                }
-                catch
-                {
-                    // Do Nothing, this is a workaround anyway.
-                    return new ArtifactUploadResult() { ArtifactId = "" };
-                }
-
-                //var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
-                //return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
+                var returnedResult = JsonConvert.DeserializeObject<CatalogUploadResult>(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+                return new ArtifactUploadResult() { ArtifactId = returnedResult.AzureStorageId };
             }
 
             _logger.LogError($"The version upload api returned a {response.StatusCode} response. Body: {body}");
