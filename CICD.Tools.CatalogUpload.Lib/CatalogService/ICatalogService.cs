@@ -41,7 +41,7 @@
         Task<ArtifactUploadResult> UploadVersionAsync(byte[] package, string fileName, string key, string catalogId, string version, string description, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Uploads a .dmapp artifact to an external store without registering it in the catalog.
+        /// Uploads a .dmapp, .dmprotocol or .dmtest artifact to an external store without registering it in the catalog.
         /// </summary>
         /// <param name="package">A byte array containing the package content.</param>
         /// <param name="key">A unique token used for authentication.</param>
@@ -52,7 +52,7 @@
 
 
         /// <summary>
-        /// Uploads either a .dmapp or .dmprotocol to an external store without registering it in the catalog.
+        /// Uploads either a .dmapp, .dmprotocol or .dmtest to an external store without registering it in the catalog.
         /// </summary>
         /// <param name="package">A byte array containing the package content.</param>
         /// <param name="type">The type of item getting uploaded: DmsScript or Connector</param>

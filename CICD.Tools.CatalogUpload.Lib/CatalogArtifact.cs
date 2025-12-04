@@ -40,7 +40,7 @@
         /// Creates an instance of <see cref="CatalogArtifact"/>.
         /// It searches for an optional dmCatalogToken in the "DATAMINER_CATALOG_TOKEN" or "DATAMINER_CATALOG_TOKEN_ENCRYPTED" Environment Variable.
         /// </summary>
-        /// <param name="pathToArtifact">Path to the application package (.dmapp) or protocol package (.dmprotocol).</param>
+        /// <param name="pathToArtifact">Path to the application package (.dmapp), protocol package (.dmprotocol) or test package (.dmtest).</param>
         /// <param name="service">An instance of <see cref="ICatalogService"/> used for communication.</param>
         /// <param name="fileSystem">An instance of <see cref="IFileSystem"/> to access the filesystem. e.g. Skyline.DataMiner.CICD.FileSystem.Instance.</param>
         /// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
@@ -64,7 +64,7 @@
         /// It searches for an optional dmCatalogToken in the "DATAMINER_CATALOG_TOKEN" or "DATAMINER_CATALOG_TOKEN_ENCRYPTED" Environment Variable for authentication.
         /// </summary>
         /// <remarks>WARNING: when wishing to upload several Artifacts it's recommended to use the CatalogArtifact(string pathToArtifact, ICatalogService service, IFileSystem fileSystem, ILogger logger).</remarks>
-        /// <param name="pathToArtifact">Path to the application package (.dmapp) or protocol package (.dmprotocol).</param>
+        /// <param name="pathToArtifact">Path to the application package (.dmapp) protocol package (.dmprotocol) or test package (.dmtest).</param>
         /// <param name="logger">An instance of <see cref="ILogger"/> that will hold error, debug and other information.</param>
         /// <param name="metaData">Contains package metadata.</param>
         public CatalogArtifact(string pathToArtifact, ILogger logger, CatalogMetaData metaData) : this(pathToArtifact, CatalogServiceFactory.CreateWithHttp(new System.Net.Http.HttpClient(), logger), FileSystem.Instance, logger, metaData)
@@ -95,7 +95,7 @@
         }
 
         /// <summary>
-        /// Path to the application package (.dmapp) or protocol package (.dmprotocol).
+        /// Path to the application package (.dmapp) protocol package (.dmprotocol) or test package (.dmtest).
         /// </summary>
         public string PathToArtifact { get; private set; }
 
@@ -239,10 +239,11 @@
             }
             else
             {
+                // Use for both .dmtest and .dmapp
                 volatileType = VolatileContentType.DmScript;
             }
 
-            var result = await catalogService.VolatileArtifactUploadAsync(packageData, volatileType, dmCatalogToken, metaData, cts.Token).ConfigureAwait(false);
+                var result = await catalogService.VolatileArtifactUploadAsync(packageData, volatileType, dmCatalogToken, metaData, cts.Token).ConfigureAwait(false);
             _logger.LogDebug($"Finished Uploading {PathToArtifact}");
 
             _logger.LogInformation(JsonConvert.SerializeObject(result));
