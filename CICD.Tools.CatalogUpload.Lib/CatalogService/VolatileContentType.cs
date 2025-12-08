@@ -13,6 +13,11 @@
         /// <summary>
         /// Represents a connector content type.
         /// </summary>
-        Connector
+        Connector,
+
+        /// <summary>
+        /// Represents a DataMiner test content type.
+        /// </summary>
+        DmTest,
     }
 }

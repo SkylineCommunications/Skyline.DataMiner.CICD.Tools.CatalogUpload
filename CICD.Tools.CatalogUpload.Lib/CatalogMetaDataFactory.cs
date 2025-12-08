@@ -39,9 +39,13 @@
             {
                 meta = FromDmprotocol(pathToArtifact);
             }
+            else if (pathToArtifact.EndsWith(".dmtest", StringComparison.InvariantCultureIgnoreCase))
+            {
+                meta = FromDmapp(pathToArtifact);
+            }
             else
             {
-                throw new InvalidOperationException($"Invalid path to artifact. Expected a path that ends with .dmapp or .dmprotocol but received {pathToArtifact}");
+                throw new InvalidOperationException($"Invalid path to artifact. Expected a path that ends with .dmapp, .dmprotocol or .dmtest but received {pathToArtifact}");
             }
 
             if (pathToReadme != null)

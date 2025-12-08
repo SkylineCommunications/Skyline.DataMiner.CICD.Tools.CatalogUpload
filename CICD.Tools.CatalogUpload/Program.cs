@@ -24,14 +24,14 @@
         {
             var pathToArtifactRequired = new Option<string>(
                 name: "--path-to-artifact",
-                description: "Path to the application package (.dmapp).")
+                description: "Path to the application package (.dmapp), protocol package (.dmprotocol) or test package (.dmtest).")
             {
                 IsRequired = true
             };
 
             var pathToArtifactOptional = new Option<string>(
             name: "--path-to-artifact",
-            description: "Path to the application package (.dmapp).")
+            description: "Path to the application package (.dmapp), protocol package (.dmprotocol) or test package (.dmtest).")
             {
                 IsRequired = false
             };
