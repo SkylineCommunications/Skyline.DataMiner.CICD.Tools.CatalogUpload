@@ -124,6 +124,21 @@
         public CatalogVersionMetaData Version { get; set; }
 
         /// <summary>
+        /// Gets or sets the vendor ID associated with the catalog entry.
+        /// </summary>
+        public string VendorId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the market name associated with the catalog entry.
+        /// </summary>
+        public string MarketName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the element type associated with the catalog entry.
+        /// </summary>
+        public string ElementType { get; set; }
+
+        /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
         /// <param name="obj">The object to compare with the current object.</param>
@@ -142,7 +157,10 @@
                        Tags.SequenceEqual(other.Tags) && // List comparison
                        String.Equals(PathToReadme, other.PathToReadme, StringComparison.OrdinalIgnoreCase) &&
                        String.Equals(PathToImages, other.PathToImages, StringComparison.OrdinalIgnoreCase) &&
-                       Equals(Version, other.Version); // Version is an object, so we use Equals
+                       Equals(Version, other.Version) && // Version is an object, so we use Equals
+                       String.Equals(VendorId, other.VendorId, StringComparison.OrdinalIgnoreCase) &&
+                       String.Equals(MarketName, other.MarketName, StringComparison.OrdinalIgnoreCase) &&
+                       String.Equals(ElementType, other.ElementType, StringComparison.OrdinalIgnoreCase);
             }
             return false;
         }
@@ -171,7 +189,10 @@
 
             int hash3 = HashCode.Combine(
                 Tags != null ? String.Join(",", Tags).ToLower() : String.Empty,
-                Version
+                Version,
+                VendorId?.ToLower(),
+                MarketName?.ToLower(),
+                ElementType?.ToLower()
             );
 
             // Combine the intermediate hashes into a final hash.
@@ -269,6 +290,10 @@
 
                 if (!String.IsNullOrWhiteSpace(p.ShortDescription)) ShortDescription = p.ShortDescription;
                 if (!String.IsNullOrWhiteSpace(p.SourceCodeUrl)) SourceCodeUri = p.SourceCodeUrl;
+
+                if (!String.IsNullOrWhiteSpace(p.VendorId)) VendorId = p.VendorId;
+                if (!String.IsNullOrWhiteSpace(p.MarketName)) MarketName = p.MarketName;
+                if (!String.IsNullOrWhiteSpace(p.ElementType)) ElementType = p.ElementType;
 
                 p.Owners?.ForEach(o => { Owners.Add(new CatalogOwner { Name = o.Name, Email = o.Email, Url = o.Url }); });
                 p.Tags?.ForEach(Tags.Add);
