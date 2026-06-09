@@ -63,6 +63,21 @@
         /// </summary>
         /// <value>A string representing the type of the entry.</value>
         public string Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets the vendor ID associated with the catalog entry.
+        /// </summary>
+        public string VendorId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the market name associated with the catalog entry.
+        /// </summary>
+        public string MarketName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the element type associated with the catalog entry.
+        /// </summary>
+        public string ElementType { get; set; }
     }
 
     /// <summary>
