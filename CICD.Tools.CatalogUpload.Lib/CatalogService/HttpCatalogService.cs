@@ -235,9 +235,17 @@
 
             _logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
 
-            CatalogItemInfo catalogItemInfo = JsonConvert.DeserializeObject<CatalogItemInfo>(body);
+            try
+            {
+                CatalogItemInfo catalogItemInfo = JsonConvert.DeserializeObject<CatalogItemInfo>(body);
 
-            return catalogItemInfo.IsPrivate == true;
+                return catalogItemInfo.IsPrivate == true;
+            }
+            catch (JsonException)
+            {
+                _logger.LogError("Failed to deserialize the JSON: {BODY}", body);
+                throw;
+            }
         }
     }
 }
