@@ -5,6 +5,7 @@
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
@@ -383,8 +384,14 @@
                     await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure everything is written
                 }
 
-                bool isSkyline = Environment.GetEnvironmentVariable("IS_SKYLINE_MANAGED") == "true";
-                if (isSkyline && ContentType == ArtifactContentType.Connector && !isPrivate)
+                string isForSkyline = Environment.GetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName);
+                if (isForSkyline == null && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    isForSkyline = Environment.GetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.User) ??
+                                   Environment.GetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.Machine);
+                }
+
+                if (String.Equals(isForSkyline, "true", StringComparison.OrdinalIgnoreCase) && ContentType == ArtifactContentType.Connector && !isPrivate)
                 {
                     // For public Skyline connectors, no README.md or images are included in the zip file.
                     // These are provided via the dataminer-docs-connectors repository.
