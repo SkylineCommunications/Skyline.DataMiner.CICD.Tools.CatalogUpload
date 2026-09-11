@@ -117,7 +117,7 @@
         {
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
 
-            bool isPrivate = await catalogService.IsCatalogItemPrivate(metaData.CatalogIdentifier, cts.Token).ConfigureAwait(false);
+            bool isPrivate = await catalogService.IsCatalogItemPrivate(metaData.CatalogIdentifier, dmCatalogToken, cts.Token).ConfigureAwait(false);
 
             var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger, isPrivate).ConfigureAwait(false);
             var result = await catalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, cts.Token).ConfigureAwait(false);
@@ -140,7 +140,7 @@
 
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
 
-            bool isPrivate = await catalogService.IsCatalogItemPrivate(metaData.CatalogIdentifier, cts.Token).ConfigureAwait(false);
+            bool isPrivate = await catalogService.IsCatalogItemPrivate(metaData.CatalogIdentifier, keyFromEnv, cts.Token).ConfigureAwait(false);
 
             var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger, isPrivate).ConfigureAwait(false);
             return await catalogService.RegisterCatalogAsync(zipArray, keyFromEnv, cts.Token).ConfigureAwait(false);

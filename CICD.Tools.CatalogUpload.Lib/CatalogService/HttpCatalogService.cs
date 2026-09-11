@@ -219,32 +219,41 @@
             return await VolatileArtifactUploadAsync(package, VolatileContentType.DmScript, key, catalog, cancellationToken);
         }
 
-        public async Task<bool> IsCatalogItemPrivate(string catalogGuid, CancellationToken cancellationToken)
+        public async Task<bool> IsCatalogItemPrivate(string catalogGuid, string key, CancellationToken cancellationToken)
         {
-            // Make GET request to receive the catalog item information
-            var response = await _httpClient.GetAsync(CatalogsPathStart + catalogGuid, cancellationToken).ConfigureAwait(false);
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                // No catalog item found with the given GUID, return true as the default for new items is private.
-                return true;
-            }
-
-            // Get the response body
-            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-            _logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
+            _httpClient.DefaultRequestHeaders.Add("DATAMINER-SERVICES-API-KEY", key);
 
             try
             {
-                CatalogItemInfo catalogItemInfo = JsonConvert.DeserializeObject<CatalogItemInfo>(body);
+                // Make GET request to receive the catalog item information
+                var response = await _httpClient.GetAsync(CatalogsPathStart + catalogGuid, cancellationToken).ConfigureAwait(false);
 
-                return catalogItemInfo.IsPrivate == true;
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    // No catalog item found with the given GUID, return true as the default for new items is private.
+                    return true;
+                }
+
+                // Get the response body
+                var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                try
+                {
+                    _logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
+                    CatalogItemInfo catalogItemInfo = JsonConvert.DeserializeObject<CatalogItemInfo>(body);
+
+                    return catalogItemInfo.IsPrivate == true;
+                }
+                catch (JsonException)
+                {
+                    _logger.LogError("[{StatusCode}] Failed to deserialize the JSON: {BODY}", response.StatusCode, body);
+                    throw;
+                }
             }
-            catch (JsonException)
+            finally
             {
-                _logger.LogError("Failed to deserialize the JSON: {BODY}", body);
-                throw;
+                // Clean up, just in case
+                _httpClient.DefaultRequestHeaders.Remove("DATAMINER-SERVICES-API-KEY");
             }
         }
     }
