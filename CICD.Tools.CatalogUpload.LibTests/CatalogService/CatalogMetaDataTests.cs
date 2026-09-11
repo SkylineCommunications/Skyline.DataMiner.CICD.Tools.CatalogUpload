@@ -386,7 +386,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object, true);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -452,7 +452,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object, true);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -508,7 +508,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object, true);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -550,7 +550,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object, true);
 
             // Assert
             using var zipStream = new MemoryStream(result);
@@ -606,7 +606,7 @@
             };
 
             // Act
-            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object);
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, mockSerializer.Object, mockLogger.Object, true);
 
             // Assert
             using var zipStream = new MemoryStream(result);

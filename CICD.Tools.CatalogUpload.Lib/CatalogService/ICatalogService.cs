@@ -61,5 +61,13 @@
         /// <param name="cancellationToken">A token used to cancel the ongoing upload if needed.</param>
         /// <returns>A <see cref="Task{TResult}"/> that represents the asynchronous operation, returning an <see cref="ArtifactUploadResult"/>.</returns>
         Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, VolatileContentType type, string key, CatalogMetaData catalog, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Checks if the Catalog item is private or not.
+        /// </summary>
+        /// <param name="catalogGuid">The identifier for the Catalog Item.</param>
+        /// <param name="cancellationToken">A token used to cancel the ongoing check.</param>
+        /// <returns>A <see cref="Task{TResult}"/> that represents the asynchronous operation, returning a <see langword="bool"/>.</returns>
+        Task<bool> IsCatalogItemPrivate(string catalogGuid, CancellationToken cancellationToken);
     }
 }

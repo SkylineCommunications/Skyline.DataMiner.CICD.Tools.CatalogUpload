@@ -5,6 +5,7 @@
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
@@ -350,7 +351,7 @@
         /// Asynchronously creates a zip file containing catalog metadata, README.md, and images folder if available.
         /// </summary>
         /// <returns>A byte array representing the zip file.</returns>
-        public async Task<byte[]> ToCatalogZipAsync(IFileSystem fs, ISerializer serializer, ILogger logger)
+        public async Task<byte[]> ToCatalogZipAsync(IFileSystem fs, ISerializer serializer, ILogger logger, bool isPrivate)
         {
             CatalogYaml catalogYaml = new CatalogYaml
             {
@@ -383,28 +384,43 @@
                     await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure everything is written
                 }
 
-                // Add README.md
-                if (PathToReadme != null && fs.File.Exists(PathToReadme))
+                string isForSkyline = Environment.GetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName);
+                if (isForSkyline == null && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    var readmeEntry = archive.CreateEntry("README.md");
-                    using var entryStream = readmeEntry.Open();
-                    var readmeContent = fs.File.ReadAllText(PathToReadme); // Get the file content as a string
-                    using var streamWriter = new StreamWriter(entryStream);
-                    await streamWriter.WriteAsync(readmeContent).ConfigureAwait(false);
-                    await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure all content is written
+                    isForSkyline = Environment.GetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.User) ??
+                                   Environment.GetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.Machine);
                 }
 
-                // Add Images folder
-                if (PathToImages != null && fs.Directory.Exists(PathToImages))
+                if (String.Equals(isForSkyline, "true", StringComparison.OrdinalIgnoreCase) && ContentType == ArtifactContentType.Connector && !isPrivate)
                 {
-                    var imageFiles = fs.Directory.GetFiles(PathToImages);
-                    foreach (var imageFile in imageFiles)
+                    // For public Skyline connectors, no README.md or images are included in the zip file.
+                    // These are provided via the dataminer-docs-connectors repository.
+                }
+                else
+                {
+                    // Add README.md
+                    if (PathToReadme != null && fs.File.Exists(PathToReadme))
                     {
-                        var imageEntry = archive.CreateEntry($"Images/{fs.Path.GetFileName(imageFile)}");
-                        using var entryStream = imageEntry.Open();
-                        var imageBytes = fs.File.ReadAllBytes(imageFile); // Get the file content as binary data
-                        await entryStream.WriteAsync(imageBytes, 0, imageBytes.Length).ConfigureAwait(false); // Write binary data
-                        await entryStream.FlushAsync().ConfigureAwait(false); // Ensure all content is written
+                        var readmeEntry = archive.CreateEntry("README.md");
+                        using var entryStream = readmeEntry.Open();
+                        var readmeContent = fs.File.ReadAllText(PathToReadme); // Get the file content as a string
+                        using var streamWriter = new StreamWriter(entryStream);
+                        await streamWriter.WriteAsync(readmeContent).ConfigureAwait(false);
+                        await streamWriter.FlushAsync().ConfigureAwait(false); // Ensure all content is written
+                    }
+
+                    // Add Images folder
+                    if (PathToImages != null && fs.Directory.Exists(PathToImages))
+                    {
+                        var imageFiles = fs.Directory.GetFiles(PathToImages);
+                        foreach (var imageFile in imageFiles)
+                        {
+                            var imageEntry = archive.CreateEntry($"Images/{fs.Path.GetFileName(imageFile)}");
+                            using var entryStream = imageEntry.Open();
+                            var imageBytes = fs.File.ReadAllBytes(imageFile); // Get the file content as binary data
+                            await entryStream.WriteAsync(imageBytes, 0, imageBytes.Length).ConfigureAwait(false); // Write binary data
+                            await entryStream.FlushAsync().ConfigureAwait(false); // Ensure all content is written
+                        }
                     }
                 }
             }
