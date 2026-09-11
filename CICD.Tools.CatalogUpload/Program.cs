@@ -120,7 +120,7 @@
             {
                 IsRequired = false,
             };
-
+            
             // dataminer-catalog-upload
             var rootCommand = new RootCommand("Uploads artifacts or their registration info to the artifact storage for the DataMiner Catalog and Cloud Connected Systems. (The default upload has no additional registration and no visibility on the catalog. Use the returned Artifact ID for deployment or download.)");
             rootCommand.AddOption(pathToArtifactRequired); // No longer global due to onlyRegistration option

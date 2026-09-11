@@ -398,6 +398,9 @@
             var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
             fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
             fakeService
+                .Setup(service => service.IsCatalogItemPrivate(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+            fakeService
                 .Setup(service => service.RegisterCatalogAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(uploadResult);
             fakeService
@@ -441,6 +444,9 @@
             var fakeFileSystem = new Mock<IFileSystem>();
             var uploadResult = new ArtifactUploadResult { ArtifactId = "10" };
             fakeFileSystem.Setup(fs => fs.File.ReadAllBytes(It.IsAny<string>())).Returns(Array.Empty<byte>());
+            fakeService
+                .Setup(service => service.IsCatalogItemPrivate(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
             fakeService
                 .Setup(service => service.RegisterCatalogAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(uploadResult);

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Runtime.InteropServices;
+    using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -117,7 +118,9 @@
         {
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
 
-            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger).ConfigureAwait(false);
+            bool isPrivate = await catalogService.IsCatalogItemPrivate(metaData.CatalogIdentifier, cts.Token).ConfigureAwait(false);
+
+            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger, isPrivate).ConfigureAwait(false);
             var result = await catalogService.RegisterCatalogAsync(zipArray, dmCatalogToken, cts.Token).ConfigureAwait(false);
             return result;
         }
@@ -137,7 +140,10 @@
             }
 
             CheckCatalogIdentifier(metaData.CatalogIdentifier);
-            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger).ConfigureAwait(false);
+
+            bool isPrivate = await catalogService.IsCatalogItemPrivate(metaData.CatalogIdentifier, cts.Token).ConfigureAwait(false);
+
+            var zipArray = await metaData.ToCatalogZipAsync(fs, serializer, _logger, isPrivate).ConfigureAwait(false);
             return await catalogService.RegisterCatalogAsync(zipArray, keyFromEnv, cts.Token).ConfigureAwait(false);
         }
 

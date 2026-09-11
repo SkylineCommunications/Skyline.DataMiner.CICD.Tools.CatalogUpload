@@ -34,7 +34,7 @@
         private const string LegacyMappingSupportPath = "api/key-catalog-registration/v1-0/register";
         private const string RegistrationPath = "api/key-catalog/v2-0/catalogs/register";
         private const string VersionUploadPathEnd = "/register/version";
-        private const string VersionUploadPathStart = "api/key-catalog/v2-0/catalogs/";
+        private const string CatalogsPathStart = "api/key-catalog/v2-0/catalogs/";
         private const string VolatileUploadPath = "api/key-artifact-upload/v1-0/private/artifact";
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
@@ -126,7 +126,7 @@
         {
             if (String.IsNullOrWhiteSpace(version)) throw new ArgumentNullException(nameof(version));
 
-            string versionUploadPath = $"{VersionUploadPathStart}{catalogId}{VersionUploadPathEnd}";
+            string versionUploadPath = $"{CatalogsPathStart}{catalogId}{VersionUploadPathEnd}";
             using var formData = new MultipartFormDataContent();
             formData.Headers.Add("Ocp-Apim-Subscription-Key", key);
 
@@ -217,6 +217,27 @@
         public async Task<ArtifactUploadResult> VolatileArtifactUploadAsync(byte[] package, string key, CatalogMetaData catalog, CancellationToken cancellationToken)
         {
             return await VolatileArtifactUploadAsync(package, VolatileContentType.DmScript, key, catalog, cancellationToken);
+        }
+
+        public async Task<bool> IsCatalogItemPrivate(string catalogGuid, CancellationToken cancellationToken)
+        {
+            // Make GET request to receive the catalog item information
+            var response = await _httpClient.GetAsync(CatalogsPathStart + catalogGuid, cancellationToken).ConfigureAwait(false);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                // No catalog item found with the given GUID, return true as the default for new items is private.
+                return true;
+            }
+
+            // Get the response body
+            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+            _logger.LogDebug($"Response: {response.StatusCode}, Body: {body}");
+
+            CatalogItemInfo catalogItemInfo = JsonConvert.DeserializeObject<CatalogItemInfo>(body);
+
+            return catalogItemInfo.IsPrivate == true;
         }
     }
 }
