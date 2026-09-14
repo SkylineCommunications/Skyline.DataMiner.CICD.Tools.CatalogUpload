@@ -221,7 +221,7 @@
 
         public async Task<bool> IsCatalogItemPrivate(string catalogGuid, string key, CancellationToken cancellationToken)
         {
-            _httpClient.DefaultRequestHeaders.Add("DATAMINER-SERVICES-API-KEY", key);
+            _httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
 
             try
             {
@@ -253,7 +253,7 @@
             finally
             {
                 // Clean up, just in case
-                _httpClient.DefaultRequestHeaders.Remove("DATAMINER-SERVICES-API-KEY");
+                _httpClient.DefaultRequestHeaders.Remove("Ocp-Apim-Subscription-Key");
             }
         }
     }
