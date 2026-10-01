@@ -296,7 +296,7 @@
                 if (!String.IsNullOrWhiteSpace(p.MarketName)) MarketName = p.MarketName;
                 if (!String.IsNullOrWhiteSpace(p.ElementType)) ElementType = p.ElementType;
 
-                p.Owners?.ForEach(o => { Owners.Add(new CatalogOwner { Name = o.Name, Email = o.Email, Url = o.Url }); });
+                p.Owners?.ForEach(o => { Owners.Add(new CatalogOwner { Name = o.Name, Email = o.Email, Url = o.Url, Role = o.Role }); });
                 p.Tags?.ForEach(Tags.Add);
             }
 
@@ -363,7 +363,7 @@
                 SourceCodeUrl = SourceCodeUri
             };
 
-            Owners?.ForEach(o => catalogYaml.Owners.Add(new CatalogYamlOwner { Name = o.Name, Email = o.Email, Url = o.Url }));
+            Owners?.ForEach(o => catalogYaml.Owners.Add(new CatalogYamlOwner { Name = o.Name, Email = o.Email, Url = o.Url, Role = o.Role }));
             Tags?.ForEach(catalogYaml.Tags.Add);
 
             var yaml = serializer.Serialize(catalogYaml);
@@ -523,6 +523,14 @@
         public string Url { get; set; }
 
         /// <summary>
+        /// Gets or sets the role of the catalog owner (e.g. "Product Owner", "Code Owner").
+        /// </summary>
+        /// <value>
+        /// A string representing the owner's role. Optional.
+        /// </value>
+        public string Role { get; set; }
+
+        /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
         /// <param name="obj">The object to compare with the current object.</param>
@@ -531,7 +539,7 @@
         {
             if (obj is CatalogOwner other)
             {
-                return Name == other.Name && Email == other.Email && Url == other.Url;
+                return Name == other.Name && Email == other.Email && Url == other.Url && Role == other.Role;
             }
             return false;
         }
@@ -542,7 +550,7 @@
         /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name, Email, Url);
+            return HashCode.Combine(Name, Email, Url, Role);
         }
     }
 

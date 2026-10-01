@@ -115,6 +115,16 @@ Alternatively, you can rely on a **catalog.yml file** located next to the `.dmap
 
 (Both the name **catalog.yml** and **manifest.yml** are supported)
 
+Each entry under `owners` supports `name` (required), `email`, `url`, and an optional `role` (for example `Product Owner` or `Code Owner`, max 64 characters). The role is forwarded to the Catalog together with the other owner details:
+
+```yaml
+owners:
+  - name: Jane Doe
+    email: jane.doe@skyline.be
+    url: https://github.com/janedoe
+    role: Product Owner
+```
+
 ```console
 dataminer-catalog-upload with-registration --path-to-artifact "pathToPackage.dmapp"
 ```
