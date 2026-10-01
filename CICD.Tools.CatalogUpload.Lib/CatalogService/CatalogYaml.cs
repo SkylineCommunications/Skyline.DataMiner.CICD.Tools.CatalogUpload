@@ -2,6 +2,8 @@
 {
     using System.Collections.Generic;
 
+    using YamlDotNet.Serialization;
+
     /// <summary>
     /// Represents the metadata of a catalog entry in YAML format.
     /// </summary>
@@ -102,5 +104,12 @@
         /// </summary>
         /// <value>A string representing the URL of the owner.</value>
         public string Url { get; set; }
+
+        /// <summary>
+        /// Gets or sets the role of the owner (e.g. "Product Owner", "Code Owner").
+        /// </summary>
+        /// <value>A string representing the role of the owner. Optional.</value>
+        [YamlMember(Alias = "role", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
+        public string Role { get; set; }
     }
 }

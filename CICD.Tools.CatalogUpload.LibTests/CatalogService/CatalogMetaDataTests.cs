@@ -311,6 +311,143 @@
 
 
         [TestMethod]
+        public void FromCatalogYaml_OwnersWithRole_ShouldParseRole()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            string yamlContent = @"
+                id: catalog-id-1234
+                type: connector
+                title: MyCatalogPackage
+                owners:
+                  - name: Jane Doe
+                    email: jane.doe@skyline.be
+                    url: https://github.com/janedoe
+                    role: Product Owner
+                  - name: John Doe
+                    email: john.doe@skyline.be
+                    role: Code Owner
+                  - name: No Role
+                    email: no.role@skyline.be
+            ";
+
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
+            mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
+            mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
+
+            // Act
+            var result = new CatalogMetaDataFactory().FromCatalogYaml(mockFileSystem.Object, "test/path");
+
+            // Assert
+            result.Owners.Should().BeEquivalentTo(new[]
+            {
+                new CatalogOwner { Name = "Jane Doe", Email = "jane.doe@skyline.be", Url = "https://github.com/janedoe", Role = "Product Owner" },
+                new CatalogOwner { Name = "John Doe", Email = "john.doe@skyline.be", Role = "Code Owner" },
+                new CatalogOwner { Name = "No Role", Email = "no.role@skyline.be" },
+            }, options => options.WithStrictOrdering());
+        }
+
+        [TestMethod]
+        public void SearchAndApplyCatalogYaml_OwnersWithRole_ShouldMergeWithExistingData()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            string yamlContent = @"
+                id: catalog-id-5678
+                type: automation
+                title: AutomationScript
+                owners:
+                  - name: Jane Doe
+                    email: jane.doe@skyline.be
+                    role: Product Owner
+            ";
+
+            mockFileSystem.Setup(fs => fs.File.ReadAllText(It.IsAny<string>())).Returns(yamlContent);
+            mockFileSystem.Setup(fs => fs.Directory.IsDirectory(It.IsAny<string>())).Returns(true);
+            mockFileSystem.Setup(fs => fs.Directory.EnumerateFiles(It.IsAny<string>())).Returns(new[] { "catalog.yml" });
+            mockFileSystem.Setup(fs => fs.Path.GetFileName(It.IsAny<string>())).Returns("catalog.yml");
+
+            var metaData = new CatalogMetaData
+            {
+                Name = "PreExistingScript",
+                Owners = new List<CatalogOwner>
+                {
+                    new CatalogOwner { Name = "Owner1", Email = "owner1@example.com", Role = "Code Owner" }
+                }
+            };
+
+            // Act
+            var success = metaData.SearchAndApplyCatalogYamlAndReadMe(mockFileSystem.Object, "test/path");
+
+            // Assert
+            success.Should().BeTrue();
+            metaData.Owners.Should().BeEquivalentTo(new[]
+            {
+                new CatalogOwner { Name = "Owner1", Email = "owner1@example.com", Role = "Code Owner" },
+                new CatalogOwner { Name = "Jane Doe", Email = "jane.doe@skyline.be", Role = "Product Owner" },
+            }, options => options.WithStrictOrdering());
+        }
+
+        [TestMethod]
+        public void CatalogOwner_Equals_ShouldTakeRoleIntoAccount()
+        {
+            var owner = new CatalogOwner { Name = "Jane Doe", Email = "jane.doe@skyline.be", Role = "Product Owner" };
+
+            owner.Should().Be(new CatalogOwner { Name = "Jane Doe", Email = "jane.doe@skyline.be", Role = "Product Owner" });
+            owner.Should().NotBe(new CatalogOwner { Name = "Jane Doe", Email = "jane.doe@skyline.be", Role = "Code Owner" });
+            owner.GetHashCode().Should().Be(new CatalogOwner { Name = "Jane Doe", Email = "jane.doe@skyline.be", Role = "Product Owner" }.GetHashCode());
+        }
+
+        [TestMethod]
+        public async Task ToCatalogZipAsync_OwnersWithRole_ShouldIncludeRoleInManifest()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockLogger = new Mock<ILogger>();
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.UnderscoredNamingConvention.Instance)
+                .Build();
+
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage",
+                Owners = new List<CatalogOwner>
+                {
+                    new CatalogOwner { Name = "Jane Doe", Email = "jane.doe@skyline.be", Url = "https://github.com/janedoe", Role = "Product Owner" },
+                    new CatalogOwner { Name = "No Role", Email = "no.role@skyline.be" },
+                }
+            };
+
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, serializer, mockLogger.Object, true);
+
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+
+            var manifestEntry = zip.GetEntry("manifest.yml");
+            manifestEntry.Should().NotBeNull();
+            if (manifestEntry == null) return;
+
+            string content;
+            using (var reader = new StreamReader(manifestEntry.Open()))
+            {
+                content = await reader.ReadToEndAsync();
+            }
+
+            content.Should().Contain("role: Product Owner");
+            System.Text.RegularExpressions.Regex.Matches(content, @"^\s*role:", System.Text.RegularExpressions.RegexOptions.Multiline).Should().HaveCount(1, "a missing role should not be emitted");
+
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.UnderscoredNamingConvention.Instance)
+                .Build();
+            var roundTripped = deserializer.Deserialize<CatalogYaml>(content);
+            roundTripped.Owners.Select(o => o.Role).Should().Equal("Product Owner", null);
+        }
+
+        [TestMethod]
         public void SearchAndApplyCatalogYaml_NoYamlFile_ShouldReturnFalse()
         {
             // Arrange
