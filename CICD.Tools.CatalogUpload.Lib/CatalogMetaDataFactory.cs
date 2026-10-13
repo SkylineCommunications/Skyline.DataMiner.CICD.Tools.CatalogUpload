@@ -210,7 +210,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
 
             description ??= "No Description.";
 
-            if (description.Length > 500) description = description.Substring(0, 497) + "...";
+            if (description.Length > 1500) description = description.Substring(0, 1497) + "...";
             meta.Version.VersionDescription = description;
             meta.ContentType = contentType;
             return meta;
@@ -305,7 +305,7 @@ Visio\skyline_Bridge Technologies VB Probe Series:0.0.0-CU2
                 }
             }
 
-            if (versionDescription.Length > 500) versionDescription = versionDescription.Substring(0, 497) + "...";
+            if (versionDescription.Length > 1500) versionDescription = versionDescription.Substring(0, 1497) + "...";
 
             meta.Version.VersionDescription = versionDescription;
 
