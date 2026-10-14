@@ -391,16 +391,22 @@
                                    Environment.GetEnvironmentVariable(CatalogArtifact.SkylineSpecificEnvironmentVariableName, EnvironmentVariableTarget.Machine);
                 }
 
+                logger.LogDebug("IsForSkyline: {isForSkyline}", isForSkyline);
+                logger.LogDebug("ContentType: {ContentType}", ContentType);
+                logger.LogDebug("Is Private Catalog Item: {IsPrivate}", isPrivate);
+
                 if (String.Equals(isForSkyline, "true", StringComparison.OrdinalIgnoreCase) && ContentType == ArtifactContentType.Connector && !isPrivate)
                 {
                     // For public Skyline connectors, no README.md or images are included in the zip file.
                     // These are provided via the dataminer-docs-connectors repository.
+                    logger.LogDebug("Skip adding README & Images as for public Skyline connectors, they should be provided via the dataminer-docs-connectors repository.");
                 }
                 else
                 {
                     // Add README.md
                     if (PathToReadme != null && fs.File.Exists(PathToReadme))
                     {
+                        logger.LogDebug("Adding README file.");
                         var readmeEntry = archive.CreateEntry("README.md");
                         using var entryStream = readmeEntry.Open();
                         var readmeContent = fs.File.ReadAllText(PathToReadme); // Get the file content as a string
@@ -412,6 +418,7 @@
                     // Add Images folder
                     if (PathToImages != null && fs.Directory.Exists(PathToImages))
                     {
+                        logger.LogDebug("Adding Images directory");
                         var imageFiles = fs.Directory.GetFiles(PathToImages);
                         foreach (var imageFile in imageFiles)
                         {
