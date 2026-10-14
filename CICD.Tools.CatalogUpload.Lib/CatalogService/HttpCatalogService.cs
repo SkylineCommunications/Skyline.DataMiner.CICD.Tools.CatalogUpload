@@ -231,6 +231,7 @@
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     // No catalog item found with the given GUID, return true as the default for new items is private.
+                    _logger.LogDebug("No Catalog item found for the given GUID, considering it private as default.");
                     return true;
                 }
 
