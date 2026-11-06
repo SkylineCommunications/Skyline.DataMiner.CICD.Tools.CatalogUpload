@@ -360,7 +360,10 @@
                 ShortDescription = ShortDescription,
                 Title = Name,
                 Type = ContentType,
-                SourceCodeUrl = SourceCodeUri
+                SourceCodeUrl = SourceCodeUri,
+                VendorId = VendorId,
+                MarketName = MarketName,
+                ElementType = ElementType
             };
 
             Owners?.ForEach(o => catalogYaml.Owners.Add(new CatalogYamlOwner { Name = o.Name, Email = o.Email, Url = o.Url, Role = o.Role }));

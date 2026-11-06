@@ -446,6 +446,91 @@
         }
 
         [TestMethod]
+        public async Task ToCatalogZipAsync_VendorMarketAndElementType_ShouldBeIncludedInManifest()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockLogger = new Mock<ILogger>();
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.UnderscoredNamingConvention.Instance)
+                .Build();
+
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage",
+                ContentType = "connector",
+                VendorId = "7a8651a2-a6ee-4389-8016-11d09aa09c85",
+                MarketName = "Broadcast",
+                ElementType = "Transport Stream Processor"
+            };
+
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, serializer, mockLogger.Object, true);
+
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+
+            var manifestEntry = zip.GetEntry("manifest.yml");
+            manifestEntry.Should().NotBeNull();
+            if (manifestEntry == null) return;
+
+            string content;
+            using (var reader = new StreamReader(manifestEntry.Open()))
+            {
+                content = await reader.ReadToEndAsync();
+            }
+
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.UnderscoredNamingConvention.Instance)
+                .Build();
+            var roundTripped = deserializer.Deserialize<CatalogYaml>(content);
+            roundTripped.VendorId.Should().Be("7a8651a2-a6ee-4389-8016-11d09aa09c85");
+            roundTripped.MarketName.Should().Be("Broadcast");
+            roundTripped.ElementType.Should().Be("Transport Stream Processor");
+        }
+
+        [TestMethod]
+        public async Task ToCatalogZipAsync_NoVendorMarketElementType_ShouldOmitKeysFromManifest()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            var mockLogger = new Mock<ILogger>();
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.UnderscoredNamingConvention.Instance)
+                .Build();
+
+            var catalogMetaData = new CatalogMetaData
+            {
+                CatalogIdentifier = "catalog-id-1234",
+                Name = "MyCatalogPackage",
+                ContentType = "Automation"
+            };
+
+            // Act
+            byte[] result = await catalogMetaData.ToCatalogZipAsync(mockFileSystem.Object, serializer, mockLogger.Object, true);
+
+            // Assert
+            using var zipStream = new MemoryStream(result);
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+
+            var manifestEntry = zip.GetEntry("manifest.yml");
+            manifestEntry.Should().NotBeNull();
+            if (manifestEntry == null) return;
+
+            string content;
+            using (var reader = new StreamReader(manifestEntry.Open()))
+            {
+                content = await reader.ReadToEndAsync();
+            }
+
+            content.Should().NotContain("vendor_id", "an unset vendor must not be sent to the Catalog API");
+            content.Should().NotContain("market_name");
+            content.Should().NotContain("element_type");
+        }
+
+        [TestMethod]
         public void SearchAndApplyCatalogYaml_NoYamlFile_ShouldReturnFalse()
         {
             // Arrange

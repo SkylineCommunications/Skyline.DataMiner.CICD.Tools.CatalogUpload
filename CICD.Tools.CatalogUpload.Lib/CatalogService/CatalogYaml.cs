@@ -69,16 +69,19 @@
         /// <summary>
         /// Gets or sets the vendor ID associated with the catalog entry.
         /// </summary>
+        [YamlMember(Alias = "vendor_id", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string VendorId { get; set; }
 
         /// <summary>
         /// Gets or sets the market name associated with the catalog entry.
         /// </summary>
+        [YamlMember(Alias = "market_name", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string MarketName { get; set; }
 
         /// <summary>
         /// Gets or sets the element type associated with the catalog entry.
         /// </summary>
+        [YamlMember(Alias = "element_type", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string ElementType { get; set; }
     }
 
